@@ -3,7 +3,6 @@ package com.eu.habbo.habbohotel.commands;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.catalog.CatalogManager;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
-import com.eu.habbo.habbohotel.users.HabboManager;
 import com.eu.habbo.messages.outgoing.generic.alerts.MessagesForYouComposer;
 
 import java.util.Collections;
@@ -28,7 +27,7 @@ public class AboutCommand extends Command {
         long minute = TimeUnit.SECONDS.toMinutes(seconds) - (TimeUnit.SECONDS.toHours(seconds) * 60);
         long second = TimeUnit.SECONDS.toSeconds(seconds) - (TimeUnit.SECONDS.toMinutes(seconds) * 60);
 
-        String message = "<b>" + Emulator.version + "</b>\r\n";
+        String message = "<b>" + Emulator.VERSION + "</b>\r\n";
 
         if (Emulator.getConfig().getBoolean("info.shown", true)) {
             message += "<b>Hotel Statistics</b>\r" +

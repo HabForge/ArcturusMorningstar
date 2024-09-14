@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,23 +34,18 @@ public final class Emulator {
     private static final String OS_NAME = (System.getProperty("os.name") != null ? System.getProperty("os.name") : "Unknown");
     private static final String CLASS_PATH = (System.getProperty("java.class.path") != null ? System.getProperty("java.class.path") : "Unknown");
 
-    public final static int MAJOR = 3;
-    public final static int MINOR = 5;
-    public final static int BUILD = 4;
-    public final static String PREVIEW = "";
+    public static final String NAME = "Arcturus Morningstar (HabForge)";
+    public static final String VERSION = BuildProperties.version;
 
-    public static final String version = "Arcturus Morningstar" + " " + MAJOR + "." + MINOR + "." + BUILD + " " + PREVIEW;
     private static final String logo =
-            "\n" +
                     "███╗   ███╗ ██████╗ ██████╗ ███╗   ██╗██╗███╗   ██╗ ██████╗ ███████╗████████╗ █████╗ ██████╗ \n" +
                     "████╗ ████║██╔═══██╗██╔══██╗████╗  ██║██║████╗  ██║██╔════╝ ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗\n" +
                     "██╔████╔██║██║   ██║██████╔╝██╔██╗ ██║██║██╔██╗ ██║██║  ███╗███████╗   ██║   ███████║██████╔╝\n" +
                     "██║╚██╔╝██║██║   ██║██╔══██╗██║╚██╗██║██║██║╚██╗██║██║   ██║╚════██║   ██║   ██╔══██║██╔══██╗\n" +
                     "██║ ╚═╝ ██║╚██████╔╝██║  ██║██║ ╚████║██║██║ ╚████║╚██████╔╝███████║   ██║   ██║  ██║██║  ██║\n" +
                     "╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝\n" +
-                    "Still Rocking in 2024.\n";
+                    "Maintained by HabForge, previously by Krews and created by TheGeneral.\n";
 
-    public static String build = "";
     public static boolean isReady = false;
     public static boolean isShuttingDown = false;
     public static boolean stopped = false;
@@ -82,13 +76,6 @@ public final class Emulator {
         Runtime.getRuntime().addShutdownHook(hook);
     }
 
-    public static void promptEnterKey(){
-        System.out.println("\n");
-        System.out.println("Press \"ENTER\" if you agree to the terms stated above...");
-        Scanner scanner = new Scanner(System.in);
-        scanner.nextLine();
-    }
-
     public static void main(String[] args) throws Exception {
         try {
             // Check if running on Windows and not in IntelliJ.
@@ -103,25 +90,28 @@ public final class Emulator {
             }
 
             Locale.setDefault(new Locale("en"));
-            setBuild();
             Emulator.stopped = false;
             ConsoleCommand.load();
             Emulator.logging = new Logging();
 
             System.out.println(logo);
 
-            // Checks if this is a BETA build before allowing them to continue.
-            if (PREVIEW.toLowerCase().contains("beta")) {
-                System.out.println("Warning, this is a beta build, this means that there may be unintended consequences so make sure you take regular backups while using this build. If you notice any issues you should make an issue on the Krews Git.");
-                promptEnterKey();
+            LOGGER.info("============================================================");
+            LOGGER.info("Starting {} {}", NAME, VERSION);
+
+            if (BuildProperties.commit != null && !BuildProperties.commit.isEmpty()) {
+                LOGGER.info("Build from commit https://github.com/HabForge/ArcturusMorningstar/commit/{}", BuildProperties.commit);
+            } else {
+                LOGGER.info("Build commit is unknown");
             }
-            System.out.println("");
-            LOGGER.warn("Arcturus Morningstar 3.x is no longer accepting merge requests. Please target MS4 branches if you wish to contribute.");
-            LOGGER.info("Follow our development at https://git.krews.org/morningstar/Arcturus-Community, ");
-            System.out.println("");
-            LOGGER.info("This project is for educational purposes only. This Emulator is an open-source fork of Arcturus created by TheGeneral.");
-            LOGGER.info("Version: {}", version);
-            LOGGER.info("Build: {}", build);
+
+            if (BuildProperties.version.contains("SNAPSHOT")) {
+                LOGGER.warn("Warning, you are running a SNAPSHOT build. This means that there may be untested features and bugs. If you notice any issues you should make an issue on the HabForge GitHub.");
+            }
+
+            LOGGER.info("The repository for the emulator can be found at https://github.com/HabForge/ArcturusMorningstar.");
+            LOGGER.info("This emulator is a fork of Arcturus Morningstar by Krews, which is a fork of Arcturus created by TheGeneral.");
+            LOGGER.info("============================================================");
 
             long startTime = System.nanoTime();
 
@@ -176,9 +166,6 @@ public final class Emulator {
                         Runtime.getRuntime().availableProcessors() * 2);
             }
 
-            Emulator.getThreading().run(() -> {
-            }, 1500);
-
             // Check if console mode is true or false, default is true
             if (Emulator.getConfig().getBoolean("console.mode", true)) {
 
@@ -205,38 +192,12 @@ public final class Emulator {
         }
     }
 
-    private static void setBuild() {
-        if (Emulator.class.getProtectionDomain().getCodeSource() == null) {
-            build = "UNKNOWN";
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        try {
-            String filepath = new File(Emulator.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
-            MessageDigest md = MessageDigest.getInstance("MD5");// MD5
-            FileInputStream fis = new FileInputStream(filepath);
-            byte[] dataBytes = new byte[1024];
-            int nread = 0;
-            while ((nread = fis.read(dataBytes)) != -1)
-                md.update(dataBytes, 0, nread);
-            byte[] mdbytes = md.digest();
-            for (int i = 0; i < mdbytes.length; i++)
-                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-        } catch (Exception e) {
-            build = "UNKNOWN";
-            return;
-        }
-
-        build = sb.toString();
-    }
-
     private static void dispose() {
         Emulator.getThreading().setCanAdd(false);
         Emulator.isShuttingDown = true;
         Emulator.isReady = false;
 
-        LOGGER.info("Stopping Arcturus Morningstar {}", version);
+        LOGGER.info("Stopping Arcturus Morningstar {}", VERSION);
 
         try {
             if (Emulator.getPluginManager() != null)
@@ -287,7 +248,7 @@ public final class Emulator {
         } catch (Exception e) {
         }
 
-        LOGGER.info("Stopped Arcturus Morningstar {}", version);
+        LOGGER.info("Stopped Arcturus Morningstar {}", VERSION);
 
         if (Emulator.database != null) {
             Emulator.getDatabase().dispose();

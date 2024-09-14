@@ -22,11 +22,8 @@ public class ConsoleInfoCommand extends ConsoleCommand {
         long minute = TimeUnit.SECONDS.toMinutes(seconds) - (TimeUnit.SECONDS.toHours(seconds) * 60);
         long second = TimeUnit.SECONDS.toSeconds(seconds) - (TimeUnit.SECONDS.toMinutes(seconds) * 60);
 
-        LOGGER.info("Emulator version: " + Emulator.version);
-        LOGGER.info("Emulator build: " + Emulator.build);
-
+        LOGGER.info("Emulator version: " + Emulator.VERSION);
         LOGGER.info("");
-
         LOGGER.info("Hotel Statistics");
         LOGGER.info("- Users: " + Emulator.getGameEnvironment().getHabboManager().getOnlineCount());
         LOGGER.info("- Rooms: " + Emulator.getGameEnvironment().getRoomManager().getActiveRooms().size());
