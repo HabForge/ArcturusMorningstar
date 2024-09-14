@@ -31,6 +31,7 @@ class DatabasePool {
             databaseConfiguration.addDataSourceProperty("useServerPrepStmts", "true");
             databaseConfiguration.addDataSourceProperty("rewriteBatchedStatements", "true");
             databaseConfiguration.addDataSourceProperty("useUnicode", "true");
+            databaseConfiguration.addDataSourceProperty("serverTimezone", "UTC");
             databaseConfiguration.setAutoCommit(true);
             databaseConfiguration.setConnectionTimeout(300000L);
             databaseConfiguration.setValidationTimeout(5000L);
