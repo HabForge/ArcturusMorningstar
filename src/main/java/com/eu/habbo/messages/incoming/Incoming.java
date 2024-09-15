@@ -1,5 +1,8 @@
 package com.eu.habbo.messages.incoming;
 
+/**
+ * Packet list shared by <a href="https://sulek.dev/">Sulek</a> from <a href="https://github.com/UnfamiliarLegacy">UnfamiliarLegacy (Mikee)</a>.
+ */
 public enum Incoming {
     // com.sulake.habbo.communication.messages.outgoing.advertisement
     GetInterstitial,

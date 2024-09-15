@@ -13,7 +13,7 @@ public class RoomAccessDeniedComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.RoomAccessDeniedComposer);
+        this.response.init(Outgoing.FlatAccessDenied);
         this.response.appendString(this.habbo);
         return this.response;
     }

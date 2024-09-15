@@ -1,5 +1,6 @@
 package com.eu.habbo.messages;
 
+import com.eu.habbo.messages.outgoing.Outgoing;
 import com.eu.habbo.util.PacketUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
@@ -15,7 +16,7 @@ public class ServerMessage {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerMessage.class);
     private boolean initialized;
 
-    private int header;
+    private Outgoing header;
     private AtomicInteger refs;
     private ByteBufOutputStream stream;
     private ByteBuf channelBuffer;
@@ -24,11 +25,17 @@ public class ServerMessage {
 
     }
 
-    public ServerMessage(int header) {
+    @Deprecated
+    public ServerMessage(int messageId) {
+        // TODO(HabForge): Do we want to fallback to 2016 production packets?
+        throw new ServerMessageException("Use ServerMessage(Outgoing header) instead.");
+    }
+
+    public ServerMessage(Outgoing header) {
         this.init(header);
     }
 
-    public ServerMessage init(int id) {
+    public ServerMessage init(Outgoing id) {
         if (this.initialized) {
             throw new ServerMessageException("ServerMessage was already initialized.");
         }
@@ -41,12 +48,16 @@ public class ServerMessage {
 
         try {
             this.stream.writeInt(0);
-            this.stream.writeShort(id);
+            this.stream.writeShort(0);
         } catch (IOException e) {
             throw new ServerMessageException(e);
         }
 
         return this;
+    }
+
+    public Outgoing getHeader() {
+        return this.header;
     }
 
     public void appendRawBytes(byte[] bytes) {
@@ -173,10 +184,6 @@ public class ServerMessage {
 
     public String getBodyString() {
         return PacketUtils.formatPacket(this.channelBuffer);
-    }
-
-    public int getHeader() {
-        return this.header;
     }
 
     public ByteBuf get() {

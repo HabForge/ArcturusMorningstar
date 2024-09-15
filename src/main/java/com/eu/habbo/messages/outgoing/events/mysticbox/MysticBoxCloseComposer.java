@@ -7,7 +7,7 @@ import com.eu.habbo.messages.outgoing.Outgoing;
 public class MysticBoxCloseComposer extends MessageComposer {
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.MysticBoxCloseComposer);
+        this.response.init(Outgoing.CancelMysteryBoxWait);
         return this.response;
     }
 }

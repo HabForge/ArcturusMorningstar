@@ -25,7 +25,7 @@ public class GuildForumListComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.GuildForumListComposer);
+        this.response.init(Outgoing.ForumsList);
         this.response.appendInt(this.mode);
         this.response.appendInt(this.guilds.size());
 

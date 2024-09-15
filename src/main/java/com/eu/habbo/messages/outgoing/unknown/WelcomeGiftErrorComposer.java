@@ -2,7 +2,6 @@ package com.eu.habbo.messages.outgoing.unknown;
 
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
-import com.eu.habbo.messages.outgoing.Outgoing;
 
 public class WelcomeGiftErrorComposer extends MessageComposer {
     public final static int EMAIL_INVALID = 0;
@@ -18,8 +17,10 @@ public class WelcomeGiftErrorComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.WelcomeGiftErrorComposer);
-        this.response.appendInt(this.error);
-        return this.response;
+        throw new UnsupportedOperationException("Not supported yet.");
+
+        //this.response.init(Outgoing._-51s);
+        //this.response.appendInt(this.error);
+        //return this.response;
     }
 }

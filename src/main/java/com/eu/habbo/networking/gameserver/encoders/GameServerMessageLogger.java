@@ -2,6 +2,7 @@ package com.eu.habbo.networking.gameserver.encoders;
 
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.util.ANSI;
+import com.eu.habbo.util.packets.PacketStringUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import org.slf4j.Logger;
@@ -15,9 +16,9 @@ public class GameServerMessageLogger extends MessageToMessageEncoder<ServerMessa
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ServerMessage message, List<Object> out) {
-        LOGGER.debug(String.format("[" + ANSI.BLUE + "SERVER" + ANSI.DEFAULT + "][%-4d] => %s",
+        LOGGER.debug(String.format("[" + ANSI.BLUE + "SERVER" + ANSI.DEFAULT + "][%-41s] => %s",
                 message.getHeader(),
-                message.getBodyString()));
+                PacketStringUtils.toString(message)));
 
         out.add(message);
     }

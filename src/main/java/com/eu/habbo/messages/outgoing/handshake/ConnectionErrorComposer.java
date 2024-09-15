@@ -23,7 +23,7 @@ public class ConnectionErrorComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.ConnectionErrorComposer);
+        this.response.init(Outgoing.ErrorReport);
         this.response.appendInt(this.messageId);
         this.response.appendInt(this.errorCode);
         this.response.appendString(this.timestamp);

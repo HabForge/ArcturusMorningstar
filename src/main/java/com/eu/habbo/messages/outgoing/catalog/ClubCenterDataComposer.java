@@ -37,7 +37,7 @@ public class ClubCenterDataComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.ClubCenterDataComposer);
+        this.response.init(Outgoing.ScrSendKickbackInfo);
         this.response.appendInt(this.currentHcStreak); // currentHcStreak (days)
         this.response.appendString(this.firstSubDate); // firstSubscriptionDate (dd-mm-yyyy)
         this.response.appendDouble(this.kickbackPercentage); // kickbackPercentage (e.g. 0.1 for 10%)

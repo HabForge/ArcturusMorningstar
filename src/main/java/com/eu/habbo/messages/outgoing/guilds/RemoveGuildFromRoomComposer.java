@@ -13,7 +13,7 @@ public class RemoveGuildFromRoomComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.RemoveGuildFromRoomComposer);
+        this.response.init(Outgoing.HabboGroupDeactivated);
         this.response.appendInt(this.guildId);
         return this.response;
     }

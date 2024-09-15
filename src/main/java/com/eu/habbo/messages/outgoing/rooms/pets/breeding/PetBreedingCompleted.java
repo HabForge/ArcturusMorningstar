@@ -15,7 +15,7 @@ public class PetBreedingCompleted extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.PetBreedingCompleted);
+        this.response.init(Outgoing.NestBreedingSuccess);
         this.response.appendInt(this.type);
         this.response.appendInt(this.race);
         return this.response;

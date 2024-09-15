@@ -19,7 +19,7 @@ public class BullyReportedMessageComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.BullyReportedMessageComposer);
+        this.response.init(Outgoing.GuideTicketCreationResult);
         this.response.appendInt(this.code);
         return this.response;
     }

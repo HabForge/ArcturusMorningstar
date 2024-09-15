@@ -17,17 +17,14 @@ import java.util.List;
 public class GameByteDecoder extends ByteToMessageDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameByteDecoder.class);
-    private final RevisionProvider revisionProvider;
-
-    public GameByteDecoder(RevisionProvider revisionProvider) {
-        this.revisionProvider = revisionProvider;
-    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         final GameClient client = ctx.channel().attr(GameServerAttributes.CLIENT).get();
+        final RevisionProvider revisionProvider = ctx.channel().attr(GameServerAttributes.REVISION_PROVIDER).get();
+
         final short messageId = in.readShort();
-        final Incoming header = this.revisionProvider.getIncoming(client.getRevision(), messageId);
+        final Incoming header = revisionProvider.getIncoming(client.getRevision(), messageId);
 
         if (header == null) {
             LOGGER.warn("Unknown message id {} for protocol {}", messageId, client.getRevision());

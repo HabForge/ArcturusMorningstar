@@ -30,7 +30,7 @@ public class RoomEnterErrorComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.RoomEnterErrorComposer);
+        this.response.init(Outgoing.CantConnect);
         this.response.appendInt(this.errorCode);
         this.response.appendString(this.queError);
         return this.response;

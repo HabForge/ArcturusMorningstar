@@ -2,7 +2,6 @@ package com.eu.habbo.messages.outgoing.gamecenter;
 
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
-import com.eu.habbo.messages.outgoing.Outgoing;
 
 public class GameCenterGameComposer extends MessageComposer {
     public final static int OK = 0;
@@ -18,9 +17,11 @@ public class GameCenterGameComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.GameCenterGameComposer);
-        this.response.appendInt(this.gameId);
-        this.response.appendInt(this.status);
-        return this.response;
+        throw new UnsupportedOperationException("Not supported yet.");
+
+        //this.response.init(Outgoing._-6JH);
+        //this.response.appendInt(this.gameId);
+        //this.response.appendInt(this.status);
+        //return this.response;
     }
 }

@@ -19,7 +19,7 @@ public class ModToolReportReceivedAlertComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.ModToolReportReceivedAlertComposer);
+        this.response.init(Outgoing.CallForHelpResult);
         this.response.appendInt(this.errorCode);
         this.response.appendString(this.message);
         return this.response;

@@ -21,7 +21,7 @@ public class MarketplaceOwnItemsComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.MarketplaceOwnItemsComposer);
+        this.response.init(Outgoing.MarketPlaceOwnOffers);
         this.response.appendInt(this.habbo.getInventory().getSoldPriceTotal());
         this.response.appendInt(this.habbo.getInventory().getMarketplaceItems().size());
 

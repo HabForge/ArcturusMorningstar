@@ -29,7 +29,7 @@ public class ClubGiftsComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.ClubGiftsComposer);
+        this.response.init(Outgoing.ClubGiftInfo);
 
         this.response.appendInt(this.daysTillNextGift); //Days Until Next Gift
         this.response.appendInt(this.availableGifts); //Gift Selectable

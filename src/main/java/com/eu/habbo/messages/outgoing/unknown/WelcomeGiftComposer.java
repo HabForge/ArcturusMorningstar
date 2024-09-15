@@ -2,7 +2,6 @@ package com.eu.habbo.messages.outgoing.unknown;
 
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
-import com.eu.habbo.messages.outgoing.Outgoing;
 
 public class WelcomeGiftComposer extends MessageComposer {
     private final String email;
@@ -21,12 +20,14 @@ public class WelcomeGiftComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.WelcomeGiftComposer);
-        this.response.appendString(this.email);
-        this.response.appendBoolean(this.unknownB1);
-        this.response.appendBoolean(this.unknownB2);
-        this.response.appendInt(this.furniId);
-        this.response.appendBoolean(this.unknownB3);
-        return this.response;
+        throw new UnsupportedOperationException("Not supported yet.");
+
+        //this.response.init(Outgoing._-Cp);
+        //this.response.appendString(this.email);
+        //this.response.appendBoolean(this.unknownB1);
+        //this.response.appendBoolean(this.unknownB2);
+        //this.response.appendInt(this.furniId);
+        //this.response.appendBoolean(this.unknownB3);
+        //return this.response;
     }
 }

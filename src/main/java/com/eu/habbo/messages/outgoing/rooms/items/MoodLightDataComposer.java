@@ -15,7 +15,7 @@ public class MoodLightDataComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.MoodLightDataComposer);
+        this.response.init(Outgoing.RoomDimmerPresets);
         this.response.appendInt(3); //PresetCount
 
         int index = 1;

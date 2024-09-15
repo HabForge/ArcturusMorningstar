@@ -97,7 +97,7 @@ public class GameClient {
 
     public void sendResponse(ServerMessage response) {
         if (this.channel.isOpen()) {
-            if (response == null || response.getHeader() <= 0) {
+            if (response == null || response.getHeader() == null) {
                 return;
             }
 
@@ -109,7 +109,7 @@ public class GameClient {
     public void sendResponses(ArrayList<ServerMessage> responses) {
         if (this.channel.isOpen()) {
             for (ServerMessage response : responses) {
-                if (response == null || response.getHeader() <= 0) {
+                if (response == null || response.getHeader() == null) {
                     return;
                 }
 

@@ -13,7 +13,7 @@ public class StaffAlertAndOpenHabboWayComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.StaffAlertAndOpenHabboWayComposer);
+        this.response.init(Outgoing.UserBanned);
         this.response.appendString(this.message);
         return this.response;
     }

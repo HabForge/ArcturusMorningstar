@@ -2,7 +2,6 @@ package com.eu.habbo.messages.outgoing.rooms.items;
 
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
-import com.eu.habbo.messages.outgoing.Outgoing;
 
 public class ItemIntStateComposer extends MessageComposer {
     private final int id;
@@ -15,9 +14,12 @@ public class ItemIntStateComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.ItemStateComposer2);
-        this.response.appendInt(this.id);
-        this.response.appendInt(this.value);
-        return this.response;
+        // TODO(HabForge): Debug
+        throw new UnsupportedOperationException("Fix packet.");
+
+        //this.response.init(Outgoing.OneWayDoorStatus2);
+        //this.response.appendInt(this.id);
+        //this.response.appendInt(this.value);
+        //return this.response;
     }
 }

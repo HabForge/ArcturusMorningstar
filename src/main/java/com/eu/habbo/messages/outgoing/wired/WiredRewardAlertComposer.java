@@ -23,7 +23,7 @@ public class WiredRewardAlertComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.WiredRewardAlertComposer);
+        this.response.init(Outgoing.WiredRewardResult);
         this.response.appendInt(this.code);
         return this.response;
     }

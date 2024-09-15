@@ -182,14 +182,14 @@ public class PacketManager {
             return;
 
         try {
-            if (this.incoming.containsKey(packet.getMessageId())) {
-                Class<? extends MessageHandler> handlerClass = this.incoming.get(packet.getMessageId());
+            if (this.incoming.containsKey(packet.getHeader())) {
+                Class<? extends MessageHandler> handlerClass = this.incoming.get(packet.getHeader());
 
-                if (handlerClass == null) throw new Exception("Unknown message " + packet.getMessageId());
+                if (handlerClass == null) throw new Exception("Unknown message " + packet.getHeader());
 
                 if (client.getHabbo() == null && !handlerClass.isAnnotationPresent(NoAuthMessage.class)) {
                     if (DEBUG_SHOW_PACKETS) {
-                        LOGGER.warn("Client packet {} requires an authenticated session.", packet.getMessageId());
+                        LOGGER.warn("Client packet {} requires an authenticated session.", packet.getHeader());
                     }
 
                     return;
@@ -200,7 +200,7 @@ public class PacketManager {
                 if (handler.getRatelimit() > 0) {
                     if (client.messageTimestamps.containsKey(handlerClass) && System.currentTimeMillis() - client.messageTimestamps.get(handlerClass) < handler.getRatelimit()) {
                         if (PacketManager.DEBUG_SHOW_PACKETS) {
-                            LOGGER.warn("Client packet {} was ratelimited.", packet.getMessageId());
+                            LOGGER.warn("Client packet {} was ratelimited.", packet.getHeader());
                         }
 
                         return;
@@ -209,15 +209,15 @@ public class PacketManager {
                     }
                 }
 
-                if (logList.contains(packet.getMessageId()) && client.getHabbo() != null) {
-                    LOGGER.info("User {} sent packet {} with body {}", client.getHabbo().getHabboInfo().getUsername(), packet.getMessageId(), packet.getMessageBody());
+                if (logList.contains(packet.getHeader()) && client.getHabbo() != null) {
+                    LOGGER.info("User {} sent packet {} with body {}", client.getHabbo().getHabboInfo().getUsername(), packet.getHeader(), packet.getMessageBody());
                 }
 
                 handler.client = client;
                 handler.packet = packet;
 
-                if (this.callables.containsKey(packet.getMessageId())) {
-                    for (ICallable callable : this.callables.get(packet.getMessageId())) {
+                if (this.callables.containsKey(packet.getHeader())) {
+                    for (ICallable callable : this.callables.get(packet.getHeader())) {
                         callable.call(handler);
                     }
                 }

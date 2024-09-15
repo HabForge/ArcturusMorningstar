@@ -17,7 +17,7 @@ public class ItemsDataUpdateComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.ItemsDataUpdateComposer);
+        this.response.init(Outgoing.ObjectsDataUpdate);
         this.response.appendInt(this.items.size());
 
         for (HabboItem item : this.items) {

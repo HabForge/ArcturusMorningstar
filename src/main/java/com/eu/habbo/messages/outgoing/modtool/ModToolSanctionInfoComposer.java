@@ -56,7 +56,7 @@ public class ModToolSanctionInfoComposer extends MessageComposer {
                         tradeLockedUntil = new Date((long) item.tradeLockedUntil * 1000);
                     }
 
-                    this.response.init(Outgoing.ModToolSanctionInfoComposer);
+                    this.response.init(Outgoing.SanctionStatus);
 
                     this.response.appendBoolean(prevItem != null && prevItem.probationTimestamp > 0); // has prev sanction
                     this.response.appendBoolean(item.probationTimestamp >= Emulator.getIntUnixTimestamp()); // is on probation
@@ -84,7 +84,7 @@ public class ModToolSanctionInfoComposer extends MessageComposer {
     }
 
     private ServerMessage cleanResponse() {
-        this.response.init(Outgoing.ModToolSanctionInfoComposer);
+        this.response.init(Outgoing.SanctionStatus);
 
         this.response.appendBoolean(false); // has prev sanction
         this.response.appendBoolean(false); // is on probation

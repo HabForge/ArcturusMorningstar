@@ -4,6 +4,7 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.eu.habbo.networking.gameserver.GameServerAttributes;
+import com.eu.habbo.protocol.RevisionProvider;
 import io.netty.channel.*;
 
 import java.util.ArrayList;
@@ -14,8 +15,10 @@ import java.util.concurrent.ConcurrentMap;
 public class GameClientManager {
 
     private final ConcurrentMap<ChannelId, GameClient> clients;
+    private final RevisionProvider revisionProvider;
 
-    public GameClientManager() {
+    public GameClientManager(RevisionProvider revisionProvider) {
+        this.revisionProvider = revisionProvider;
         this.clients = new ConcurrentHashMap<>();
     }
 
@@ -35,6 +38,7 @@ public class GameClientManager {
         });
 
         ctx.channel().attr(GameServerAttributes.CLIENT).set(client);
+        ctx.channel().attr(GameServerAttributes.REVISION_PROVIDER).set(this.revisionProvider);
         ctx.fireChannelRegistered();
 
         return this.clients.putIfAbsent(ctx.channel().id(), client) == null;

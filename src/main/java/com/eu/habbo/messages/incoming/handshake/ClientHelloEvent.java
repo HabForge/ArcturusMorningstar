@@ -26,7 +26,9 @@ public class ClientHelloEvent extends MessageHandler {
         final int platform = this.packet.readInt();
         final int unknown = this.packet.readInt();
 
-        final Revision parsedRevision = Revision.getRevision(revision);
+        final Revision parsedRevision = revision.startsWith("NITRO-")
+                ? Revision.PRODUCTION_201611291003_338511768
+                : Revision.getRevision(revision);
 
         // Check revision.
         if (parsedRevision == null) {

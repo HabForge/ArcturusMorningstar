@@ -7,7 +7,7 @@ import com.eu.habbo.messages.outgoing.Outgoing;
 public class HotelViewComposer extends MessageComposer {
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.HotelViewComposer);
+        this.response.init(Outgoing.CloseConnection);
         return this.response;
     }
 }

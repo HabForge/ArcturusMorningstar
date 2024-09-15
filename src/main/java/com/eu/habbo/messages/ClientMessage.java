@@ -14,12 +14,12 @@ public class ClientMessage {
         this.buffer = ((buffer == null) || (buffer.readableBytes() == 0) ? Unpooled.EMPTY_BUFFER : buffer);
     }
 
-    public ByteBuf getBuffer() {
-        return this.buffer;
+    public Incoming getHeader() {
+        return this.header;
     }
 
-    public Incoming getMessageId() {
-        return this.header;
+    public ByteBuf getBuffer() {
+        return this.buffer;
     }
 
     /**

@@ -21,7 +21,7 @@ public class ClubDataComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.ClubDataComposer);
+        this.response.init(Outgoing.HabboClubOffers);
 
         List<ClubOffer> offers = Emulator.getGameEnvironment().getCatalogManager().getClubOffers();
         this.response.appendInt(offers.size());

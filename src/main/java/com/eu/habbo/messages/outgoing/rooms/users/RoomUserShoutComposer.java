@@ -17,7 +17,7 @@ public class RoomUserShoutComposer extends MessageComposer {
         if (this.roomChatMessage.getMessage().isEmpty())
             return null;
 
-        this.response.init(Outgoing.RoomUserShoutComposer);
+        this.response.init(Outgoing.Shout);
         this.roomChatMessage.serialize(this.response);
 
         return this.response;

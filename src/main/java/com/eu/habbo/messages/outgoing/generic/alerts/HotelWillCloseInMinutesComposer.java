@@ -13,7 +13,7 @@ public class HotelWillCloseInMinutesComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.HotelWillCloseInMinutesComposer);
+        this.response.init(Outgoing.InfoHotelClosing);
         this.response.appendInt(this.minutes);
         return this.response;
     }

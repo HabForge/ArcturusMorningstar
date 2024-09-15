@@ -13,7 +13,7 @@ public class UpdateFailedComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.UpdateFailedComposer);
+        this.response.init(Outgoing.WiredValidationError);
         this.response.appendString(this.message);
         return this.response;
     }

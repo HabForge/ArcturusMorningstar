@@ -14,7 +14,7 @@ public class RemovePetComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.RemovePetComposer);
+        this.response.init(Outgoing.PetRemovedFromInventory);
         this.response.appendInt(this.petId);
         return this.response;
     }

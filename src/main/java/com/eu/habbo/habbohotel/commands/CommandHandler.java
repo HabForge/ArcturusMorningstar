@@ -294,8 +294,6 @@ public class CommandHandler {
         addCommand(new AddYoutubePlaylistCommand());
         addCommand(new SoftKickCommand());
         addCommand(new SubscriptionCommand());
-
-        addCommand(new TestCommand());
     }
 
     public List<Command> getCommandsForRank(int rankId) {

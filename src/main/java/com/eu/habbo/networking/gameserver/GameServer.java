@@ -14,15 +14,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 
 public class GameServer extends Server {
-    private final RevisionProvider revisionProvider;
     private final PacketManager packetManager;
     private final GameClientManager gameClientManager;
 
     public GameServer(RevisionProvider revisionProvider, String host, int port) throws Exception {
         super("Game Server", host, port, Emulator.getConfig().getInt("io.bossgroup.threads"), Emulator.getConfig().getInt("io.workergroup.threads"));
-        this.revisionProvider = revisionProvider;
         this.packetManager = new PacketManager();
-        this.gameClientManager = new GameClientManager();
+        this.gameClientManager = new GameClientManager(revisionProvider);
     }
 
     @Override
@@ -37,7 +35,7 @@ public class GameServer extends Server {
                 // Decoders.
                 ch.pipeline().addLast(new GamePolicyDecoder());
                 ch.pipeline().addLast(new GameByteFrameDecoder());
-                ch.pipeline().addLast(new GameByteDecoder(revisionProvider));
+                ch.pipeline().addLast(new GameByteDecoder());
 
                 if (PacketManager.DEBUG_SHOW_PACKETS) {
                     ch.pipeline().addLast(new GameClientMessageLogger());

@@ -13,7 +13,7 @@ public class MutedWhisperComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.MutedWhisperComposer);
+        this.response.init(Outgoing.RemainingMutePeriod);
         this.response.appendInt(this.seconds);
         return this.response;
     }

@@ -16,7 +16,7 @@ public class RoomUserReceivedHandItemComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.RoomUserReceivedHandItemComposer);
+        this.response.init(Outgoing.HandItemReceived);
         this.response.appendInt(this.from.getId());
         this.response.appendInt(this.handItem);
         return this.response;

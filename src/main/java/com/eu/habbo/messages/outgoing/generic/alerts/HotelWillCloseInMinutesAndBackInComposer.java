@@ -15,7 +15,7 @@ public class HotelWillCloseInMinutesAndBackInComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.HotelWillCloseInMinutesAndBackInComposer);
+        this.response.init(Outgoing.MaintenanceStatus);
         this.response.appendBoolean(true);
         this.response.appendInt(this.closeInMinutes);
         this.response.appendInt(this.reopenInMinutes);

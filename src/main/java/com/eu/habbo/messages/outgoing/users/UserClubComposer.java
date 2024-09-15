@@ -44,7 +44,7 @@ public class UserClubComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.UserClubComposer);
+        this.response.init(Outgoing.ScrSendUserInfo);
 
         this.response.appendString(this.subscriptionType.toLowerCase());
 

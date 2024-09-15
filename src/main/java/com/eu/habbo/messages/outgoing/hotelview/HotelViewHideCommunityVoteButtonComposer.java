@@ -13,7 +13,7 @@ public class HotelViewHideCommunityVoteButtonComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.HotelViewHideCommunityVoteButtonComposer);
+        this.response.init(Outgoing.CommunityVoteReceived);
         this.response.appendBoolean(this.unknownBoolean);
         return this.response;
     }

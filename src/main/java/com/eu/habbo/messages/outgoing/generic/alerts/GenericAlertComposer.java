@@ -18,7 +18,7 @@ public class GenericAlertComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.GenericAlertComposer);
+        this.response.init(Outgoing.HabboBroadcast);
 
         this.response.appendString(this.message);
 

@@ -2,6 +2,7 @@ package com.eu.habbo.networking.gameserver.decoders;
 
 import com.eu.habbo.messages.ClientMessage;
 import com.eu.habbo.util.ANSI;
+import com.eu.habbo.util.packets.PacketStringUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import org.slf4j.Logger;
@@ -16,8 +17,8 @@ public class GameClientMessageLogger extends MessageToMessageDecoder<ClientMessa
     @Override
     protected void decode(ChannelHandlerContext ctx, ClientMessage message, List<Object> out) {
         LOGGER.debug(String.format("[" + ANSI.GREEN + "CLIENT" + ANSI.DEFAULT + "][%-41s] => %s",
-                message.getMessageId(),
-                message.getMessageBody()));
+                message.getHeader(),
+                PacketStringUtils.toString(message)));
 
         out.add(message);
     }

@@ -23,7 +23,7 @@ public class RoomFloorItemsComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.RoomFloorItemsComposer);
+        this.response.init(Outgoing.Objects);
 
         TIntObjectIterator<String> iterator = this.furniOwnerNames.iterator();
 

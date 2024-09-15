@@ -14,7 +14,7 @@ public class RoomFilterWordsComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.RoomFilterWordsComposer);
+        this.response.init(Outgoing.RoomFilterSettings);
 
         this.response.appendInt(this.room.getWordFilterWords().size());
 

@@ -32,7 +32,7 @@ public class GameMessageRateLimit extends MessageToMessageDecoder<ClientMessage>
             client.lastPacketCounterCleared = timestamp;
         } else {
             // Get stored count for message id.
-            count = client.incomingPacketCounter.getOrDefault(message.getMessageId(), 0);
+            count = client.incomingPacketCounter.getOrDefault(message.getHeader(), 0);
         }
 
         // If we exceeded the counter, drop the packet.
@@ -40,7 +40,7 @@ public class GameMessageRateLimit extends MessageToMessageDecoder<ClientMessage>
             return;
         }
 
-        client.incomingPacketCounter.put(message.getMessageId(), ++count);
+        client.incomingPacketCounter.put(message.getHeader(), ++count);
 
         // Continue processing.
         out.add(message);

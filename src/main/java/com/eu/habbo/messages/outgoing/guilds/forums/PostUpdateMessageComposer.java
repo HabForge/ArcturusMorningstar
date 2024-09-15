@@ -18,7 +18,7 @@ public class PostUpdateMessageComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.PostUpdateMessageComposer);
+        this.response.init(Outgoing.UpdateMessage);
 
         this.response.appendInt(this.guildId); //guild_id
         this.response.appendInt(this.threadId); //thread_id

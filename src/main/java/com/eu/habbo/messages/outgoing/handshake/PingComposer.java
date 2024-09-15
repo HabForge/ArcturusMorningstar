@@ -7,7 +7,7 @@ import com.eu.habbo.messages.outgoing.Outgoing;
 public class PingComposer extends MessageComposer {
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.PingComposer);
+        this.response.init(Outgoing.Ping);
         return this.response;
     }
 }

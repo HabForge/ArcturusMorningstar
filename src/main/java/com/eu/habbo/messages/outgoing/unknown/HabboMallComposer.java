@@ -7,7 +7,7 @@ import com.eu.habbo.messages.outgoing.Outgoing;
 public class HabboMallComposer extends MessageComposer {
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(Outgoing.HabboMallComposer);
+        this.response.init(Outgoing.TargetedOfferNotFound);
         //Empty body
         return this.response;
     }
