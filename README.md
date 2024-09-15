@@ -7,6 +7,17 @@ Arcturus Morningstar (HabForge) is a fork of [Arcturus Morningstar by Krews](htt
 
 This emulator targets protocol version [PRODUCTION-201611291003-338511768](https://sulek.dev/release/flash/PRODUCTION-201611291003-338511768).
 
+## Branches
+
+These are the two main branches, there may be other branches for features or hotfixes.
+
+| Branch | Status                                                                                                                                      | Description                                                   |
+|--------|---------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| main   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/HabForge/ArcturusMorningstar/build.yml?branch=main) | Stable version, only meant for hotfixes.                      |
+| dev    | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/HabForge/ArcturusMorningstar/build.yml?branch=dev)  | Unstable version, in development and may have a broken state. |
+
+Please stick to the releases when you want to use the emulator.
+
 ## Client
 
 ### Nitro
@@ -19,17 +30,6 @@ Compatible with the [web flash](https://sulek.dev/release/flash/PRODUCTION-20161
 Adobe Flash Player is no longer supported by Adobe, and is no longer available for download.  
 Thus this client is no longer recommended for use.
 
-## Branches
-
-These are the two main branches, there may be other branches for features or hotfixes.
-
-| Branch | Description                                                   |
-|--------|---------------------------------------------------------------|
-| main   | Stable version, only meant for hotfixes.                      |
-| dev    | Unstable version, in development and may have a broken state. |
-
-Please stick to the releases when you want to use the emulator.
-
 ## Contributing
 
 If you would like to contribute to the project. Please follow the following steps:
@@ -40,4 +40,5 @@ If you would like to contribute to the project. Please follow the following step
 - Push your changes to your fork
 - Create a pull request to the `dev` branch
 
-Please discuss any big changes in the [Discord](https://discord.gg/q3tCNQAzWe) before making a pull request.
+Please discuss any big changes in the [Discord](https://discord.gg/q3tCNQAzWe) before starting to work on them.  
+We may have a different goal in mind for the project.
