@@ -1,9 +1,10 @@
 package com.eu.habbo.networking.gameserver.decoders;
 
 import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.messages.ClientMessage;
 import com.eu.habbo.messages.PacketManager;
-import com.eu.habbo.threading.runnables.ChannelReadHandler;
+import com.eu.habbo.networking.gameserver.GameServerAttributes;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -22,8 +23,13 @@ import java.security.NoSuchAlgorithmException;
 
 @ChannelHandler.Sharable
 public class GameMessageHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GameMessageHandler.class);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameMessageHandler.class);
+    private final PacketManager packetManager;
+
+    public GameMessageHandler() {
+        this.packetManager = Emulator.getGameServer().getPacketManager();
+    }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
@@ -38,25 +44,22 @@ public class GameMessageHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ClientMessage message = (ClientMessage) msg;
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
         try {
-            ChannelReadHandler handler = new ChannelReadHandler(ctx, message);
+            final ClientMessage message = (ClientMessage) msg;
+            final GameClient client = ctx.channel().attr(GameServerAttributes.CLIENT).get();
 
-            if (PacketManager.MULTI_THREADED_PACKET_HANDLING) {
-                Emulator.getThreading().run(handler);
-                return;
+            if (client != null) {
+                this.packetManager.handlePacket(client, message);
             }
-
-            handler.run();
         } catch (Exception e) {
             LOGGER.error("Caught exception", e);
         }
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         ctx.channel().close();
     }
 
@@ -71,7 +74,7 @@ public class GameMessageHandler extends ChannelInboundHandlerAdapter {
                 LOGGER.error("Plaintext received instead of ssl, closing channel");
             }
             else if (cause instanceof DecoderException) {
-                LOGGER.error("Plaintext received instead of ssl, closing channel");
+                LOGGER.error("Failed to decode packets, closing channel", cause);
             }
             else if (cause instanceof TooLongFrameException) {
                 LOGGER.error("Disconnecting client, reason " + cause.getMessage());

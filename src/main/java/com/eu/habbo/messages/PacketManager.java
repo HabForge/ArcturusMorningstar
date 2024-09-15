@@ -4,7 +4,6 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.messages.incoming.Incoming;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.incoming.achievements.RequestAchievementConfigurationEvent;
 import com.eu.habbo.messages.incoming.achievements.RequestAchievementsEvent;
 import com.eu.habbo.messages.incoming.ambassadors.AmbassadorAlertCommandEvent;
 import com.eu.habbo.messages.incoming.ambassadors.AmbassadorVisitCommandEvent;
@@ -22,7 +21,6 @@ import com.eu.habbo.messages.incoming.floorplaneditor.FloorPlanEditorRequestBloc
 import com.eu.habbo.messages.incoming.floorplaneditor.FloorPlanEditorRequestDoorSettingsEvent;
 import com.eu.habbo.messages.incoming.floorplaneditor.FloorPlanEditorSaveEvent;
 import com.eu.habbo.messages.incoming.friends.*;
-import com.eu.habbo.messages.incoming.gamecenter.*;
 import com.eu.habbo.messages.incoming.guardians.GuardianAcceptRequestEvent;
 import com.eu.habbo.messages.incoming.guardians.GuardianNoUpdatesWantedEvent;
 import com.eu.habbo.messages.incoming.guardians.GuardianVoteEvent;
@@ -81,18 +79,14 @@ public class PacketManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PacketManager.class);
 
-    private static final List<Integer> logList = new ArrayList<>();
+    private static final List<Incoming> logList = new ArrayList<>();
     public static boolean DEBUG_SHOW_PACKETS = false;
-    public static boolean MULTI_THREADED_PACKET_HANDLING = false;
-    private final THashMap<Integer, Class<? extends MessageHandler>> incoming;
-    private final THashMap<Integer, List<ICallable>> callables;
-    private final PacketNames names;
+    private final THashMap<Incoming, Class<? extends MessageHandler>> incoming;
+    private final THashMap<Incoming, List<ICallable>> callables;
 
     public PacketManager() throws Exception {
         this.incoming = new THashMap<>();
         this.callables = new THashMap<>();
-        this.names = new PacketNames();
-        this.names.initialize();
 
         this.registerHandshake();
         this.registerCatalog();
@@ -119,27 +113,24 @@ public class PacketManager {
         this.registerGameCenter();
     }
 
-    public PacketNames getNames() {
-        return names;
-    }
-
     @EventHandler
     public static void onConfigurationUpdated(EmulatorConfigUpdatedEvent event) {
         logList.clear();
 
         for (String s : Emulator.getConfig().getValue("debug.show.headers").split(";")) {
-            try {
-                logList.add(Integer.valueOf(s));
-            } catch (NumberFormatException e) {
+            if (s.isEmpty()) {
+                continue;
+            }
 
+            try {
+                logList.add(Incoming.valueOf(s));
+            } catch (Exception e) {
+                LOGGER.error("Failed to add {} to packet log list, check your debug.show.headers config", s, e);
             }
         }
     }
 
-    public void registerHandler(Integer header, Class<? extends MessageHandler> handler) throws Exception {
-        if (header < 0)
-            return;
-
+    public void registerHandler(Incoming header, Class<? extends MessageHandler> handler) throws Exception {
         if (this.incoming.containsKey(header)) {
             throw new Exception("Header already registered. Failed to register " + handler.getName() + " with header " + header);
         }
@@ -147,21 +138,43 @@ public class PacketManager {
         this.incoming.putIfAbsent(header, handler);
     }
 
-    public void registerCallable(Integer header, ICallable callable) {
+    @Deprecated
+    public void registerHandler(Integer header, Class<? extends MessageHandler> handler) throws Exception {
+        // TODO(HabForge): Translate
+    }
+
+    public void registerCallable(Incoming header, ICallable callable) {
         this.callables.putIfAbsent(header, new ArrayList<>());
         this.callables.get(header).add(callable);
     }
 
-    public void unregisterCallables(Integer header, ICallable callable) {
+    @Deprecated
+    public void registerCallable(Integer header, ICallable callable) {
+        // TODO(HabForge): Translate
+    }
+
+    @Deprecated
+    public void unregisterCallables(Incoming header, ICallable callable) {
         if (this.callables.containsKey(header)) {
             this.callables.get(header).remove(callable);
         }
     }
 
-    public void unregisterCallables(Integer header) {
+    @Deprecated
+    public void unregisterCallables(Integer header, ICallable callable) {
+        // TODO(HabForge): Translate
+    }
+
+    @Deprecated
+    public void unregisterCallables(Incoming header) {
         if (this.callables.containsKey(header)) {
             this.callables.clear();
         }
+    }
+
+    @Deprecated
+    public void unregisterCallables(Integer header) {
+        // TODO(HabForge): Translate
     }
 
     public void handlePacket(GameClient client, ClientMessage packet) {
@@ -169,7 +182,7 @@ public class PacketManager {
             return;
 
         try {
-            if (this.isRegistered(packet.getMessageId())) {
+            if (this.incoming.containsKey(packet.getMessageId())) {
                 Class<? extends MessageHandler> handlerClass = this.incoming.get(packet.getMessageId());
 
                 if (handlerClass == null) throw new Exception("Unknown message " + packet.getMessageId());
@@ -218,430 +231,426 @@ public class PacketManager {
         }
     }
 
-    boolean isRegistered(int header) {
-        return this.incoming.containsKey(header);
-    }
-
     private void registerAmbassadors() throws Exception {
-        this.registerHandler(Incoming.AmbassadorAlertCommandEvent, AmbassadorAlertCommandEvent.class);
-        this.registerHandler(Incoming.AmbassadorVisitCommandEvent, AmbassadorVisitCommandEvent.class);
+        this.registerHandler(Incoming.AmbassadorAlert, AmbassadorAlertCommandEvent.class);
+        this.registerHandler(Incoming.VisitUser, AmbassadorVisitCommandEvent.class);
     }
 
     private void registerCatalog() throws Exception {
-        this.registerHandler(Incoming.RequestRecylerLogicEvent, RequestRecyclerLogicEvent.class);
-        this.registerHandler(Incoming.RequestDiscountEvent, RequestDiscountEvent.class);
-        this.registerHandler(Incoming.RequestGiftConfigurationEvent, RequestGiftConfigurationEvent.class);
-        this.registerHandler(Incoming.GetMarketplaceConfigEvent, RequestMarketplaceConfigEvent.class);
-        this.registerHandler(Incoming.RequestCatalogModeEvent, RequestCatalogModeEvent.class);
-        this.registerHandler(Incoming.RequestCatalogIndexEvent, RequestCatalogIndexEvent.class);
-        this.registerHandler(Incoming.RequestCatalogPageEvent, RequestCatalogPageEvent.class);
-        this.registerHandler(Incoming.CatalogBuyItemAsGiftEvent, CatalogBuyItemAsGiftEvent.class);
-        this.registerHandler(Incoming.CatalogBuyItemEvent, CatalogBuyItemEvent.class);
-        this.registerHandler(Incoming.RedeemVoucherEvent, RedeemVoucherEvent.class);
-        this.registerHandler(Incoming.ReloadRecyclerEvent, ReloadRecyclerEvent.class);
-        this.registerHandler(Incoming.RecycleEvent, RecycleEvent.class);
-        this.registerHandler(Incoming.OpenRecycleBoxEvent, OpenRecycleBoxEvent.class);
-        this.registerHandler(Incoming.RequestOwnItemsEvent, RequestOwnItemsEvent.class);
-        this.registerHandler(Incoming.TakeBackItemEvent, TakeBackItemEvent.class);
-        this.registerHandler(Incoming.RequestOffersEvent, RequestOffersEvent.class);
-        this.registerHandler(Incoming.RequestItemInfoEvent, RequestItemInfoEvent.class);
-        this.registerHandler(Incoming.BuyItemEvent, BuyItemEvent.class);
-        this.registerHandler(Incoming.RequestSellItemEvent, RequestSellItemEvent.class);
-        this.registerHandler(Incoming.SellItemEvent, SellItemEvent.class);
-        this.registerHandler(Incoming.RequestCreditsEvent, RequestCreditsEvent.class);
-        this.registerHandler(Incoming.RequestPetBreedsEvent, RequestPetBreedsEvent.class);
-        this.registerHandler(Incoming.CheckPetNameEvent, CheckPetNameEvent.class);
-        this.registerHandler(Incoming.GetClubDataEvent, RequestClubDataEvent.class);
-        this.registerHandler(Incoming.RequestClubGiftsEvent, RequestClubGiftsEvent.class);
-        this.registerHandler(Incoming.CatalogSearchedItemEvent, CatalogSearchedItemEvent.class);
-        this.registerHandler(Incoming.PurchaseTargetOfferEvent, PurchaseTargetOfferEvent.class);
-        this.registerHandler(Incoming.TargetOfferStateEvent, TargetOfferStateEvent.class);
-        this.registerHandler(Incoming.CatalogSelectClubGiftEvent, CatalogSelectClubGiftEvent.class);
-        this.registerHandler(Incoming.RequestClubCenterEvent, RequestClubCenterEvent.class);
-        this.registerHandler(Incoming.CatalogRequestClubDiscountEvent, CatalogRequestClubDiscountEvent.class);
-        this.registerHandler(Incoming.CatalogBuyClubDiscountEvent, CatalogBuyClubDiscountEvent.class);
+        this.registerHandler(Incoming.GetRecyclerPrizes, RequestRecyclerLogicEvent.class);
+        this.registerHandler(Incoming.GetBundleDiscountRulesetComposer, RequestDiscountEvent.class);
+        this.registerHandler(Incoming.GetGiftWrappingConfigurationComposer, RequestGiftConfigurationEvent.class);
+        this.registerHandler(Incoming.GetMarketplaceConfiguration, RequestMarketplaceConfigEvent.class);
+        this.registerHandler(Incoming.GetCatalogIndexComposer, RequestCatalogModeEvent.class);
+        this.registerHandler(Incoming.BuildersClubQueryFurniCount, RequestCatalogIndexEvent.class);
+        this.registerHandler(Incoming.GetCatalogPageComposer, RequestCatalogPageEvent.class);
+        this.registerHandler(Incoming.PurchaseFromCatalogAsGiftComposer, CatalogBuyItemAsGiftEvent.class);
+        this.registerHandler(Incoming.PurchaseFromCatalogComposer, CatalogBuyItemEvent.class);
+        this.registerHandler(Incoming.RedeemVoucher, RedeemVoucherEvent.class);
+        this.registerHandler(Incoming.GetRecyclerStatus, ReloadRecyclerEvent.class);
+        this.registerHandler(Incoming.RecycleItems, RecycleEvent.class);
+        this.registerHandler(Incoming.PresentOpen, OpenRecycleBoxEvent.class);
+        this.registerHandler(Incoming.GetMarketplaceOwnOffers, RequestOwnItemsEvent.class);
+        this.registerHandler(Incoming.CancelMarketplaceOffer, TakeBackItemEvent.class);
+        this.registerHandler(Incoming.GetMarketplaceOffers, RequestOffersEvent.class);
+        this.registerHandler(Incoming.GetMarketplaceItemStatsComposer, RequestItemInfoEvent.class);
+        this.registerHandler(Incoming.BuyMarketplaceOffer, BuyItemEvent.class);
+        this.registerHandler(Incoming.GetMarketplaceCanMakeOffer, RequestSellItemEvent.class);
+        this.registerHandler(Incoming.MakeOffer, SellItemEvent.class);
+        this.registerHandler(Incoming.RedeemMarketplaceOfferCredits, RequestCreditsEvent.class);
+        this.registerHandler(Incoming.GetSellablePetPalettesComposer, RequestPetBreedsEvent.class);
+        this.registerHandler(Incoming.ApproveName, CheckPetNameEvent.class);
+        this.registerHandler(Incoming.GetClubOffers, RequestClubDataEvent.class);
+        this.registerHandler(Incoming.GetClubGift, RequestClubGiftsEvent.class);
+        this.registerHandler(Incoming.GetProductOfferComposer, CatalogSearchedItemEvent.class);
+        this.registerHandler(Incoming.PurchaseTargetedOfferComposer, PurchaseTargetOfferEvent.class);
+        this.registerHandler(Incoming.SetTargetedOfferStateComposer, TargetOfferStateEvent.class);
+        this.registerHandler(Incoming.SelectClubGiftComposer, CatalogSelectClubGiftEvent.class);
+        this.registerHandler(Incoming.ScrGetKickbackInfo, RequestClubCenterEvent.class);
+        this.registerHandler(Incoming.GetHabboClubExtendOffer, CatalogRequestClubDiscountEvent.class);
+        this.registerHandler(Incoming.PurchaseVipMembershipExtensionComposer, CatalogBuyClubDiscountEvent.class);
     }
 
     private void registerEvent() throws Exception {
-        this.registerHandler(Incoming.AdventCalendarOpenDayEvent, AdventCalendarOpenDayEvent.class);
-        this.registerHandler(Incoming.AdventCalendarForceOpenEvent, AdventCalendarForceOpenEvent.class);
+        this.registerHandler(Incoming.OpenCampaignCalendarDoorComposer, AdventCalendarOpenDayEvent.class);
+        this.registerHandler(Incoming.OpenCampaignCalendarDoorAsStaffComposer, AdventCalendarForceOpenEvent.class);
     }
 
     private void registerHandshake() throws Exception {
-        this.registerHandler(Incoming.ReleaseVersionEvent, ReleaseVersionEvent.class);
+        this.registerHandler(Incoming.ClientHello, ClientHelloEvent.class);
         this.registerHandler(Incoming.InitDiffieHandshake, InitDiffieHandshakeEvent.class);
         this.registerHandler(Incoming.CompleteDiffieHandshake, CompleteDiffieHandshakeEvent.class);
-        this.registerHandler(Incoming.SecureLoginEvent, SecureLoginEvent.class);
-        this.registerHandler(Incoming.MachineIDEvent, MachineIDEvent.class);
-        this.registerHandler(Incoming.UsernameEvent, UsernameEvent.class);
-        this.registerHandler(Incoming.PingEvent, PingEvent.class);
+        this.registerHandler(Incoming.SSOTicket, SecureLoginEvent.class);
+        this.registerHandler(Incoming.UniqueID, MachineIDEvent.class);
+        this.registerHandler(Incoming.GetIgnoredUsers, UsernameEvent.class);
+        this.registerHandler(Incoming.LatencyPingRequest, PingEvent.class);
     }
 
     private void registerFriends() throws Exception {
-        this.registerHandler(Incoming.RequestFriendsEvent, RequestFriendsEvent.class);
-        this.registerHandler(Incoming.ChangeRelationEvent, ChangeRelationEvent.class);
-        this.registerHandler(Incoming.RemoveFriendEvent, RemoveFriendEvent.class);
-        this.registerHandler(Incoming.SearchUserEvent, SearchUserEvent.class);
-        this.registerHandler(Incoming.FriendRequestEvent, FriendRequestEvent.class);
-        this.registerHandler(Incoming.AcceptFriendRequest, AcceptFriendRequestEvent.class);
-        this.registerHandler(Incoming.DeclineFriendRequest, DeclineFriendRequestEvent.class);
-        this.registerHandler(Incoming.FriendPrivateMessageEvent, FriendPrivateMessageEvent.class);
-        this.registerHandler(Incoming.RequestFriendRequestEvent, RequestFriendRequestsEvent.class);
-        this.registerHandler(Incoming.StalkFriendEvent, StalkFriendEvent.class);
-        this.registerHandler(Incoming.RequestInitFriendsEvent, RequestInitFriendsEvent.class);
-        this.registerHandler(Incoming.FindNewFriendsEvent, FindNewFriendsEvent.class);
-        this.registerHandler(Incoming.InviteFriendsEvent, InviteFriendsEvent.class);
+        this.registerHandler(Incoming.GetMOTD, RequestFriendsEvent.class);
+        this.registerHandler(Incoming.SetRelationshipStatus, ChangeRelationEvent.class);
+        this.registerHandler(Incoming.RemoveFriend, RemoveFriendEvent.class);
+        this.registerHandler(Incoming.HabboSearch, SearchUserEvent.class);
+        this.registerHandler(Incoming.RequestFriend, FriendRequestEvent.class);
+        this.registerHandler(Incoming.AcceptFriend, AcceptFriendRequestEvent.class);
+        this.registerHandler(Incoming.DeclineFriend, DeclineFriendRequestEvent.class);
+        this.registerHandler(Incoming.SendMsg, FriendPrivateMessageEvent.class);
+        this.registerHandler(Incoming.GetFriendRequests, RequestFriendRequestsEvent.class);
+        this.registerHandler(Incoming.FollowFriend, StalkFriendEvent.class);
+        this.registerHandler(Incoming.MessengerInit, RequestInitFriendsEvent.class);
+        this.registerHandler(Incoming.FindNewFriends, FindNewFriendsEvent.class);
+        this.registerHandler(Incoming.SendRoomInvite, InviteFriendsEvent.class);
     }
 
     private void registerUsers() throws Exception {
-        this.registerHandler(Incoming.RequestUserDataEvent, RequestUserDataEvent.class);
-        this.registerHandler(Incoming.RequestUserCreditsEvent, RequestUserCreditsEvent.class);
-        this.registerHandler(Incoming.RequestUserClubEvent, RequestUserClubEvent.class);
-        this.registerHandler(Incoming.RequestMeMenuSettingsEvent, RequestMeMenuSettingsEvent.class);
-        this.registerHandler(Incoming.RequestUserCitizinShipEvent, RequestUserCitizinShipEvent.class);
-        this.registerHandler(Incoming.RequestUserProfileEvent, RequestUserProfileEvent.class);
-        this.registerHandler(Incoming.RequestProfileFriendsEvent, RequestProfileFriendsEvent.class);
-        this.registerHandler(Incoming.RequestUserWardrobeEvent, RequestUserWardrobeEvent.class);
-        this.registerHandler(Incoming.SaveWardrobeEvent, SaveWardrobeEvent.class);
-        this.registerHandler(Incoming.SaveMottoEvent, SaveMottoEvent.class);
-        this.registerHandler(Incoming.UserSaveLookEvent, UserSaveLookEvent.class);
-        this.registerHandler(Incoming.UserWearBadgeEvent, UserWearBadgeEvent.class);
-        this.registerHandler(Incoming.RequestWearingBadgesEvent, RequestWearingBadgesEvent.class);
-        this.registerHandler(Incoming.SaveUserVolumesEvent, SaveUserVolumesEvent.class);
-        this.registerHandler(Incoming.SaveBlockCameraFollowEvent, SaveBlockCameraFollowEvent.class);
-        this.registerHandler(Incoming.SaveIgnoreRoomInvitesEvent, SaveIgnoreRoomInvitesEvent.class);
-        this.registerHandler(Incoming.SavePreferOldChatEvent, SavePreferOldChatEvent.class);
-        this.registerHandler(Incoming.ActivateEffectEvent, ActivateEffectEvent.class);
-        this.registerHandler(Incoming.EnableEffectEvent, EnableEffectEvent.class);
-        this.registerHandler(Incoming.UserActivityEvent, UserActivityEvent.class);
-        this.registerHandler(Incoming.UserNuxEvent, UserNuxEvent.class);
-        this.registerHandler(Incoming.PickNewUserGiftEvent, PickNewUserGiftEvent.class);
-        this.registerHandler(Incoming.ChangeNameCheckUsernameEvent, ChangeNameCheckUsernameEvent.class);
-        this.registerHandler(Incoming.ConfirmChangeNameEvent, ConfirmChangeNameEvent.class);
-        this.registerHandler(Incoming.ChangeChatBubbleEvent, ChangeChatBubbleEvent.class);
-        this.registerHandler(Incoming.UpdateUIFlagsEvent, UpdateUIFlagsEvent.class);
+        this.registerHandler(Incoming.InfoRetrieve, RequestUserDataEvent.class);
+        this.registerHandler(Incoming.GetCreditsInfoComposer, RequestUserCreditsEvent.class);
+        this.registerHandler(Incoming.ScrGetUserInfo, RequestUserClubEvent.class);
+        this.registerHandler(Incoming.GetSoundSettingsComposer, RequestMeMenuSettingsEvent.class);
+        this.registerHandler(Incoming.GetTalentTrackLevel, RequestUserCitizinShipEvent.class);
+        this.registerHandler(Incoming.GetExtendedProfile, RequestUserProfileEvent.class);
+        this.registerHandler(Incoming.GetRelationshipStatusInfo, RequestProfileFriendsEvent.class);
+        this.registerHandler(Incoming.GetWardrobe, RequestUserWardrobeEvent.class);
+        this.registerHandler(Incoming.SaveWardrobeOutfit, SaveWardrobeEvent.class);
+        this.registerHandler(Incoming.ChangeMotto, SaveMottoEvent.class);
+        this.registerHandler(Incoming.UpdateFigureData, UserSaveLookEvent.class);
+        this.registerHandler(Incoming.SetActivatedBadgesComposer, UserWearBadgeEvent.class);
+        this.registerHandler(Incoming.GetSelectedBadges, RequestWearingBadgesEvent.class);
+        this.registerHandler(Incoming.SetSoundSettingsComposer, SaveUserVolumesEvent.class);
+        this.registerHandler(Incoming.SetRoomCameraPreferences, SaveBlockCameraFollowEvent.class);
+        this.registerHandler(Incoming.SetIgnoreRoomInvites, SaveIgnoreRoomInvitesEvent.class);
+        this.registerHandler(Incoming.SetChatPreferences, SavePreferOldChatEvent.class);
+        this.registerHandler(Incoming.AvatarEffectActivatedComposer, ActivateEffectEvent.class);
+        this.registerHandler(Incoming.AvatarEffectSelectedComposer, EnableEffectEvent.class);
+        this.registerHandler(Incoming.EventLog, UserActivityEvent.class);
+        this.registerHandler(Incoming.NewUserExperienceScriptProceedComposer, UserNuxEvent.class);
+        this.registerHandler(Incoming.NewUserExperienceGetGifts, PickNewUserGiftEvent.class);
+        this.registerHandler(Incoming.CheckUserName, ChangeNameCheckUsernameEvent.class);
+        this.registerHandler(Incoming.ChangeUserName, ConfirmChangeNameEvent.class);
+        this.registerHandler(Incoming.SetChatStylePreferenceComposer, ChangeChatBubbleEvent.class);
+        this.registerHandler(Incoming.SetUIFlags, UpdateUIFlagsEvent.class);
     }
 
     private void registerNavigator() throws Exception {
-        this.registerHandler(Incoming.RequestRoomCategoriesEvent, RequestRoomCategoriesEvent.class);
-        this.registerHandler(Incoming.RequestPopularRoomsEvent, RequestPopularRoomsEvent.class);
-        this.registerHandler(Incoming.RequestHighestScoreRoomsEvent, RequestHighestScoreRoomsEvent.class);
-        this.registerHandler(Incoming.RequestMyRoomsEvent, RequestMyRoomsEvent.class);
-        this.registerHandler(Incoming.RequestCanCreateRoomEvent, RequestCanCreateRoomEvent.class);
-        this.registerHandler(Incoming.RequestPromotedRoomsEvent, RequestPromotedRoomsEvent.class);
-        this.registerHandler(Incoming.RequestCreateRoomEvent, RequestCreateRoomEvent.class);
-        this.registerHandler(Incoming.RequestTagsEvent, RequestTagsEvent.class);
-        this.registerHandler(Incoming.SearchRoomsByTagEvent, SearchRoomsByTagEvent.class);
-        this.registerHandler(Incoming.SearchRoomsEvent, SearchRoomsEvent.class);
-        this.registerHandler(Incoming.SearchRoomsFriendsNowEvent, SearchRoomsFriendsNowEvent.class);
-        this.registerHandler(Incoming.SearchRoomsFriendsOwnEvent, SearchRoomsFriendsOwnEvent.class);
-        this.registerHandler(Incoming.SearchRoomsWithRightsEvent, SearchRoomsWithRightsEvent.class);
-        this.registerHandler(Incoming.SearchRoomsInGroupEvent, SearchRoomsInGroupEvent.class);
-        this.registerHandler(Incoming.SearchRoomsMyFavoriteEvent, SearchRoomsMyFavouriteEvent.class);
-        this.registerHandler(Incoming.SearchRoomsVisitedEvent, SearchRoomsVisitedEvent.class);
-        this.registerHandler(Incoming.RequestNewNavigatorDataEvent, RequestNewNavigatorDataEvent.class);
-        this.registerHandler(Incoming.RequestNewNavigatorRoomsEvent, RequestNewNavigatorRoomsEvent.class);
-        this.registerHandler(Incoming.NewNavigatorActionEvent, NewNavigatorActionEvent.class);
-        this.registerHandler(Incoming.RequestNavigatorSettingsEvent, RequestNavigatorSettingsEvent.class);
-        this.registerHandler(Incoming.SaveWindowSettingsEvent, SaveWindowSettingsEvent.class);
-        this.registerHandler(Incoming.RequestDeleteRoomEvent, RequestDeleteRoomEvent.class);
-        this.registerHandler(Incoming.NavigatorCategoryListModeEvent, NavigatorCategoryListModeEvent.class);
-        this.registerHandler(Incoming.NavigatorCollapseCategoryEvent, NavigatorCollapseCategoryEvent.class);
-        this.registerHandler(Incoming.NavigatorUncollapseCategoryEvent, NavigatorUncollapseCategoryEvent.class);
-        this.registerHandler(Incoming.AddSavedSearchEvent, AddSavedSearchEvent.class);
-        this.registerHandler(Incoming.DeleteSavedSearchEvent, DeleteSavedSearchEvent.class);
+        this.registerHandler(Incoming.GetUserFlatCats, RequestRoomCategoriesEvent.class);
+        this.registerHandler(Incoming.PopularRoomsSearch, RequestPopularRoomsEvent.class);
+        this.registerHandler(Incoming.RoomsWithHighestScoreSearch, RequestHighestScoreRoomsEvent.class);
+        this.registerHandler(Incoming.MyRoomsSearch, RequestMyRoomsEvent.class);
+        this.registerHandler(Incoming.CanCreateRoom, RequestCanCreateRoomEvent.class);
+        this.registerHandler(Incoming.GetUnreadForumsCount, RequestPromotedRoomsEvent.class);
+        this.registerHandler(Incoming.CreateFlat, RequestCreateRoomEvent.class);
+        this.registerHandler(Incoming.GetPopularRoomTags, RequestTagsEvent.class);
+        // this.registerHandler(Incoming.SearchRoomsByTagEvent, SearchRoomsByTagEvent.class);
+        this.registerHandler(Incoming.RoomTextSearch, SearchRoomsEvent.class);
+        this.registerHandler(Incoming.RoomsWhereMyFriendsAreSearch, SearchRoomsFriendsNowEvent.class);
+        this.registerHandler(Incoming.MyFriendsRoomsSearch, SearchRoomsFriendsOwnEvent.class);
+        this.registerHandler(Incoming.MyRoomRightsSearch, SearchRoomsWithRightsEvent.class);
+        this.registerHandler(Incoming.MyGuildBasesSearch, SearchRoomsInGroupEvent.class);
+        this.registerHandler(Incoming.MyFavouriteRoomsSearch, SearchRoomsMyFavouriteEvent.class);
+        this.registerHandler(Incoming.MyRoomHistorySearch, SearchRoomsVisitedEvent.class);
+        this.registerHandler(Incoming.NewNavigatorInitComposer, RequestNewNavigatorDataEvent.class);
+        this.registerHandler(Incoming.NewNavigatorSearchComposer, RequestNewNavigatorRoomsEvent.class);
+        this.registerHandler(Incoming.ForwardToSomeRoom, NewNavigatorActionEvent.class);
+        this.registerHandler(Incoming.GetUserEventCats, RequestNavigatorSettingsEvent.class);
+        this.registerHandler(Incoming.SetNewNavigatorWindowPreferences, SaveWindowSettingsEvent.class);
+        this.registerHandler(Incoming.DeleteRoom, RequestDeleteRoomEvent.class);
+        this.registerHandler(Incoming.NavigatorSetSearchCodeViewMode, NavigatorCategoryListModeEvent.class);
+        this.registerHandler(Incoming.NavigatorAddCollapsedCategory, NavigatorCollapseCategoryEvent.class);
+        this.registerHandler(Incoming.NavigatorRemoveCollapsedCategory, NavigatorUncollapseCategoryEvent.class);
+        this.registerHandler(Incoming.NavigatorAddSavedSearchComposer, AddSavedSearchEvent.class);
+        this.registerHandler(Incoming.NavigatorDeleteSavedSearchComposer, DeleteSavedSearchEvent.class);
     }
 
     private void registerHotelview() throws Exception {
-        this.registerHandler(Incoming.HotelViewEvent, HotelViewEvent.class);
-        this.registerHandler(Incoming.HotelViewRequestBonusRareEvent, HotelViewRequestBonusRareEvent.class);
-        this.registerHandler(Incoming.RequestNewsListEvent, RequestNewsListEvent.class);
-        this.registerHandler(Incoming.HotelViewDataEvent, HotelViewDataEvent.class);
-        this.registerHandler(Incoming.HotelViewRequestBadgeRewardEvent, HotelViewRequestBadgeRewardEvent.class);
-        this.registerHandler(Incoming.HotelViewClaimBadgeRewardEvent, HotelViewClaimBadgeRewardEvent.class);
-        this.registerHandler(Incoming.HotelViewRequestLTDAvailabilityEvent, HotelViewRequestLTDAvailabilityEvent.class);
-        this.registerHandler(Incoming.HotelViewRequestSecondsUntilEvent, HotelViewRequestSecondsUntilEvent.class);
+        this.registerHandler(Incoming.Quit, HotelViewEvent.class);
+        this.registerHandler(Incoming.GetBonusRareInfo, HotelViewRequestBonusRareEvent.class);
+        this.registerHandler(Incoming.GetPromoArticles, RequestNewsListEvent.class);
+        this.registerHandler(Incoming.GetCurrentTimingCode, HotelViewDataEvent.class);
+        //this.registerHandler(Incoming.HotelViewRequestBadgeRewardEvent, HotelViewRequestBadgeRewardEvent.class);
+        //this.registerHandler(Incoming.HotelViewClaimBadgeRewardEvent, HotelViewClaimBadgeRewardEvent.class);
+        this.registerHandler(Incoming.GetLimitedOfferAppearingNextComposer, HotelViewRequestLTDAvailabilityEvent.class);
+        this.registerHandler(Incoming.GetSecondsUntil, HotelViewRequestSecondsUntilEvent.class);
     }
 
     private void registerInventory() throws Exception {
-        this.registerHandler(Incoming.RequestInventoryBadgesEvent, RequestInventoryBadgesEvent.class);
-        this.registerHandler(Incoming.RequestInventoryBotsEvent, RequestInventoryBotsEvent.class);
-        this.registerHandler(Incoming.RequestInventoryItemsEvent, RequestInventoryItemsEvent.class);
-        this.registerHandler(Incoming.HotelViewInventoryEvent, RequestInventoryItemsEvent.class);
-        this.registerHandler(Incoming.RequestInventoryPetsEvent, RequestInventoryPetsEvent.class);
+        this.registerHandler(Incoming.GetBadgesComposer, RequestInventoryBadgesEvent.class);
+        this.registerHandler(Incoming.GetBotInventoryComposer, RequestInventoryBotsEvent.class);
+        this.registerHandler(Incoming.RequestFurniInventoryComposer, RequestInventoryItemsEvent.class);
+        this.registerHandler(Incoming.RequestFurniInventoryWhenNotInRoomComposer, RequestInventoryItemsEvent.class);
+        this.registerHandler(Incoming.GetPetInventoryComposer, RequestInventoryPetsEvent.class);
     }
 
     void registerRooms() throws Exception {
-        this.registerHandler(Incoming.RequestRoomLoadEvent, RequestRoomLoadEvent.class);
-        this.registerHandler(Incoming.RequestHeightmapEvent, RequestRoomHeightmapEvent.class);
-        this.registerHandler(Incoming.RequestRoomHeightmapEvent, RequestRoomHeightmapEvent.class);
-        this.registerHandler(Incoming.RoomVoteEvent, RoomVoteEvent.class);
-        this.registerHandler(Incoming.RequestRoomDataEvent, RequestRoomDataEvent.class);
-        this.registerHandler(Incoming.RoomSettingsSaveEvent, RoomSettingsSaveEvent.class);
-        this.registerHandler(Incoming.RoomPlaceItemEvent, RoomPlaceItemEvent.class);
-        this.registerHandler(Incoming.RotateMoveItemEvent, RotateMoveItemEvent.class);
-        this.registerHandler(Incoming.MoveWallItemEvent, MoveWallItemEvent.class);
-        this.registerHandler(Incoming.RoomPickupItemEvent, RoomPickupItemEvent.class);
-        this.registerHandler(Incoming.RoomPlacePaintEvent, RoomPlacePaintEvent.class);
-        this.registerHandler(Incoming.RoomUserStartTypingEvent, RoomUserStartTypingEvent.class);
-        this.registerHandler(Incoming.RoomUserStopTypingEvent, RoomUserStopTypingEvent.class);
-        this.registerHandler(Incoming.ToggleFloorItemEvent, ToggleFloorItemEvent.class);
-        this.registerHandler(Incoming.ToggleWallItemEvent, ToggleWallItemEvent.class);
-        this.registerHandler(Incoming.RoomBackgroundEvent, RoomBackgroundEvent.class);
-        this.registerHandler(Incoming.MannequinSaveNameEvent, MannequinSaveNameEvent.class);
-        this.registerHandler(Incoming.MannequinSaveLookEvent, MannequinSaveLookEvent.class);
-        this.registerHandler(Incoming.FootballGateSaveLookEvent, FootballGateSaveLookEvent.class);
-        this.registerHandler(Incoming.AdvertisingSaveEvent, AdvertisingSaveEvent.class);
-        this.registerHandler(Incoming.RequestRoomSettingsEvent, RequestRoomSettingsEvent.class);
-        this.registerHandler(Incoming.MoodLightSettingsEvent, MoodLightSettingsEvent.class);
-        this.registerHandler(Incoming.MoodLightTurnOnEvent, MoodLightTurnOnEvent.class);
-        this.registerHandler(Incoming.RoomUserDropHandItemEvent, RoomUserDropHandItemEvent.class);
-        this.registerHandler(Incoming.RoomUserLookAtPoint, RoomUserLookAtPoint.class);
-        this.registerHandler(Incoming.RoomUserTalkEvent, RoomUserTalkEvent.class);
-        this.registerHandler(Incoming.RoomUserShoutEvent, RoomUserShoutEvent.class);
-        this.registerHandler(Incoming.RoomUserWhisperEvent, RoomUserWhisperEvent.class);
-        this.registerHandler(Incoming.RoomUserActionEvent, RoomUserActionEvent.class);
-        this.registerHandler(Incoming.RoomUserSitEvent, RoomUserSitEvent.class);
-        this.registerHandler(Incoming.RoomUserDanceEvent, RoomUserDanceEvent.class);
-        this.registerHandler(Incoming.RoomUserSignEvent, RoomUserSignEvent.class);
-        this.registerHandler(Incoming.RoomUserWalkEvent, RoomUserWalkEvent.class);
-        this.registerHandler(Incoming.RoomUserGiveRespectEvent, RoomUserGiveRespectEvent.class);
-        this.registerHandler(Incoming.RoomUserGiveRightsEvent, RoomUserGiveRightsEvent.class);
-        this.registerHandler(Incoming.RoomRemoveRightsEvent, RoomRemoveRightsEvent.class);
-        this.registerHandler(Incoming.RequestRoomRightsEvent, RequestRoomRightsEvent.class);
-        this.registerHandler(Incoming.RoomRemoveAllRightsEvent, RoomRemoveAllRightsEvent.class);
-        this.registerHandler(Incoming.RoomUserRemoveRightsEvent, RoomUserRemoveRightsEvent.class);
-        this.registerHandler(Incoming.BotPlaceEvent, BotPlaceEvent.class);
-        this.registerHandler(Incoming.BotPickupEvent, BotPickupEvent.class);
-        this.registerHandler(Incoming.BotSaveSettingsEvent, BotSaveSettingsEvent.class);
-        this.registerHandler(Incoming.BotSettingsEvent, BotSettingsEvent.class);
-        this.registerHandler(Incoming.TriggerDiceEvent, TriggerDiceEvent.class);
-        this.registerHandler(Incoming.CloseDiceEvent, CloseDiceEvent.class);
-        this.registerHandler(Incoming.TriggerColorWheelEvent, TriggerColorWheelEvent.class);
-        this.registerHandler(Incoming.RedeemItemEvent, RedeemItemEvent.class);
-        this.registerHandler(Incoming.PetPlaceEvent, PetPlaceEvent.class);
-        this.registerHandler(Incoming.RoomUserKickEvent, RoomUserKickEvent.class);
-        this.registerHandler(Incoming.SetStackHelperHeightEvent, SetStackHelperHeightEvent.class);
-        this.registerHandler(Incoming.TriggerOneWayGateEvent, TriggerOneWayGateEvent.class);
-        this.registerHandler(Incoming.HandleDoorbellEvent, HandleDoorbellEvent.class);
-        this.registerHandler(Incoming.RedeemClothingEvent, RedeemClothingEvent.class);
-        this.registerHandler(Incoming.PostItPlaceEvent, PostItPlaceEvent.class);
-        this.registerHandler(Incoming.PostItRequestDataEvent, PostItRequestDataEvent.class);
-        this.registerHandler(Incoming.PostItSaveDataEvent, PostItSaveDataEvent.class);
-        this.registerHandler(Incoming.PostItDeleteEvent, PostItDeleteEvent.class);
-        this.registerHandler(Incoming.MoodLightSaveSettingsEvent, MoodLightSaveSettingsEvent.class);
-        this.registerHandler(Incoming.RentSpaceEvent, RentSpaceEvent.class);
-        this.registerHandler(Incoming.RentSpaceCancelEvent, RentSpaceCancelEvent.class);
-        this.registerHandler(Incoming.SetHomeRoomEvent, SetHomeRoomEvent.class);
-        this.registerHandler(Incoming.RoomUserGiveHandItemEvent, RoomUserGiveHandItemEvent.class);
-        this.registerHandler(Incoming.RoomMuteEvent, RoomMuteEvent.class);
-        this.registerHandler(Incoming.RequestRoomWordFilterEvent, RequestRoomWordFilterEvent.class);
-        this.registerHandler(Incoming.RoomWordFilterModifyEvent, RoomWordFilterModifyEvent.class);
-        this.registerHandler(Incoming.RoomStaffPickEvent, RoomStaffPickEvent.class);
-        this.registerHandler(Incoming.RoomRequestBannedUsersEvent, RoomRequestBannedUsersEvent.class);
-        this.registerHandler(Incoming.JukeBoxRequestTrackCodeEvent, JukeBoxRequestTrackCodeEvent.class);
-        this.registerHandler(Incoming.JukeBoxRequestTrackDataEvent, JukeBoxRequestTrackDataEvent.class);
-        this.registerHandler(Incoming.JukeBoxAddSoundTrackEvent, JukeBoxAddSoundTrackEvent.class);
-        this.registerHandler(Incoming.JukeBoxRemoveSoundTrackEvent, JukeBoxRemoveSoundTrackEvent.class);
-        this.registerHandler(Incoming.JukeBoxRequestPlayListEvent, JukeBoxRequestPlayListEvent.class);
-        this.registerHandler(Incoming.JukeBoxEventOne, JukeBoxEventOne.class);
-        this.registerHandler(Incoming.JukeBoxEventTwo, JukeBoxEventTwo.class);
-        this.registerHandler(Incoming.SavePostItStickyPoleEvent, SavePostItStickyPoleEvent.class);
-        this.registerHandler(Incoming.RequestPromotionRoomsEvent, RequestPromotionRoomsEvent.class);
-        this.registerHandler(Incoming.BuyRoomPromotionEvent, BuyRoomPromotionEvent.class);
-        this.registerHandler(Incoming.EditRoomPromotionMessageEvent, UpdateRoomPromotionEvent.class);
-        this.registerHandler(Incoming.IgnoreRoomUserEvent, IgnoreRoomUserEvent.class);
-        this.registerHandler(Incoming.UnIgnoreRoomUserEvent, UnIgnoreRoomUserEvent.class);
-        this.registerHandler(Incoming.RoomUserMuteEvent, RoomUserMuteEvent.class);
-        this.registerHandler(Incoming.RoomUserBanEvent, RoomUserBanEvent.class);
-        this.registerHandler(Incoming.UnbanRoomUserEvent, UnbanRoomUserEvent.class);
-        this.registerHandler(Incoming.RequestRoomUserTagsEvent, RequestRoomUserTagsEvent.class);
-        this.registerHandler(Incoming.YoutubeRequestPlaylists, YoutubeRequestPlaylists.class);
-        this.registerHandler(Incoming.YoutubeRequestStateChange, YoutubeRequestStateChange.class);
-        this.registerHandler(Incoming.YoutubeRequestPlaylistChange, YoutubeRequestPlaylistChange.class);
-        this.registerHandler(Incoming.RoomFavoriteEvent, RoomFavoriteEvent.class);
-        this.registerHandler(Incoming.LoveLockStartConfirmEvent, LoveLockStartConfirmEvent.class);
-        this.registerHandler(Incoming.RoomUnFavoriteEvent, RoomUnFavoriteEvent.class);
-        this.registerHandler(Incoming.UseRandomStateItemEvent, UseRandomStateItemEvent.class);
+        this.registerHandler(Incoming.OpenFlatConnection, RequestRoomLoadEvent.class);
+        this.registerHandler(Incoming.GetFurnitureAliases, RequestRoomHeightmapEvent.class);
+        this.registerHandler(Incoming.GetHeightMap, RequestRoomHeightmapEvent.class);
+        this.registerHandler(Incoming.RateFlat, RoomVoteEvent.class);
+        this.registerHandler(Incoming.GetGuestRoom, RequestRoomDataEvent.class);
+        this.registerHandler(Incoming.SaveRoomSettings, RoomSettingsSaveEvent.class);
+        this.registerHandler(Incoming.PlaceObject, RoomPlaceItemEvent.class);
+        this.registerHandler(Incoming.MoveObject, RotateMoveItemEvent.class);
+        this.registerHandler(Incoming.MoveWallItem, MoveWallItemEvent.class);
+        this.registerHandler(Incoming.PickupObject, RoomPickupItemEvent.class);
+        this.registerHandler(Incoming.RequestRoomPropertySet, RoomPlacePaintEvent.class);
+        this.registerHandler(Incoming.StartTyping, RoomUserStartTypingEvent.class);
+        this.registerHandler(Incoming.CancelTyping, RoomUserStopTypingEvent.class);
+        this.registerHandler(Incoming.UseFurniture, ToggleFloorItemEvent.class);
+        this.registerHandler(Incoming.UseWallItem, ToggleWallItemEvent.class);
+        this.registerHandler(Incoming.SetRoomBackgroundColorDataComposer, RoomBackgroundEvent.class);
+        this.registerHandler(Incoming.SetMannequinNameComposer, MannequinSaveNameEvent.class);
+        this.registerHandler(Incoming.SetMannequinFigureComposer, MannequinSaveLookEvent.class);
+        this.registerHandler(Incoming.SetClothingChangeData, FootballGateSaveLookEvent.class);
+        this.registerHandler(Incoming.SetObjectData, AdvertisingSaveEvent.class);
+        this.registerHandler(Incoming.GetRoomSettings, RequestRoomSettingsEvent.class);
+        this.registerHandler(Incoming.RoomDimmerGetPresets, MoodLightSettingsEvent.class);
+        this.registerHandler(Incoming.RoomDimmerChangeState, MoodLightTurnOnEvent.class);
+        this.registerHandler(Incoming.DropCarryItem, RoomUserDropHandItemEvent.class);
+        this.registerHandler(Incoming.LookTo, RoomUserLookAtPoint.class);
+        this.registerHandler(Incoming.Chat, RoomUserTalkEvent.class);
+        this.registerHandler(Incoming.Shout, RoomUserShoutEvent.class);
+        this.registerHandler(Incoming.Whisper, RoomUserWhisperEvent.class);
+        this.registerHandler(Incoming.AvatarExpression, RoomUserActionEvent.class);
+        this.registerHandler(Incoming.ChangePosture, RoomUserSitEvent.class);
+        this.registerHandler(Incoming.Dance, RoomUserDanceEvent.class);
+        this.registerHandler(Incoming.Sign, RoomUserSignEvent.class);
+        this.registerHandler(Incoming.MoveAvatar, RoomUserWalkEvent.class);
+        this.registerHandler(Incoming.RespectUser, RoomUserGiveRespectEvent.class);
+        this.registerHandler(Incoming.AssignRights, RoomUserGiveRightsEvent.class);
+        this.registerHandler(Incoming.RemoveOwnRoomRightsRoom, RoomRemoveRightsEvent.class);
+        this.registerHandler(Incoming.GetFlatControllers, RequestRoomRightsEvent.class);
+        this.registerHandler(Incoming.RemoveAllRights, RoomRemoveAllRightsEvent.class);
+        this.registerHandler(Incoming.RemoveRights, RoomUserRemoveRightsEvent.class);
+        this.registerHandler(Incoming.PlaceBot, BotPlaceEvent.class);
+        this.registerHandler(Incoming.RemoveBotFromFlat, BotPickupEvent.class);
+        this.registerHandler(Incoming.CommandBotComposer, BotSaveSettingsEvent.class);
+        this.registerHandler(Incoming.GetBotCommandConfigurationDataComposer, BotSettingsEvent.class);
+        this.registerHandler(Incoming.ThrowDice, TriggerDiceEvent.class);
+        this.registerHandler(Incoming.DiceOff, CloseDiceEvent.class);
+        this.registerHandler(Incoming.SpinWheelOfFortune, TriggerColorWheelEvent.class);
+        this.registerHandler(Incoming.CreditFurniRedeem, RedeemItemEvent.class);
+        this.registerHandler(Incoming.PlacePet, PetPlaceEvent.class);
+        this.registerHandler(Incoming.KickUser, RoomUserKickEvent.class);
+        this.registerHandler(Incoming.SetCustomStackingHeightComposer, SetStackHelperHeightEvent.class);
+        this.registerHandler(Incoming.EnterOneWayDoor, TriggerOneWayGateEvent.class);
+        this.registerHandler(Incoming.LetUserIn, HandleDoorbellEvent.class);
+        this.registerHandler(Incoming.CustomizeAvatarWithFurni, RedeemClothingEvent.class);
+        this.registerHandler(Incoming.PlacePostIt, PostItPlaceEvent.class);
+        this.registerHandler(Incoming.GetItemData, PostItRequestDataEvent.class);
+        this.registerHandler(Incoming.SetItemData, PostItSaveDataEvent.class);
+        this.registerHandler(Incoming.RemoveItem, PostItDeleteEvent.class);
+        this.registerHandler(Incoming.RoomDimmerSavePreset, MoodLightSaveSettingsEvent.class);
+        this.registerHandler(Incoming.RentableSpaceRent, RentSpaceEvent.class);
+        this.registerHandler(Incoming.RentableSpaceCancelRent, RentSpaceCancelEvent.class);
+        this.registerHandler(Incoming.UpdateHomeRoom, SetHomeRoomEvent.class);
+        this.registerHandler(Incoming.PassCarryItem, RoomUserGiveHandItemEvent.class);
+        this.registerHandler(Incoming.MuteAllInRoomComposer, RoomMuteEvent.class);
+        this.registerHandler(Incoming.GetCustomRoomFilter, RequestRoomWordFilterEvent.class);
+        this.registerHandler(Incoming.UpdateRoomFilter, RoomWordFilterModifyEvent.class);
+        this.registerHandler(Incoming.ToggleStaffPick, RoomStaffPickEvent.class);
+        this.registerHandler(Incoming.GetBannedUsersFromRoom, RoomRequestBannedUsersEvent.class);
+        this.registerHandler(Incoming.GetOfficialSongId, JukeBoxRequestTrackCodeEvent.class);
+        this.registerHandler(Incoming.GetSongInfo, JukeBoxRequestTrackDataEvent.class);
+        this.registerHandler(Incoming.AddJukeboxDiskComposer, JukeBoxAddSoundTrackEvent.class);
+        this.registerHandler(Incoming.RemoveJukeboxDiskComposer, JukeBoxRemoveSoundTrackEvent.class);
+        this.registerHandler(Incoming.GetNowPlaying, JukeBoxRequestPlayListEvent.class);
+        this.registerHandler(Incoming.GetUserSongDisks, JukeBoxEventOne.class);
+        this.registerHandler(Incoming.GetJukeboxPlayList, JukeBoxEventTwo.class);
+        this.registerHandler(Incoming.AddSpamWallPostIt, SavePostItStickyPoleEvent.class);
+        this.registerHandler(Incoming.GetRoomAdPurchaseInfoComposer, RequestPromotionRoomsEvent.class);
+        this.registerHandler(Incoming.PurchaseRoomAd, BuyRoomPromotionEvent.class);
+        this.registerHandler(Incoming.EditEvent, UpdateRoomPromotionEvent.class);
+        this.registerHandler(Incoming.IgnoreUser, IgnoreRoomUserEvent.class);
+        this.registerHandler(Incoming.UnignoreUser, UnIgnoreRoomUserEvent.class);
+        this.registerHandler(Incoming.MuteUser, RoomUserMuteEvent.class);
+        this.registerHandler(Incoming.BanUserWithDuration, RoomUserBanEvent.class);
+        this.registerHandler(Incoming.UnbanUserFromRoom, UnbanRoomUserEvent.class);
+        //this.registerHandler(Incoming._-07A, RequestRoomUserTagsEvent.class);
+        this.registerHandler(Incoming.GetYoutubeDisplayStatus, YoutubeRequestPlaylists.class);
+        this.registerHandler(Incoming.ControlYoutubeDisplayPlayback, YoutubeRequestStateChange.class);
+        this.registerHandler(Incoming.SetYoutubeDisplayPlaylist, YoutubeRequestPlaylistChange.class);
+        this.registerHandler(Incoming.AddFavouriteRoom, RoomFavoriteEvent.class);
+        this.registerHandler(Incoming.FriendFurniConfirmLock, LoveLockStartConfirmEvent.class);
+        this.registerHandler(Incoming.DeleteFavouriteRoom, RoomUnFavoriteEvent.class);
+        this.registerHandler(Incoming.SetRandomState, UseRandomStateItemEvent.class);
     }
 
     void registerPolls() throws Exception {
-        this.registerHandler(Incoming.CancelPollEvent, CancelPollEvent.class);
-        this.registerHandler(Incoming.GetPollDataEvent, GetPollDataEvent.class);
-        this.registerHandler(Incoming.AnswerPollEvent, AnswerPollEvent.class);
+        this.registerHandler(Incoming.PollRejectComposer, CancelPollEvent.class);
+        this.registerHandler(Incoming.PollStartComposer, GetPollDataEvent.class);
+        this.registerHandler(Incoming.PollAnswerComposer, AnswerPollEvent.class);
     }
 
     void registerModTool() throws Exception {
-        this.registerHandler(Incoming.ModToolRequestRoomInfoEvent, ModToolRequestRoomInfoEvent.class);
-        this.registerHandler(Incoming.ModToolRequestRoomChatlogEvent, ModToolRequestRoomChatlogEvent.class);
-        this.registerHandler(Incoming.ModToolRequestUserInfoEvent, ModToolRequestUserInfoEvent.class);
-        this.registerHandler(Incoming.ModToolPickTicketEvent, ModToolPickTicketEvent.class);
-        this.registerHandler(Incoming.ModToolCloseTicketEvent, ModToolCloseTicketEvent.class);
-        this.registerHandler(Incoming.ModToolReleaseTicketEvent, ModToolReleaseTicketEvent.class);
-        this.registerHandler(Incoming.ModToolAlertEvent, ModToolAlertEvent.class);
-        this.registerHandler(Incoming.ModToolWarnEvent, ModToolWarnEvent.class);
-        this.registerHandler(Incoming.ModToolKickEvent, ModToolKickEvent.class);
-        this.registerHandler(Incoming.ModToolRoomAlertEvent, ModToolRoomAlertEvent.class);
-        this.registerHandler(Incoming.ModToolChangeRoomSettingsEvent, ModToolChangeRoomSettingsEvent.class);
-        this.registerHandler(Incoming.ModToolRequestRoomVisitsEvent, ModToolRequestRoomVisitsEvent.class);
-        this.registerHandler(Incoming.ModToolRequestIssueChatlogEvent, ModToolRequestIssueChatlogEvent.class);
-        this.registerHandler(Incoming.ModToolRequestRoomUserChatlogEvent, ModToolRequestRoomUserChatlogEvent.class);
-        this.registerHandler(Incoming.ModToolRequestUserChatlogEvent, ModToolRequestUserChatlogEvent.class);
-        this.registerHandler(Incoming.ModToolSanctionAlertEvent, ModToolSanctionAlertEvent.class);
-        this.registerHandler(Incoming.ModToolSanctionMuteEvent, ModToolSanctionMuteEvent.class);
-        this.registerHandler(Incoming.ModToolSanctionBanEvent, ModToolSanctionBanEvent.class);
-        this.registerHandler(Incoming.ModToolSanctionTradeLockEvent, ModToolSanctionTradeLockEvent.class);
-        this.registerHandler(Incoming.ModToolIssueChangeTopicEvent, ModToolIssueChangeTopicEvent.class);
-        this.registerHandler(Incoming.ModToolIssueDefaultSanctionEvent, ModToolIssueDefaultSanctionEvent.class);
+        this.registerHandler(Incoming.GetModeratorRoomInfo, ModToolRequestRoomInfoEvent.class);
+        this.registerHandler(Incoming.GetRoomChatlog, ModToolRequestRoomChatlogEvent.class);
+        this.registerHandler(Incoming.GetModeratorUserInfo, ModToolRequestUserInfoEvent.class);
+        this.registerHandler(Incoming.PickIssues, ModToolPickTicketEvent.class);
+        this.registerHandler(Incoming.CloseIssues, ModToolCloseTicketEvent.class);
+        this.registerHandler(Incoming.ReleaseIssues, ModToolReleaseTicketEvent.class);
+        this.registerHandler(Incoming.ModMessage, ModToolAlertEvent.class);
+        //this.registerHandler(Incoming.ModToolWarnEvent, ModToolWarnEvent.class);
+        this.registerHandler(Incoming.ModKick, ModToolKickEvent.class);
+        this.registerHandler(Incoming.ModeratorAction, ModToolRoomAlertEvent.class);
+        this.registerHandler(Incoming.ModerateRoom, ModToolChangeRoomSettingsEvent.class);
+        this.registerHandler(Incoming.GetRoomVisits, ModToolRequestRoomVisitsEvent.class);
+        this.registerHandler(Incoming.GetCfhChatlog, ModToolRequestIssueChatlogEvent.class);
+        //this.registerHandler(Incoming.ModToolRequestRoomUserChatlogEvent, ModToolRequestRoomUserChatlogEvent.class);
+        this.registerHandler(Incoming.GetUserChatlog, ModToolRequestUserChatlogEvent.class);
+        this.registerHandler(Incoming.ModAlert, ModToolSanctionAlertEvent.class);
+        this.registerHandler(Incoming.ModMute, ModToolSanctionMuteEvent.class);
+        this.registerHandler(Incoming.ModBan, ModToolSanctionBanEvent.class);
+        this.registerHandler(Incoming.ModTradingLock, ModToolSanctionTradeLockEvent.class);
+        this.registerHandler(Incoming.ModToolSanctionComposer, ModToolIssueChangeTopicEvent.class);
+        this.registerHandler(Incoming.CloseIssueDefaultAction, ModToolIssueDefaultSanctionEvent.class);
 
-        this.registerHandler(Incoming.RequestReportRoomEvent, RequestReportRoomEvent.class);
-        this.registerHandler(Incoming.RequestReportUserBullyingEvent, RequestReportUserBullyingEvent.class);
-        this.registerHandler(Incoming.ReportBullyEvent, ReportBullyEvent.class);
-        this.registerHandler(Incoming.ReportEvent, ReportEvent.class);
-        this.registerHandler(Incoming.ReportFriendPrivateChatEvent, ReportFriendPrivateChatEvent.class);
-        this.registerHandler(Incoming.ReportThreadEvent, ReportThreadEvent.class);
-        this.registerHandler(Incoming.ReportCommentEvent, ReportCommentEvent.class);
-        this.registerHandler(Incoming.ReportPhotoEvent, ReportPhotoEvent.class);
+        this.registerHandler(Incoming.GetPendingCallsForHelp, RequestReportRoomEvent.class);
+        this.registerHandler(Incoming.GetGuideReportingStatus, RequestReportUserBullyingEvent.class);
+        this.registerHandler(Incoming.ChatReviewSessionCreate, ReportBullyEvent.class);
+        this.registerHandler(Incoming.CallForHelp, ReportEvent.class);
+        this.registerHandler(Incoming.CallForHelpFromIM, ReportFriendPrivateChatEvent.class);
+        this.registerHandler(Incoming.CallForHelpFromForumThread, ReportThreadEvent.class);
+        this.registerHandler(Incoming.CallForHelpFromForumMessage, ReportCommentEvent.class);
+        this.registerHandler(Incoming.CallForHelpFromPhoto, ReportPhotoEvent.class);
     }
 
     void registerTrading() throws Exception {
-        this.registerHandler(Incoming.TradeStartEvent, TradeStartEvent.class);
-        this.registerHandler(Incoming.TradeOfferItemEvent, TradeOfferItemEvent.class);
-        this.registerHandler(Incoming.TradeOfferMultipleItemsEvent, TradeOfferMultipleItemsEvent.class);
-        this.registerHandler(Incoming.TradeCancelOfferItemEvent, TradeCancelOfferItemEvent.class);
-        this.registerHandler(Incoming.TradeAcceptEvent, TradeAcceptEvent.class);
-        this.registerHandler(Incoming.TradeUnAcceptEvent, TradeUnAcceptEvent.class);
-        this.registerHandler(Incoming.TradeConfirmEvent, TradeConfirmEvent.class);
-        this.registerHandler(Incoming.TradeCloseEvent, TradeCloseEvent.class);
-        this.registerHandler(Incoming.TradeCancelEvent, TradeCancelEvent.class);
+        this.registerHandler(Incoming.OpenTradingComposer, TradeStartEvent.class);
+        this.registerHandler(Incoming.AddItemToTradeComposer, TradeOfferItemEvent.class);
+        this.registerHandler(Incoming.AddItemsToTradeComposer, TradeOfferMultipleItemsEvent.class);
+        this.registerHandler(Incoming.RemoveItemFromTradeComposer, TradeCancelOfferItemEvent.class);
+        this.registerHandler(Incoming.AcceptTradingComposer, TradeAcceptEvent.class);
+        this.registerHandler(Incoming.UnacceptTradingComposer, TradeUnAcceptEvent.class);
+        this.registerHandler(Incoming.ConfirmAcceptTradingComposer, TradeConfirmEvent.class);
+        this.registerHandler(Incoming.CloseTradingComposer, TradeCloseEvent.class);
+        this.registerHandler(Incoming.ConfirmDeclineTradingComposer, TradeCancelEvent.class);
     }
 
     void registerGuilds() throws Exception {
-        this.registerHandler(Incoming.RequestGuildBuyRoomsEvent, RequestGuildBuyRoomsEvent.class);
-        this.registerHandler(Incoming.RequestGuildPartsEvent, RequestGuildPartsEvent.class);
-        this.registerHandler(Incoming.RequestGuildBuyEvent, RequestGuildBuyEvent.class);
-        this.registerHandler(Incoming.RequestGuildInfoEvent, RequestGuildInfoEvent.class);
-        this.registerHandler(Incoming.RequestGuildManageEvent, RequestGuildManageEvent.class);
-        this.registerHandler(Incoming.RequestGuildMembersEvent, RequestGuildMembersEvent.class);
-        this.registerHandler(Incoming.RequestGuildJoinEvent, RequestGuildJoinEvent.class);
-        this.registerHandler(Incoming.GuildChangeNameDescEvent, GuildChangeNameDescEvent.class);
-        this.registerHandler(Incoming.GuildChangeBadgeEvent, GuildChangeBadgeEvent.class);
-        this.registerHandler(Incoming.GuildChangeColorsEvent, GuildChangeColorsEvent.class);
-        this.registerHandler(Incoming.GuildRemoveAdminEvent, GuildRemoveAdminEvent.class);
-        this.registerHandler(Incoming.GuildRemoveMemberEvent, GuildRemoveMemberEvent.class);
-        this.registerHandler(Incoming.GuildChangeSettingsEvent, GuildChangeSettingsEvent.class);
-        this.registerHandler(Incoming.GuildAcceptMembershipEvent, GuildAcceptMembershipEvent.class);
-        this.registerHandler(Incoming.GuildDeclineMembershipEvent, GuildDeclineMembershipEvent.class);
-        this.registerHandler(Incoming.GuildSetAdminEvent, GuildSetAdminEvent.class);
-        this.registerHandler(Incoming.GuildSetFavoriteEvent, GuildSetFavoriteEvent.class);
-        this.registerHandler(Incoming.RequestOwnGuildsEvent, RequestOwnGuildsEvent.class);
-        this.registerHandler(Incoming.RequestGuildFurniWidgetEvent, RequestGuildFurniWidgetEvent.class);
-        this.registerHandler(Incoming.GuildConfirmRemoveMemberEvent, GuildConfirmRemoveMemberEvent.class);
-        this.registerHandler(Incoming.GuildRemoveFavoriteEvent, GuildRemoveFavoriteEvent.class);
-        this.registerHandler(Incoming.GuildDeleteEvent, GuildDeleteEvent.class);
-        this.registerHandler(Incoming.GuildForumListEvent, GuildForumListEvent.class);
-        this.registerHandler(Incoming.GuildForumThreadsEvent, GuildForumThreadsEvent.class);
-        this.registerHandler(Incoming.GuildForumDataEvent, GuildForumDataEvent.class);
-        this.registerHandler(Incoming.GuildForumPostThreadEvent, GuildForumPostThreadEvent.class);
-        this.registerHandler(Incoming.GuildForumUpdateSettingsEvent, GuildForumUpdateSettingsEvent.class);
-        this.registerHandler(Incoming.GuildForumThreadsMessagesEvent, GuildForumThreadsMessagesEvent.class);
-        this.registerHandler(Incoming.GuildForumModerateMessageEvent, GuildForumModerateMessageEvent.class);
-        this.registerHandler(Incoming.GuildForumModerateThreadEvent, GuildForumModerateThreadEvent.class);
-        this.registerHandler(Incoming.GuildForumThreadUpdateEvent, GuildForumThreadUpdateEvent.class);
-        this.registerHandler(Incoming.GetHabboGuildBadgesMessageEvent, GetHabboGuildBadgesMessageEvent.class);
+        this.registerHandler(Incoming.GetGuildCreationInfo, RequestGuildBuyRoomsEvent.class);
+        this.registerHandler(Incoming.GetGuildEditorData, RequestGuildPartsEvent.class);
+        this.registerHandler(Incoming.CreateGuild, RequestGuildBuyEvent.class);
+        this.registerHandler(Incoming.GetHabboGroupDetails, RequestGuildInfoEvent.class);
+        this.registerHandler(Incoming.GetGuildEditInfo, RequestGuildManageEvent.class);
+        this.registerHandler(Incoming.GetGuildMembers, RequestGuildMembersEvent.class);
+        this.registerHandler(Incoming.JoinHabboGroup, RequestGuildJoinEvent.class);
+        this.registerHandler(Incoming.UpdateGuildIdentity, GuildChangeNameDescEvent.class);
+        this.registerHandler(Incoming.UpdateGuildBadge, GuildChangeBadgeEvent.class);
+        this.registerHandler(Incoming.UpdateGuildColors, GuildChangeColorsEvent.class);
+        this.registerHandler(Incoming.RemoveAdminRightsFromMember, GuildRemoveAdminEvent.class);
+        this.registerHandler(Incoming.KickMember, GuildRemoveMemberEvent.class);
+        this.registerHandler(Incoming.UpdateGuildSettings, GuildChangeSettingsEvent.class);
+        this.registerHandler(Incoming.ApproveMembershipRequest, GuildAcceptMembershipEvent.class);
+        this.registerHandler(Incoming.RejectMembershipRequest, GuildDeclineMembershipEvent.class);
+        this.registerHandler(Incoming.AddAdminRightsToMember, GuildSetAdminEvent.class);
+        this.registerHandler(Incoming.SelectFavouriteHabboGroup, GuildSetFavoriteEvent.class);
+        this.registerHandler(Incoming.GetGuildMemberships, RequestOwnGuildsEvent.class);
+        this.registerHandler(Incoming.GetGuildFurniContextMenuInfo, RequestGuildFurniWidgetEvent.class);
+        this.registerHandler(Incoming.GetMemberGuildItemCount, GuildConfirmRemoveMemberEvent.class);
+        this.registerHandler(Incoming.DeselectFavouriteHabboGroup, GuildRemoveFavoriteEvent.class);
+        this.registerHandler(Incoming.DeactivateGuild, GuildDeleteEvent.class);
+        this.registerHandler(Incoming.GetForumsList, GuildForumListEvent.class);
+        this.registerHandler(Incoming.GetThreads, GuildForumThreadsEvent.class);
+        this.registerHandler(Incoming.GetForumStats, GuildForumDataEvent.class);
+        this.registerHandler(Incoming.PostMessage, GuildForumPostThreadEvent.class);
+        this.registerHandler(Incoming.UpdateForumSettings, GuildForumUpdateSettingsEvent.class);
+        this.registerHandler(Incoming.GetMessages, GuildForumThreadsMessagesEvent.class);
+        this.registerHandler(Incoming.ModerateMessage, GuildForumModerateMessageEvent.class);
+        this.registerHandler(Incoming.ModerateThread, GuildForumModerateThreadEvent.class);
+        this.registerHandler(Incoming.UpdateThread, GuildForumThreadUpdateEvent.class);
+        this.registerHandler(Incoming.GetHabboGroupBadges, GetHabboGuildBadgesMessageEvent.class);
 
-//        this.registerHandler(Incoming.GuildForumDataEvent,              GuildForumModerateMessageEvent.class);
-//        this.registerHandler(Incoming.GuildForumDataEvent,              GuildForumModerateThreadEvent.class);
-//        this.registerHandler(Incoming.GuildForumDataEvent,              GuildForumPostThreadEvent.class);
-//        this.registerHandler(Incoming.GuildForumDataEvent,              GuildForumThreadsEvent.class);
-//        this.registerHandler(Incoming.GuildForumDataEvent,              GuildForumThreadsMessagesEvent.class);
-//        this.registerHandler(Incoming.GuildForumDataEvent,              GuildForumUpdateSettingsEvent.class);
+//        this.registerHandler(Incoming.GetForumStats,              GuildForumModerateMessageEvent.class);
+//        this.registerHandler(Incoming.GetForumStats,              GuildForumModerateThreadEvent.class);
+//        this.registerHandler(Incoming.GetForumStats,              GuildForumPostThreadEvent.class);
+//        this.registerHandler(Incoming.GetForumStats,              GuildForumThreadsEvent.class);
+//        this.registerHandler(Incoming.GetForumStats,              GuildForumThreadsMessagesEvent.class);
+//        this.registerHandler(Incoming.GetForumStats,              GuildForumUpdateSettingsEvent.class);
     }
 
     void registerPets() throws Exception {
-        this.registerHandler(Incoming.RequestPetInformationEvent, RequestPetInformationEvent.class);
-        this.registerHandler(Incoming.PetPickupEvent, PetPickupEvent.class);
-        this.registerHandler(Incoming.ScratchPetEvent, ScratchPetEvent.class);
-        this.registerHandler(Incoming.RequestPetTrainingPanelEvent, RequestPetTrainingPanelEvent.class);
-        this.registerHandler(Incoming.PetUseItemEvent, PetUseItemEvent.class);
-        this.registerHandler(Incoming.HorseRideSettingsEvent, PetRideSettingsEvent.class);
-        this.registerHandler(Incoming.HorseRideEvent, PetRideEvent.class);
-        this.registerHandler(Incoming.HorseRemoveSaddleEvent, HorseRemoveSaddleEvent.class);
-        this.registerHandler(Incoming.ToggleMonsterplantBreedableEvent, ToggleMonsterplantBreedableEvent.class);
-        this.registerHandler(Incoming.CompostMonsterplantEvent, CompostMonsterplantEvent.class);
-        this.registerHandler(Incoming.BreedMonsterplantsEvent, BreedMonsterplantsEvent.class);
-        this.registerHandler(Incoming.MovePetEvent, MovePetEvent.class);
-        this.registerHandler(Incoming.PetPackageNameEvent, PetPackageNameEvent.class);
-        this.registerHandler(Incoming.StopBreedingEvent, StopBreedingEvent.class);
-        this.registerHandler(Incoming.ConfirmPetBreedingEvent, ConfirmPetBreedingEvent.class);
+        this.registerHandler(Incoming.GetPetInfo, RequestPetInformationEvent.class);
+        this.registerHandler(Incoming.RemovePetFromFlat, PetPickupEvent.class);
+        this.registerHandler(Incoming.RespectPet, ScratchPetEvent.class);
+        this.registerHandler(Incoming.GetPetCommands, RequestPetTrainingPanelEvent.class);
+        this.registerHandler(Incoming.CustomizePetWithFurniComposer, PetUseItemEvent.class);
+        this.registerHandler(Incoming.TogglePetRidingPermission, PetRideSettingsEvent.class);
+        this.registerHandler(Incoming.MountPet, PetRideEvent.class);
+        this.registerHandler(Incoming.RemoveSaddleFromPet, HorseRemoveSaddleEvent.class);
+        this.registerHandler(Incoming.TogglePetBreedingPermission, ToggleMonsterplantBreedableEvent.class);
+        this.registerHandler(Incoming.CompostPlant, CompostMonsterplantEvent.class);
+        this.registerHandler(Incoming.BreedPets, BreedMonsterplantsEvent.class);
+        this.registerHandler(Incoming.MovePet, MovePetEvent.class);
+        this.registerHandler(Incoming.OpenPetPackage, PetPackageNameEvent.class);
+        this.registerHandler(Incoming.CancelPetBreedingComposer, StopBreedingEvent.class);
+        this.registerHandler(Incoming.ConfirmPetBreedingComposer, ConfirmPetBreedingEvent.class);
     }
 
     void registerWired() throws Exception {
-        this.registerHandler(Incoming.WiredTriggerSaveDataEvent, WiredTriggerSaveDataEvent.class);
-        this.registerHandler(Incoming.WiredEffectSaveDataEvent, WiredEffectSaveDataEvent.class);
-        this.registerHandler(Incoming.WiredConditionSaveDataEvent, WiredConditionSaveDataEvent.class);
-        this.registerHandler(Incoming.WiredApplySetConditionsEvent, WiredApplySetConditionsEvent.class);
+        this.registerHandler(Incoming.UpdateTrigger, WiredTriggerSaveDataEvent.class);
+        this.registerHandler(Incoming.UpdateAction, WiredEffectSaveDataEvent.class);
+        this.registerHandler(Incoming.UpdateCondition, WiredConditionSaveDataEvent.class);
+        this.registerHandler(Incoming.ApplySnapshot, WiredApplySetConditionsEvent.class);
     }
 
     void registerUnknown() throws Exception {
-        this.registerHandler(Incoming.RequestResolutionEvent, RequestResolutionEvent.class);
-        this.registerHandler(Incoming.RequestTalenTrackEvent, RequestTalentTrackEvent.class);
-        this.registerHandler(Incoming.UnknownEvent1, UnknownEvent1.class);
-        this.registerHandler(Incoming.MySanctionStatusEvent, MySanctionStatusEvent.class);
+        this.registerHandler(Incoming.GetResolutionAchievements, RequestResolutionEvent.class);
+        this.registerHandler(Incoming.GetTalentTrack, RequestTalentTrackEvent.class);
+        this.registerHandler(Incoming.GetBadgePointLimitsComposer, UnknownEvent1.class);
+        this.registerHandler(Incoming.GetCfhStatus, MySanctionStatusEvent.class);
     }
 
     void registerFloorPlanEditor() throws Exception {
-        this.registerHandler(Incoming.FloorPlanEditorSaveEvent, FloorPlanEditorSaveEvent.class);
-        this.registerHandler(Incoming.FloorPlanEditorRequestBlockedTilesEvent, FloorPlanEditorRequestBlockedTilesEvent.class);
-        this.registerHandler(Incoming.FloorPlanEditorRequestDoorSettingsEvent, FloorPlanEditorRequestDoorSettingsEvent.class);
+        this.registerHandler(Incoming.UpdateFloorProperties, FloorPlanEditorSaveEvent.class);
+        this.registerHandler(Incoming.GetOccupiedTiles, FloorPlanEditorRequestBlockedTilesEvent.class);
+        this.registerHandler(Incoming.GetRoomEntryTile, FloorPlanEditorRequestDoorSettingsEvent.class);
     }
 
     void registerAchievements() throws Exception {
-        this.registerHandler(Incoming.RequestAchievementsEvent, RequestAchievementsEvent.class);
-        this.registerHandler(Incoming.RequestAchievementConfigurationEvent, RequestAchievementConfigurationEvent.class);
+        this.registerHandler(Incoming.GetAchievementsComposer, RequestAchievementsEvent.class);
+        //this.registerHandler(Incoming.RequestAchievementConfigurationEvent, RequestAchievementConfigurationEvent.class);
     }
 
     void registerGuides() throws Exception {
-        this.registerHandler(Incoming.RequestGuideToolEvent, RequestGuideToolEvent.class);
-        this.registerHandler(Incoming.RequestGuideAssistanceEvent, RequestGuideAssistanceEvent.class);
-        this.registerHandler(Incoming.GuideUserTypingEvent, GuideUserTypingEvent.class);
-        this.registerHandler(Incoming.GuideReportHelperEvent, GuideReportHelperEvent.class);
-        this.registerHandler(Incoming.GuideRecommendHelperEvent, GuideRecommendHelperEvent.class);
-        this.registerHandler(Incoming.GuideUserMessageEvent, GuideUserMessageEvent.class);
-        this.registerHandler(Incoming.GuideCancelHelpRequestEvent, GuideCancelHelpRequestEvent.class);
-        this.registerHandler(Incoming.GuideHandleHelpRequestEvent, GuideHandleHelpRequestEvent.class);
-        this.registerHandler(Incoming.GuideInviteUserEvent, GuideInviteUserEvent.class);
-        this.registerHandler(Incoming.GuideVisitUserEvent, GuideVisitUserEvent.class);
-        this.registerHandler(Incoming.GuideCloseHelpRequestEvent, GuideCloseHelpRequestEvent.class);
+        this.registerHandler(Incoming.GuideSessionOnDutyUpdate, RequestGuideToolEvent.class);
+        this.registerHandler(Incoming.GuideSessionCreate, RequestGuideAssistanceEvent.class);
+        this.registerHandler(Incoming.GuideSessionIsTyping, GuideUserTypingEvent.class);
+        this.registerHandler(Incoming.GuideSessionReport, GuideReportHelperEvent.class);
+        this.registerHandler(Incoming.GuideSessionFeedback, GuideRecommendHelperEvent.class);
+        this.registerHandler(Incoming.GuideSessionMessage, GuideUserMessageEvent.class);
+        this.registerHandler(Incoming.GuideSessionRequesterCancels, GuideCancelHelpRequestEvent.class);
+        this.registerHandler(Incoming.GuideSessionGuideDecides, GuideHandleHelpRequestEvent.class);
+        this.registerHandler(Incoming.GuideSessionInviteRequester, GuideInviteUserEvent.class);
+        this.registerHandler(Incoming.GuideSessionGetRequesterRoom, GuideVisitUserEvent.class);
+        this.registerHandler(Incoming.GuideSessionResolved, GuideCloseHelpRequestEvent.class);
 
-        this.registerHandler(Incoming.GuardianNoUpdatesWantedEvent, GuardianNoUpdatesWantedEvent.class);
-        this.registerHandler(Incoming.GuardianAcceptRequestEvent, GuardianAcceptRequestEvent.class);
-        this.registerHandler(Incoming.GuardianVoteEvent, GuardianVoteEvent.class);
+        this.registerHandler(Incoming.ChatReviewGuideDetached, GuardianNoUpdatesWantedEvent.class);
+        this.registerHandler(Incoming.ChatReviewGuideDecidesOnOffer, GuardianAcceptRequestEvent.class);
+        this.registerHandler(Incoming.ChatReviewGuideVote, GuardianVoteEvent.class);
     }
 
     void registerCrafting() throws Exception {
-        this.registerHandler(Incoming.RequestCraftingRecipesEvent, RequestCraftingRecipesEvent.class);
-        this.registerHandler(Incoming.CraftingAddRecipeEvent, CraftingAddRecipeEvent.class);
-        this.registerHandler(Incoming.CraftingCraftItemEvent, CraftingCraftItemEvent.class);
-        this.registerHandler(Incoming.CraftingCraftSecretEvent, CraftingCraftSecretEvent.class);
-        this.registerHandler(Incoming.RequestCraftingRecipesAvailableEvent, RequestCraftingRecipesAvailableEvent.class);
+        this.registerHandler(Incoming.GetCraftableProductsComposer, RequestCraftingRecipesEvent.class);
+        this.registerHandler(Incoming.GetCraftingRecipeComposer, CraftingAddRecipeEvent.class);
+        this.registerHandler(Incoming.CraftComposer, CraftingCraftItemEvent.class);
+        this.registerHandler(Incoming.CraftSecretComposer, CraftingCraftSecretEvent.class);
+        this.registerHandler(Incoming.GetCraftingRecipesAvailableComposer, RequestCraftingRecipesAvailableEvent.class);
     }
 
     void registerCamera() throws Exception {
-        this.registerHandler(Incoming.CameraRoomPictureEvent, CameraRoomPictureEvent.class);
-        this.registerHandler(Incoming.RequestCameraConfigurationEvent, RequestCameraConfigurationEvent.class);
-        this.registerHandler(Incoming.CameraPurchaseEvent, CameraPurchaseEvent.class);
-        this.registerHandler(Incoming.CameraRoomThumbnailEvent, CameraRoomThumbnailEvent.class);
-        this.registerHandler(Incoming.CameraPublishToWebEvent, CameraPublishToWebEvent.class);
+        this.registerHandler(Incoming.RenderRoom, CameraRoomPictureEvent.class);
+        this.registerHandler(Incoming.RequestCameraConfiguration, RequestCameraConfigurationEvent.class);
+        this.registerHandler(Incoming.PurchasePhoto, CameraPurchaseEvent.class);
+        this.registerHandler(Incoming.RenderRoomThumbnail, CameraRoomThumbnailEvent.class);
+        this.registerHandler(Incoming.PublishPhoto, CameraPublishToWebEvent.class);
     }
 
     void registerGameCenter() throws Exception {
-        this.registerHandler(Incoming.GameCenterRequestGamesEvent, GameCenterRequestGamesEvent.class);
-        this.registerHandler(Incoming.GameCenterRequestAccountStatusEvent, GameCenterRequestAccountStatusEvent.class);
-        this.registerHandler(Incoming.GameCenterJoinGameEvent, GameCenterJoinGameEvent.class);
-        this.registerHandler(Incoming.GameCenterLoadGameEvent, GameCenterLoadGameEvent.class);
-        this.registerHandler(Incoming.GameCenterLeaveGameEvent, GameCenterLeaveGameEvent.class);
-        this.registerHandler(Incoming.GameCenterEvent, GameCenterEvent.class);
-        this.registerHandler(Incoming.GameCenterRequestGameStatusEvent, GameCenterRequestGameStatusEvent.class);
+        //this.registerHandler(Incoming._-01o, GameCenterRequestGamesEvent.class);
+        //this.registerHandler(Incoming._-1xb, GameCenterRequestAccountStatusEvent.class);
+        //this.registerHandler(Incoming._-2nU, GameCenterJoinGameEvent.class);
+        //this.registerHandler(Incoming._-1Yj, GameCenterLoadGameEvent.class);
+        //this.registerHandler(Incoming._-5uY, GameCenterLeaveGameEvent.class);
+        //this.registerHandler(Incoming._-5sD, GameCenterEvent.class);
+        //this.registerHandler(Incoming._-5Xy, GameCenterRequestGameStatusEvent.class);
     }
 }

@@ -15,6 +15,7 @@ import com.eu.habbo.plugin.events.emulator.EmulatorConfigUpdatedEvent;
 import com.eu.habbo.plugin.events.emulator.EmulatorLoadedEvent;
 import com.eu.habbo.plugin.events.emulator.EmulatorStartShutdownEvent;
 import com.eu.habbo.plugin.events.emulator.EmulatorStoppedEvent;
+import com.eu.habbo.protocol.RevisionManager;
 import com.eu.habbo.threading.ThreadPooling;
 import com.eu.habbo.util.imager.badges.BadgeImager;
 import org.slf4j.Logger;
@@ -115,6 +116,10 @@ public final class Emulator {
 
             long startTime = System.nanoTime();
 
+            final RevisionManager revisionManager = new RevisionManager();
+
+            revisionManager.load();
+
             Emulator.runtime = Runtime.getRuntime();
             Emulator.config = new ConfigurationManager("config.ini");
             Emulator.crypto = new CryptoConfig(
@@ -134,7 +139,7 @@ public final class Emulator {
             Emulator.getPluginManager().fireEvent(new EmulatorConfigUpdatedEvent());
             Emulator.texts = new TextsManager();
             new CleanerThread();
-            Emulator.gameServer = new GameServer(getConfig().getValue("game.host", "127.0.0.1"), getConfig().getInt("game.port", 30000));
+            Emulator.gameServer = new GameServer(revisionManager, getConfig().getValue("game.host", "127.0.0.1"), getConfig().getInt("game.port", 30000));
             Emulator.rconServer = new RCONServer(getConfig().getValue("rcon.host", "127.0.0.1"), getConfig().getInt("rcon.port", 30001));
             Emulator.gameEnvironment = new GameEnvironment();
             Emulator.gameEnvironment.load();

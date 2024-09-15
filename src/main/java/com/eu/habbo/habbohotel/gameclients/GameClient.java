@@ -4,15 +4,14 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.crypto.HabboEncryption;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.ServerMessage;
+import com.eu.habbo.messages.incoming.Incoming;
 import com.eu.habbo.messages.incoming.MessageHandler;
 import com.eu.habbo.messages.outgoing.MessageComposer;
+import com.eu.habbo.protocol.Revision;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,11 +22,13 @@ public class GameClient {
     private final Channel channel;
     private final HabboEncryption encryption;
 
+    private Revision revision;
+
     private Habbo habbo;
     private boolean handshakeFinished;
     private String machineId = "";
 
-    public final ConcurrentHashMap<Integer, Integer> incomingPacketCounter = new ConcurrentHashMap<>(25);
+    public final ConcurrentHashMap<Incoming, Integer> incomingPacketCounter = new ConcurrentHashMap<>(25);
     public final ConcurrentHashMap<Class<? extends MessageHandler>, Long> messageTimestamps = new ConcurrentHashMap<>();
     public long lastPacketCounterCleared = Emulator.getIntUnixTimestamp();
 
@@ -39,6 +40,7 @@ public class GameClient {
                     Emulator.getCrypto().getModulus(),
                     Emulator.getCrypto().getPrivateExponent())
                 : null;
+        this.revision = Revision.DEFAULT;
     }
 
     public Channel getChannel() {
@@ -47,6 +49,18 @@ public class GameClient {
 
     public HabboEncryption getEncryption() {
         return encryption;
+    }
+
+    public Revision getRevision() {
+        return this.revision;
+    }
+
+    public void setRevision(Revision revision) {
+        if (this.revision != Revision.DEFAULT) {
+            throw new RuntimeException("Cannot modify revision after it has been set!");
+        }
+
+        this.revision = revision;
     }
 
     public Habbo getHabbo() {
