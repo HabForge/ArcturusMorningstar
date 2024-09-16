@@ -64,8 +64,9 @@ public class SPacket {
     }
 
     public String readString(Charset charset) {
-        String r = readString(this.packet.readerIndex(), charset);
-        this.packet.readerIndex(2 + this.readShort(this.packet.readerIndex()));
+        final int ridx = this.packet.readerIndex();
+        String r = readString(ridx, charset);
+        this.packet.readerIndex(ridx + 2 + this.readShort(ridx));
         return r;
     }
 
