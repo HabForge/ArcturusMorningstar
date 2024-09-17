@@ -3,9 +3,9 @@ package com.eu.habbo.habbohotel.catalog;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.items.FurnitureType;
 import com.eu.habbo.habbohotel.items.Item;
-import com.eu.habbo.habbohotel.users.HabboBadge;
 import com.eu.habbo.messages.ISerialize;
 import com.eu.habbo.messages.ServerMessage;
+import com.eu.habbo.protocol.Revision;
 import gnu.trove.set.hash.THashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -281,14 +281,17 @@ public class CatalogItem implements ISerialize, Runnable, Comparable<CatalogItem
     }
 
     @Override
-    public void serialize(ServerMessage message) {
-        message.appendInt(this.getId());
-        message.appendString(this.getName());
-        message.appendBoolean(false);
-        message.appendInt(this.getCredits());
-        message.appendInt(this.getPoints());
-        message.appendInt(this.getPointsType());
-        message.appendBoolean(this.allowGift); //Can gift
+    public void serialize(ServerMessage message, Revision revision) {
+        message.appendInt(this.getId()); // offerId
+        message.appendString(this.getName()); // localizationId
+        message.appendBoolean(false); // isRent
+        message.appendInt(this.getCredits()); // priceInCredits
+        message.appendInt(this.getPoints()); // priceInActivityPoints
+        if (revision != Revision.PRODUCTION_201611291003_338511768) {
+            message.appendInt(0); // priceInSilver TODO(HabForge): Conditional serialization based on revision
+        }
+        message.appendInt(this.getPointsType()); // activityPointType
+        message.appendBoolean(this.allowGift); // giftable
 
         THashSet<Item> items = this.getBaseItems();
 
@@ -300,7 +303,7 @@ public class CatalogItem implements ISerialize, Runnable, Comparable<CatalogItem
             if (item.getType() == FurnitureType.BADGE) {
                 message.appendString(item.getName());
             } else {
-                message.appendInt(item.getSpriteId());
+                message.appendInt(item.getSpriteId()); // furniClassId
 
                 if (this.getName().contains("wallpaper_single") || this.getName().contains("floor_single") || this.getName().contains("landscape_single")) {
                     message.appendString(this.getName().split("_")[2]);
@@ -326,19 +329,24 @@ public class CatalogItem implements ISerialize, Runnable, Comparable<CatalogItem
                 } else {
                     message.appendString("");
                 }
-                message.appendInt(this.getItemAmount(item.getId()));
-                message.appendBoolean(this.isLimited());
+                message.appendInt(this.getItemAmount(item.getId())); // productCount
+                message.appendBoolean(this.isLimited()); // uniqueLimitedItem
                 if (this.isLimited()) {
-                    message.appendInt(this.getLimitedStack());
-                    message.appendInt(this.getLimitedStack() - this.getLimitedSells());
+                    message.appendInt(this.getLimitedStack()); // uniqueLimitedItemSeriesSize
+                    message.appendInt(this.getLimitedStack() - this.getLimitedSells()); // uniqueLimitedItemsLeft
                 }
             }
         }
 
-        message.appendInt(this.clubOnly);
-        message.appendBoolean(haveOffer(this));
-        message.appendBoolean(false); //unknown
-        message.appendString(this.name + ".png");
+        message.appendInt(this.clubOnly); // clubLevel
+        message.appendBoolean(haveOffer(this)); // bundlePurchaseAllowed
+        message.appendBoolean(false); // ?
+        message.appendString(this.name + ".png"); // previewImage
+    }
+
+    @Override
+    public void serialize(ServerMessage message) {
+        throw new UnsupportedOperationException("Serialize without revision is not supported.");
     }
 
     @Override

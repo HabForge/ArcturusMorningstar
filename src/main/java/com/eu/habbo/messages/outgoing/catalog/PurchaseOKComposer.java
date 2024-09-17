@@ -4,6 +4,7 @@ import com.eu.habbo.habbohotel.catalog.CatalogItem;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.eu.habbo.messages.outgoing.Outgoing;
+import com.eu.habbo.protocol.Revision;
 
 public class PurchaseOKComposer extends MessageComposer {
     private final CatalogItem catalogItem;
@@ -20,7 +21,7 @@ public class PurchaseOKComposer extends MessageComposer {
     protected ServerMessage composeInternal() {
         this.response.init(Outgoing.PurchaseOK);
         if (this.catalogItem != null) {
-            this.catalogItem.serialize(this.response);
+            this.catalogItem.serialize(this.response, Revision.PRODUCTION_201611291003_338511768);
         } else {
             this.response.appendInt(0);
             this.response.appendString("");

@@ -48,7 +48,7 @@ public class CatalogPageComposer extends MessageComposer {
             List<CatalogItem> items = new ArrayList<>(this.page.getCatalogItems().valueCollection());
             Collections.sort(items);
             for (CatalogItem item : items) {
-                item.serialize(this.response);
+                item.serialize(this.response, this.habbo.getClient().getRevision());
             }
         }
         this.response.appendInt(this.offerId);
