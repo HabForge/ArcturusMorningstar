@@ -23,6 +23,10 @@ public class MeMenuSettingsComposer extends MessageComposer {
         this.response.appendBoolean(this.habbo.getHabboStats().blockCameraFollow);
         this.response.appendInt(this.habbo.getHabboStats().uiFlags);
         this.response.appendInt(this.habbo.getHabboStats().chatColor.getType());
+        this.response.appendBoolean(false); // TODO(HabForge): wiredMenuButton
+        this.response.appendBoolean(false); // TODO(HabForge): wiredInspectButton
+        this.response.appendBoolean(false); // TODO(HabForge): playTestMode
+        this.response.appendInt(0); // TODO(HabForge): variableSyntaxMode
         return this.response;
     }
 }

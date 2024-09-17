@@ -47,11 +47,15 @@ public class RoomSettingsComposer extends MessageComposer {
         this.response.appendInt(this.room.getChatDistance());
         this.response.appendInt(this.room.getChatProtection());
 
-        this.response.appendBoolean(false); //IDK?
+        this.response.appendBoolean(false); // allowNavigatorDynamicCats
 
         this.response.appendInt(this.room.getMuteOption());
         this.response.appendInt(this.room.getKickOption());
         this.response.appendInt(this.room.getBanOption());
+
+        // hiddenByBc
+        // _window.findChildByName("doormode_override_info").visible = ((_local_2.hiddenByBc) && (!(_navigator.sessionData.hasSecurity(4))));
+        this.response.appendBoolean(false);
         return this.response;
     }
 }

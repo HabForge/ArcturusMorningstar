@@ -18,6 +18,15 @@ public class RoomHeightMapComposer extends MessageComposer {
         this.response.appendBoolean(true);
         this.response.appendInt(this.room.getWallHeight()); //FixedWallsHeight
         this.response.appendString(this.room.getLayout().getRelativeMap());
+        this.response.appendInt(0); // TODO(HabForge): Area hide data
+        // Array of AreaHideMessageData
+        // - furniId: int
+        // - on: bool
+        // - rootX: int
+        // - rootY: int
+        // - width: int
+        // - length: int
+        // - invert: bool
         return this.response;
     }
 }

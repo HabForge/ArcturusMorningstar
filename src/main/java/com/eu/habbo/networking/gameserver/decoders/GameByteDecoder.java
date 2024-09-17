@@ -21,6 +21,11 @@ public class GameByteDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         final GameClient client = ctx.channel().attr(GameServerAttributes.CLIENT).get();
+
+        if (client == null) {
+            return;
+        }
+
         final RevisionProvider revisionProvider = ctx.channel().attr(GameServerAttributes.REVISION_PROVIDER).get();
 
         final short messageId = in.readShort();

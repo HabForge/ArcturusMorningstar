@@ -16,9 +16,11 @@ public class GameServerMessageLogger extends MessageToMessageEncoder<ServerMessa
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ServerMessage message, List<Object> out) {
-        LOGGER.debug(String.format("[" + ANSI.BLUE + "SERVER" + ANSI.DEFAULT + "][%-41s] => %s",
-                message.getHeader(),
-                PacketStringUtils.toString(message)));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("[" + ANSI.BLUE + "SERVER" + ANSI.DEFAULT + "][%-41s] => %s",
+                    message.getHeader(),
+                    PacketStringUtils.toString(message)));
+        }
 
         out.add(message);
     }

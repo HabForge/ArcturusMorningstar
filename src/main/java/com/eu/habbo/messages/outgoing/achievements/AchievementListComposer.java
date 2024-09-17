@@ -8,21 +8,29 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.eu.habbo.messages.outgoing.Outgoing;
+import com.eu.habbo.protocol.Revision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AchievementListComposer extends MessageComposer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AchievementListComposer.class);
 
+    private final int gameTypeId;
     private final Habbo habbo;
 
-    public AchievementListComposer(Habbo habbo) {
+    public AchievementListComposer(int gameTypeId, Habbo habbo) {
+        this.gameTypeId = gameTypeId;
         this.habbo = habbo;
     }
 
     @Override
     protected ServerMessage composeInternal() {
         this.response.init(Outgoing.Achievements);
+
+        if (this.habbo.getClient().getRevision() != Revision.PRODUCTION_201611291003_338511768) {
+            // TODO(HabForge): Figure out proper gameTypeId's.
+            this.response.appendInt(this.gameTypeId);
+        }
 
         try {
             this.response.appendInt(Emulator.getGameEnvironment().getAchievementManager().getAchievements().size());

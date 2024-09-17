@@ -2276,8 +2276,6 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
 
     public boolean removeFromQueue(Habbo habbo) {
         try {
-            this.sendComposer(new HideDoorbellComposer(habbo.getHabboInfo().getUsername()).compose());
-
             synchronized (this.habboQueue) {
                 return this.habboQueue.remove(habbo.getHabboInfo().getId()) != null;
             }
@@ -4022,10 +4020,10 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
         }
 
         if (habbo.hasPermission(Permission.ACC_ANYROOMOWNER)) {
-            habbo.getClient().sendResponse(new RoomOwnerComposer());
+            habbo.getClient().sendResponse(new RoomOwnerComposer(this.id));
             flatCtrl = RoomRightLevels.MODERATOR;
         } else if (this.isOwner(habbo)) {
-            habbo.getClient().sendResponse(new RoomOwnerComposer());
+            habbo.getClient().sendResponse(new RoomOwnerComposer(this.id));
             flatCtrl = RoomRightLevels.MODERATOR;
         } else if (this.hasRights(habbo) && !this.hasGuild()) {
             flatCtrl = RoomRightLevels.RIGHTS;
@@ -4033,7 +4031,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
             flatCtrl = this.getGuildRightLevel(habbo);
         }
 
-        habbo.getClient().sendResponse(new RoomRightsComposer(flatCtrl));
+        habbo.getClient().sendResponse(new RoomRightsComposer(habbo.getClient().getRevision(), this.id, flatCtrl));
         habbo.getRoomUnit().setStatus(RoomUnitStatus.FLAT_CONTROL, flatCtrl.level + "");
         habbo.getRoomUnit().setRightsLevel(flatCtrl);
         habbo.getRoomUnit().statusUpdate(true);

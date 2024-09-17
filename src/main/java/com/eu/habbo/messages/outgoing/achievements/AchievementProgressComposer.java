@@ -53,6 +53,7 @@ public class AchievementProgressComposer extends MessageComposer {
         this.response.appendString(""); //Empty, completly unused in client code
         this.response.appendInt(this.achievement.levels.size()); //Count of total levels in this achievement
         this.response.appendInt(0); //1 = Progressbar visible if the achievement is completed
+        this.response.appendInt(0); // TODO(HabForge): State
 
         return this.response;
     }

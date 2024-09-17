@@ -22,6 +22,11 @@ public class GameServerMessageEncoder extends MessageToByteEncoder<ServerMessage
     protected void encode(ChannelHandlerContext ctx, ServerMessage message, ByteBuf out) throws Exception {
         try {
             final GameClient client = ctx.channel().attr(GameServerAttributes.CLIENT).get();
+
+            if (client == null) {
+                return;
+            }
+
             final RevisionProvider revisionProvider = ctx.channel().attr(GameServerAttributes.REVISION_PROVIDER).get();
 
             final ByteBuf buf = message.get();

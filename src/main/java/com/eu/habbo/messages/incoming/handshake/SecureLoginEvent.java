@@ -33,7 +33,6 @@ import com.eu.habbo.messages.outgoing.unknown.BuildersClubExpiredComposer;
 import com.eu.habbo.messages.outgoing.mysterybox.MysteryBoxKeysComposer;
 import com.eu.habbo.messages.outgoing.users.*;
 import com.eu.habbo.plugin.events.emulator.SSOAuthenticationEvent;
-import com.eu.habbo.plugin.events.users.UserExecuteCommandEvent;
 import com.eu.habbo.plugin.events.users.UserLoginEvent;
 import gnu.trove.map.hash.THashMap;
 import org.slf4j.Logger;
@@ -115,7 +114,7 @@ public class SecureLoginEvent extends MessageHandler {
 
                 ArrayList<ServerMessage> messages = new ArrayList<>();
 
-                messages.add(new SecureLoginOKComposer().compose());
+                messages.add(new SecureLoginOKComposer(this.client.getHabbo().getHabboInfo().getId(), null, this.client.getHabbo().getHabboInfo().getId()).compose());
 
                 int roomIdToEnter = 0;
 
