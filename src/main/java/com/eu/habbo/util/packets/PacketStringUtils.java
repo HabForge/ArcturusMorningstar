@@ -7,6 +7,7 @@ import com.eu.habbo.util.packets.prediction.StructurePredictor;
 import io.netty.buffer.ByteBuf;
 
 public class PacketStringUtils {
+    private static final int MAX_PACKET_LENGTH = 4096;
 
     public static String toString(ClientMessage message) {
         final ByteBuf copy = message.getBuffer().copy();
@@ -32,6 +33,10 @@ public class PacketStringUtils {
     }
 
     private static String toString(SPacket packet) {
+        if (packet.getBytesLength() > MAX_PACKET_LENGTH) {
+            return "Packet too large to parse";
+        }
+
         try {
             final StructurePredictor predictor = new StructurePredictor(packet);
             final String structure = predictor.getStructure();
