@@ -8,8 +8,7 @@ import com.eu.habbo.messages.outgoing.Outgoing;
 public class EffectsListAddComposer extends MessageComposer {
     public final EffectsComponent.HabboEffect effect;
 
-    public
-    EffectsListAddComposer(EffectsComponent.HabboEffect effect) {
+    public EffectsListAddComposer(EffectsComponent.HabboEffect effect) {
         this.effect = effect;
     }
 
