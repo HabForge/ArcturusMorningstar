@@ -25,12 +25,6 @@ public class ServerMessage {
 
     }
 
-    @Deprecated
-    public ServerMessage(int messageId) {
-        // TODO(HabForge): Do we want to fallback to 2016 production packets?
-        throw new ServerMessageException("Use ServerMessage(Outgoing header) instead.");
-    }
-
     public ServerMessage(Outgoing header) {
         this.init(header);
     }

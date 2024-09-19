@@ -138,31 +138,9 @@ public class PacketManager {
         this.incoming.putIfAbsent(header, handler);
     }
 
-    @Deprecated
-    public void registerHandler(Integer header, Class<? extends MessageHandler> handler) throws Exception {
-        // TODO(HabForge): Translate
-    }
-
     public void registerCallable(Incoming header, ICallable callable) {
         this.callables.putIfAbsent(header, new ArrayList<>());
         this.callables.get(header).add(callable);
-    }
-
-    @Deprecated
-    public void registerCallable(Integer header, ICallable callable) {
-        // TODO(HabForge): Translate
-    }
-
-    @Deprecated
-    public void unregisterCallables(Incoming header, ICallable callable) {
-        if (this.callables.containsKey(header)) {
-            this.callables.get(header).remove(callable);
-        }
-    }
-
-    @Deprecated
-    public void unregisterCallables(Integer header, ICallable callable) {
-        // TODO(HabForge): Translate
     }
 
     @Deprecated
@@ -170,11 +148,6 @@ public class PacketManager {
         if (this.callables.containsKey(header)) {
             this.callables.clear();
         }
-    }
-
-    @Deprecated
-    public void unregisterCallables(Integer header) {
-        // TODO(HabForge): Translate
     }
 
     public void handlePacket(GameClient client, ClientMessage packet) {
