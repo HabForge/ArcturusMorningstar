@@ -45,6 +45,7 @@ import com.eu.habbo.messages.outgoing.inventory.AddPetComposer;
 import com.eu.habbo.messages.outgoing.inventory.InventoryRefreshComposer;
 import com.eu.habbo.messages.outgoing.polls.infobus.SimplePollAnswerComposer;
 import com.eu.habbo.messages.outgoing.polls.infobus.SimplePollStartComposer;
+import com.eu.habbo.messages.outgoing.room.furniture.OneWayDoorStatusComposer;
 import com.eu.habbo.messages.outgoing.rooms.*;
 import com.eu.habbo.messages.outgoing.rooms.items.*;
 import com.eu.habbo.messages.outgoing.rooms.pets.RoomPetComposer;
@@ -4161,7 +4162,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
 
     public void updateItemState(HabboItem item) {
         if (!item.isLimited()) {
-            this.sendComposer(new ItemStateComposer(item).compose());
+            this.sendComposer(new OneWayDoorStatusComposer(item.getId(), Integer.parseInt(item.getExtradata())).compose());
         } else {
             this.sendComposer(new FloorItemUpdateComposer(item).compose());
         }
