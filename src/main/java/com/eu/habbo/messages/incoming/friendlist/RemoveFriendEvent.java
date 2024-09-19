@@ -4,7 +4,7 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.messenger.Messenger;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.friends.RemoveFriendComposer;
+import com.eu.habbo.messages.outgoing.friends.UpdateFriendComposer;
 import gnu.trove.list.array.TIntArrayList;
 
 public class RemoveFriendEvent extends MessageHandler {
@@ -29,10 +29,10 @@ public class RemoveFriendEvent extends MessageHandler {
 
             if (habbo != null) {
                 habbo.getMessenger().removeBuddy(this.client.getHabbo());
-                habbo.getClient().sendResponse(new RemoveFriendComposer(this.client.getHabbo().getHabboInfo().getId()));
+                habbo.getClient().sendResponse(new UpdateFriendComposer(this.client.getHabbo(), new TIntArrayList(new int[]{this.client.getHabbo().getHabboInfo().getId()})));
             }
         }
 
-        this.client.sendResponse(new RemoveFriendComposer(this.removedFriends));
+        this.client.sendResponse(new UpdateFriendComposer(this.client.getHabbo(), this.removedFriends));
     }
 }

@@ -1,9 +1,5 @@
 package com.eu.habbo.messages.outgoing.friends;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import com.eu.habbo.habbohotel.messenger.MessengerBuddy;
 import com.eu.habbo.habbohotel.messenger.MessengerCategory;
 import com.eu.habbo.habbohotel.users.Habbo;
@@ -11,12 +7,18 @@ import com.eu.habbo.habbohotel.users.HabboGender;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.eu.habbo.messages.outgoing.Outgoing;
+import gnu.trove.list.array.TIntArrayList;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class UpdateFriendComposer extends MessageComposer {
     private Collection<MessengerBuddy> buddies;
 
     private Habbo habbo;
     private int action;
+    private TIntArrayList removedFriends;
 
     public UpdateFriendComposer(Habbo habbo, MessengerBuddy buddy, Integer action) {
         this.habbo = habbo;
@@ -30,10 +32,28 @@ public class UpdateFriendComposer extends MessageComposer {
         this.action = action;
     }
 
+    public UpdateFriendComposer(Habbo habbo, TIntArrayList removedFriends) {
+        this.habbo = habbo;
+        this.removedFriends = removedFriends;
+        this.action = -1;
+    }
+
     @Override
     protected ServerMessage composeInternal() {
-
         this.response.init(Outgoing.FriendListUpdate);
+
+        if (removedFriends != null) {
+            this.response.appendInt(0);
+            this.response.appendInt(removedFriends.size());
+
+            for (int i = 0; i < removedFriends.size(); i++) {
+                this.response.appendInt(-1);
+                this.response.appendInt(removedFriends.get(i));
+            }
+
+            return this.response;
+        }
+
         if (this.habbo != null && !this.habbo.getHabboInfo().getMessengerCategories().isEmpty()) {
 
             List<MessengerCategory> messengerCategories = this.habbo.getHabboInfo().getMessengerCategories();
@@ -49,13 +69,11 @@ public class UpdateFriendComposer extends MessageComposer {
 
         this.response.appendInt(buddies.size()); // totalbuddies
 
-        for(MessengerBuddy buddy : buddies){
-
-        if (buddy != null) {
-            this.response.appendInt(this.action); // -1 = removed friendId / 0 = updated friend / 1 = added friend 
+        for (MessengerBuddy buddy : buddies) {
+            this.response.appendInt(this.action); // -1 = removed friendId / 0 = updated friend / 1 = added friend
             this.response.appendInt(buddy.getId());
             if (this.action == -1) {
-             continue;   
+                continue;
             }
             this.response.appendString(buddy.getUsername());
             this.response.appendInt(buddy.getGender().equals(HabboGender.M) ? 0 : 1);
@@ -71,7 +89,7 @@ public class UpdateFriendComposer extends MessageComposer {
             this.response.appendBoolean(false);
             this.response.appendShort(buddy.getRelation());
         }
-    }
+
         return this.response;
     }
 }
