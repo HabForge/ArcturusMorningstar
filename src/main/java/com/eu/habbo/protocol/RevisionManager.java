@@ -133,7 +133,7 @@ public class RevisionManager implements RevisionProvider {
 
             try {
                 final String headerName = clazz == Incoming.class
-                        ? message.getName().replace("MessageComposer", "")
+                        ? message.getName().replace("MessageComposer", "").replaceFirst("Composer$", "")
                         : message.getName().replace("MessageEvent", "").replaceFirst("Event$", "");
 
                 final T header = Enum.valueOf(clazz, headerName);

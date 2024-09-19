@@ -24,47 +24,47 @@ public enum Incoming {
     RenderRoomThumbnail,
 
     // com.sulake.habbo.communication.messages.outgoing.campaign
-    OpenCampaignCalendarDoorAsStaffComposer,
-    OpenCampaignCalendarDoorComposer,
+    OpenCampaignCalendarDoorAsStaff,
+    OpenCampaignCalendarDoor,
 
     // com.sulake.habbo.communication.messages.outgoing.catalog
     BuildersClubPlaceRoomItem,
     BuildersClubPlaceWallItem,
     BuildersClubQueryFurniCount,
     GetBonusRareInfo,
-    GetBundleDiscountRulesetComposer,
-    GetCatalogIndexComposer,
-    GetCatalogPageComposer,
-    GetCatalogPageExpirationComposer, // NO-OP WIN63-2021
-    GetCatalogPageWithEarliestExpiryComposer,
+    GetBundleDiscountRuleset,
+    GetCatalogIndex,
+    GetCatalogPage,
+    GetCatalogPageExpiration, // NO-OP WIN63-2021
+    GetCatalogPageWithEarliestExpiry,
     GetClubGift,
     GetClubOffers,
-    GetDirectClubBuyAvailableComposer, // NO-OP WIN63-2021
-    GetGiftWrappingConfigurationComposer,
-    GetHabboBasicMembershipExtendOfferComposer, // NO-OP WIN63-2021
+    GetDirectClubBuyAvailable, // NO-OP WIN63-2021
+    GetGiftWrappingConfiguration,
+    GetHabboBasicMembershipExtendOffer, // NO-OP WIN63-2021
     GetHabboClubExtendOffer,
-    GetIsOfferGiftableComposer,
-    GetLimitedOfferAppearingNextComposer,
-    GetNextTargetedOfferComposer,
-    GetProductOfferComposer,
-    GetRoomAdPurchaseInfoComposer,
-    GetSeasonalCalendarDailyComposer,
-    GetSellablePetPalettesComposer,
-    GetSnowWarGameTokensOfferComposer,
-    GetTargetedOfferComposer, // NO-OP WIN63-2021
-    MarkCatalogNewAdditionsPageOpenedComposer,
-    PurchaseBasicMembershipExtensionComposer,
-    PurchaseFromCatalogAsGiftComposer,
-    PurchaseFromCatalogComposer,
+    GetIsOfferGiftable,
+    GetLimitedOfferAppearingNext,
+    GetNextTargetedOffer,
+    GetProductOffer,
+    GetRoomAdPurchaseInfo,
+    GetSeasonalCalendarDaily,
+    GetSellablePetPalettes,
+    GetSnowWarGameTokensOffer,
+    GetTargetedOffer, // NO-OP WIN63-2021
+    MarkCatalogNewAdditionsPageOpened,
+    PurchaseBasicMembershipExtension,
+    PurchaseFromCatalogAsGift,
+    PurchaseFromCatalog,
     PurchaseRoomAd,
-    PurchaseSnowWarGameTokensOfferComposer,
-    PurchaseTargetedOfferComposer,
-    PurchaseVipMembershipExtensionComposer,
+    PurchaseSnowWarGameTokensOffer,
+    PurchaseTargetedOffer,
+    PurchaseVipMembershipExtension,
     RedeemVoucher,
-    RoomAdPurchaseInitiatedComposer,
-    SelectClubGiftComposer,
-    SetTargetedOfferStateComposer,
-    ShopTargetedOfferViewedComposer,
+    RoomAdPurchaseInitiated,
+    SelectClubGift,
+    SetTargetedOfferState,
+    ShopTargetedOfferViewed,
 
     // com.sulake.habbo.communication.messages.outgoing.competition
     ForwardToACompetitionRoom,
@@ -93,11 +93,11 @@ public enum Incoming {
     NftTransferAssets,
 
     // com.sulake.habbo.communication.messages.outgoing.crafting
-    CraftComposer,
-    CraftSecretComposer,
-    GetCraftableProductsComposer,
-    GetCraftingRecipeComposer,
-    GetCraftingRecipesAvailableComposer,
+    Craft,
+    CraftSecret,
+    GetCraftableProducts,
+    GetCraftingRecipe,
+    GetCraftingRecipesAvailable,
 
     // com.sulake.habbo.communication.messages.outgoing.feedback
     UserFeedback, // AIR63
@@ -120,7 +120,7 @@ public enum Incoming {
     SendRoomInvite,
     SetRelationshipStatus,
     VisitUser,
-    GetMessengerHistoryComposer,
+    GetMessengerHistory,
 
     // com.sulake.habbo.communication.messages.outgoing.game.arena
     Game2ExitGame,
@@ -148,16 +148,16 @@ public enum Incoming {
     ResetResolutionAchievement,
 
     // com.sulake.habbo.communication.messages.outgoing.game.score
-    Game2GetFriendsLeaderboardComposer,
-    Game2GetTotalGroupLeaderboardComposer,
-    Game2GetTotalLeaderboardComposer,
-    Game2GetWeeklyFriendsLeaderboardComposer,
-    Game2GetWeeklyGroupLeaderboardComposer,
-    Game2GetWeeklyLeaderboardComposer,
-    GetFriendsWeeklyCompetitiveLeaderboardComposer, // NO-OP WIN63-2021
-    GetWeeklyCompetitiveLeaderboardComposer, // NO-OP WIN63-2021
-    GetWeeklyGameRewardComposer, // NO-OP WIN63-2021
-    GetWeeklyGameRewardWinnersComposer, // NO-OP WIN63-2021
+    Game2GetFriendsLeaderboard,
+    Game2GetTotalGroupLeaderboard,
+    Game2GetTotalLeaderboard,
+    Game2GetWeeklyFriendsLeaderboard,
+    Game2GetWeeklyGroupLeaderboard,
+    Game2GetWeeklyLeaderboard,
+    GetFriendsWeeklyCompetitiveLeaderboard, // NO-OP WIN63-2021
+    GetWeeklyCompetitiveLeaderboard, // NO-OP WIN63-2021
+    GetWeeklyGameReward, // NO-OP WIN63-2021
+    GetWeeklyGameRewardWinners, // NO-OP WIN63-2021
 
     // com.sulake.habbo.communication.messages.outgoing.gifts
     GetGift, // NO-OP WIN63-2021
@@ -213,7 +213,7 @@ public enum Incoming {
     GetFaqText, // NO-OP WIN63-2021
     GetGuideReportingStatus,
     GetPendingCallsForHelp,
-    GetQuizQuestionsComposer,
+    GetQuizQuestions,
     GuideSessionCreate,
     GuideSessionFeedback,
     GuideSessionGetRequesterRoom,
@@ -225,52 +225,52 @@ public enum Incoming {
     GuideSessionReport,
     GuideSessionRequesterCancels,
     GuideSessionResolved,
-    PostQuizAnswersComposer,
+    PostQuizAnswers,
     SearchFaqs, // NO-OP WIN63-2021
 
     // com.sulake.habbo.communication.messages.outgoing.hotlooks
     GetHotLooks,
 
     // com.sulake.habbo.communication.messages.outgoing.inventory.achievements
-    GetAchievementsComposer,
+    GetAchievements,
 
     // com.sulake.habbo.communication.messages.outgoing.inventory.avatareffect
-    AvatarEffectActivatedComposer,
-    AvatarEffectSelectedComposer,
+    AvatarEffectActivated,
+    AvatarEffectSelected,
 
     // com.sulake.habbo.communication.messages.outgoing.inventory.badges
-    GetBadgePointLimitsComposer,
-    GetBadgesComposer,
-    GetIsBadgeRequestFulfilledComposer,
-    RequestABadgeComposer,
-    SetActivatedBadgesComposer,
+    GetBadgePointLimits,
+    GetBadges,
+    GetIsBadgeRequestFulfilled,
+    RequestABadge,
+    SetActivatedBadges,
 
     // com.sulake.habbo.communication.messages.outgoing.inventory.bots
-    GetBotInventoryComposer,
+    GetBotInventory,
 
     // com.sulake.habbo.communication.messages.outgoing.inventory.furni
-    RequestFurniInventoryComposer,
-    RequestFurniInventoryWhenNotInRoomComposer,
+    RequestFurniInventory,
+    RequestFurniInventoryWhenNotInRoom,
     RequestRoomPropertySet,
 
     // com.sulake.habbo.communication.messages.outgoing.inventory.pets
-    CancelPetBreedingComposer,
-    ConfirmPetBreedingComposer,
-    GetPetInventoryComposer,
+    CancelPetBreeding,
+    ConfirmPetBreeding,
+    GetPetInventory,
 
     // com.sulake.habbo.communication.messages.outgoing.inventory.purse
-    GetCreditsInfoComposer,
+    GetCreditsInfo,
 
     // com.sulake.habbo.communication.messages.outgoing.inventory.trading
-    AcceptTradingComposer,
-    AddItemsToTradeComposer,
-    AddItemToTradeComposer,
-    CloseTradingComposer,
-    ConfirmAcceptTradingComposer,
-    ConfirmDeclineTradingComposer,
-    OpenTradingComposer,
-    RemoveItemFromTradeComposer,
-    UnacceptTradingComposer,
+    AcceptTrading,
+    AddItemsToTrade,
+    AddItemToTrade,
+    CloseTrading,
+    ConfirmAcceptTrading,
+    ConfirmDeclineTrading,
+    OpenTrading,
+    RemoveItemFromTrade,
+    UnacceptTrading,
     SilverFee,
 
     // com.sulake.habbo.communication.messages.outgoing.landingview
@@ -285,7 +285,7 @@ public enum Incoming {
     CancelMarketplaceOffer,
     GetMarketplaceCanMakeOffer,
     GetMarketplaceConfiguration,
-    GetMarketplaceItemStatsComposer,
+    GetMarketplaceItemStats,
     GetMarketplaceOffers,
     GetMarketplaceOwnOffers,
     MakeOffer,
@@ -308,8 +308,8 @@ public enum Incoming {
     ModKick,
     ModMessage,
     ModMute,
-    ModToolPreferencesComposer,
-    ModToolSanctionComposer,
+    ModToolPreferences,
+    ModToolSanction,
     ModTradingLock,
     PickIssues,
     ReleaseIssues,
@@ -346,8 +346,8 @@ public enum Incoming {
     PopularRoomsSearch,
     RateFlat,
     RemoveOwnRoomRightsRoom,
-    RoomAdEventTabAdClickedComposer,
-    RoomAdEventTabViewedComposer,
+    RoomAdEventTabAdClicked,
+    RoomAdEventTabViewed,
     RoomAdSearch,
     RoomsWhereMyFriendsAreSearch,
     RoomsWithHighestScoreSearch,
@@ -359,12 +359,12 @@ public enum Incoming {
 
     // com.sulake.habbo.communication.messages.outgoing.newnavigator
     NavigatorAddCollapsedCategory,
-    NavigatorAddSavedSearchComposer,
-    NavigatorDeleteSavedSearchComposer,
+    NavigatorAddSavedSearch,
+    NavigatorDeleteSavedSearch,
     NavigatorRemoveCollapsedCategory,
     NavigatorSetSearchCodeViewMode,
-    NewNavigatorInitComposer,
-    NewNavigatorSearchComposer,
+    NewNavigatorInit,
+    NewNavigatorSearch,
 
     // com.sulake.habbo.communication.messages.outgoing.nft
     GetNftCredits,
@@ -374,26 +374,26 @@ public enum Incoming {
     SaveUserNftWardrobe,
 
     // com.sulake.habbo.communication.messages.outgoing.notifications
-    ResetUnseenItemIdsComposer,
-    ResetUnseenItemsComposer,
+    ResetUnseenItemIds,
+    ResetUnseenItems,
 
     // com.sulake.habbo.communication.messages.outgoing.nux
     NewUserExperienceGetGifts,
-    NewUserExperienceScriptProceedComposer,
-    SelectInitialRoomComposer,
+    NewUserExperienceScriptProceed,
+    SelectInitialRoom,
 
     // com.sulake.habbo.communication.messages.outgoing.poll
-    PollAnswerComposer,
-    PollRejectComposer,
-    PollStartComposer,
+    PollAnswer,
+    PollReject,
+    PollStart,
 
     // com.sulake.habbo.communication.messages.outgoing.preferences
     SetChatPreferences,
-    SetChatStylePreferenceComposer,
+    SetChatStylePreference,
     SetIgnoreRoomInvites,
     SetNewNavigatorWindowPreferences,
     SetRoomCameraPreferences,
-    SetSoundSettingsComposer,
+    SetSoundSettings,
     SetUIFlags,
 
     // com.sulake.habbo.communication.messages.outgoing.quest
@@ -428,7 +428,7 @@ public enum Incoming {
     BanUserWithDuration,
     KickUser,
     LetUserIn,
-    MuteAllInRoomComposer,
+    MuteAllInRoom,
     MuteUser,
     RemoveAllRights,
     RemoveRights,
@@ -448,8 +448,8 @@ public enum Incoming {
     Sign,
 
     // com.sulake.habbo.communication.messages.outgoing.room.bots
-    CommandBotComposer,
-    GetBotCommandConfigurationDataComposer,
+    CommandBot,
+    GetBotCommandConfigurationData,
 
     // com.sulake.habbo.communication.messages.outgoing.room.chat
     StartTyping,
@@ -510,15 +510,15 @@ public enum Incoming {
     RoomDimmerChangeState,
     RoomDimmerGetPresets,
     RoomDimmerSavePreset,
-    SetCustomStackingHeightComposer,
-    SetMannequinFigureComposer,
-    SetMannequinNameComposer,
+    SetCustomStackingHeight,
+    SetMannequinFigure,
+    SetMannequinName,
     SetRandomState,
-    SetRoomBackgroundColorDataComposer,
+    SetRoomBackgroundColorData,
     SetYoutubeDisplayPlaylist,
     SpinWheelOfFortune,
     ThrowDice,
-    SetAreaHideDataComposer,
+    SetAreaHideData,
 
     // com.sulake.habbo.communication.messages.outgoing.room.layout
     GetOccupiedTiles,
@@ -527,7 +527,7 @@ public enum Incoming {
 
     // com.sulake.habbo.communication.messages.outgoing.room.pets
     BreedPets,
-    CustomizePetWithFurniComposer,
+    CustomizePetWithFurni,
     GetPetInfo,
     PetSelected,
     RespectPet,
@@ -547,19 +547,19 @@ public enum Incoming {
     GetFlatControllers,
     GetRoomSettings,
     SaveRoomSettings,
-    UpdateRoomCategoryAndTradeSettingsComposer,
+    UpdateRoomCategoryAndTradeSettings,
     UpdateRoomFilter,
 
     // com.sulake.habbo.communication.messages.outgoing.sound
-    AddJukeboxDiskComposer,
+    AddJukeboxDisk,
     GetJukeboxPlayList,
     GetNowPlaying,
     GetOfficialSongId,
     GetSongInfo,
     GetSoundMachinePlayList,
-    GetSoundSettingsComposer,
+    GetSoundSettings,
     GetUserSongDisks,
-    RemoveJukeboxDiskComposer,
+    RemoveJukeboxDisk,
 
     // com.sulake.habbo.communication.messages.outgoing.talent
     GetTalentTrackLevel,
@@ -609,11 +609,11 @@ public enum Incoming {
     ApproveAllMembershipRequests,
     ApproveMembershipRequest,
     ApproveName,
-    ChangeEmailComposer,
+    ChangeEmail,
     CreateGuild,
     DeactivateGuild,
     DeselectFavouriteHabboGroup,
-    GetEmailStatusComposer,
+    GetEmailStatus,
     GetExtendedProfileByName,
     GetExtendedProfile,
     GetGuildCreationInfo,
