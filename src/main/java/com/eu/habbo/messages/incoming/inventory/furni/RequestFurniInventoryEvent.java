@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.NoSuchElementException;
 
-public class RequestFurniInventoryWhenNotInRoomEvent extends MessageHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RequestFurniInventoryWhenNotInRoomEvent.class);
+public class RequestFurniInventoryEvent extends MessageHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestFurniInventoryEvent.class);
 
     @Override
     public void handle() throws Exception {

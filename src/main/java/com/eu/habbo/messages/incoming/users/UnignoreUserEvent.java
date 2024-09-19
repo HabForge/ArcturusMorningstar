@@ -1,4 +1,4 @@
-package com.eu.habbo.messages.incoming.rooms.users;
+package com.eu.habbo.messages.incoming.users;
 
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;

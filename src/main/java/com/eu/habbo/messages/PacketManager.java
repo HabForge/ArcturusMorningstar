@@ -4,8 +4,8 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.messages.incoming.Incoming;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.incoming.avatar.CheckUserNameEvent;
 import com.eu.habbo.messages.incoming.avatar.ChangeUserNameEvent;
+import com.eu.habbo.messages.incoming.avatar.CheckUserNameEvent;
 import com.eu.habbo.messages.incoming.avatar.GetWardrobeEvent;
 import com.eu.habbo.messages.incoming.avatar.SaveWardrobeOutfitEvent;
 import com.eu.habbo.messages.incoming.camera.*;
@@ -29,7 +29,7 @@ import com.eu.habbo.messages.incoming.inventory.badges.GetBadgePointLimitsEvent;
 import com.eu.habbo.messages.incoming.inventory.badges.GetBadgesEvent;
 import com.eu.habbo.messages.incoming.inventory.badges.SetActivatedBadgesEvent;
 import com.eu.habbo.messages.incoming.inventory.bots.GetBotInventoryEvent;
-import com.eu.habbo.messages.incoming.inventory.furni.RequestFurniInventoryWhenNotInRoomEvent;
+import com.eu.habbo.messages.incoming.inventory.furni.RequestFurniInventoryEvent;
 import com.eu.habbo.messages.incoming.inventory.furni.RequestRoomPropertySetEvent;
 import com.eu.habbo.messages.incoming.inventory.pets.CancelPetBreedingEvent;
 import com.eu.habbo.messages.incoming.inventory.pets.ConfirmPetBreedingEvent;
@@ -70,7 +70,6 @@ import com.eu.habbo.messages.incoming.room.pets.GetPetInfoEvent;
 import com.eu.habbo.messages.incoming.room.pets.RespectPetEvent;
 import com.eu.habbo.messages.incoming.room.session.OpenFlatConnectionEvent;
 import com.eu.habbo.messages.incoming.room.session.QuitEvent;
-import com.eu.habbo.messages.incoming.rooms.users.UnignoreUserEvent;
 import com.eu.habbo.messages.incoming.roomsettings.*;
 import com.eu.habbo.messages.incoming.sound.*;
 import com.eu.habbo.messages.incoming.talent.GetTalentTrackEvent;
@@ -361,8 +360,8 @@ public class PacketManager {
     private void registerInventory() throws Exception {
         this.registerHandler(Incoming.GetBadges, GetBadgesEvent.class);
         this.registerHandler(Incoming.GetBotInventory, GetBotInventoryEvent.class);
-        this.registerHandler(Incoming.RequestFurniInventory, RequestFurniInventoryWhenNotInRoomEvent.class);
-        this.registerHandler(Incoming.RequestFurniInventoryWhenNotInRoom, RequestFurniInventoryWhenNotInRoomEvent.class);
+        this.registerHandler(Incoming.RequestFurniInventory, RequestFurniInventoryEvent.class);
+        this.registerHandler(Incoming.RequestFurniInventoryWhenNotInRoom, RequestFurniInventoryEvent.class);
         this.registerHandler(Incoming.GetPetInventory, GetPetInventoryEvent.class);
     }
 
