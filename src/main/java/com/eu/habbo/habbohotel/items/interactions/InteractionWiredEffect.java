@@ -6,7 +6,7 @@ import com.eu.habbo.habbohotel.items.interactions.wired.WiredSettings;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.wired.WiredEffectType;
-import com.eu.habbo.messages.incoming.wired.WiredSaveException;
+import com.eu.habbo.messages.incoming.userdefinedroomevents.WiredSaveException;
 import com.eu.habbo.messages.outgoing.wired.WiredEffectDataComposer;
 
 import java.sql.ResultSet;

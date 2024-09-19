@@ -13,7 +13,7 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.wired.WiredEffectType;
 import com.eu.habbo.habbohotel.wired.WiredHandler;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.incoming.wired.WiredSaveException;
+import com.eu.habbo.messages.incoming.userdefinedroomevents.WiredSaveException;
 import gnu.trove.procedure.TObjectProcedure;
 
 import java.sql.ResultSet;
