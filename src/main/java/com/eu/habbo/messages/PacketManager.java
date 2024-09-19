@@ -110,7 +110,6 @@ public class PacketManager {
         this.registerGuides();
         this.registerCrafting();
         this.registerCamera();
-        this.registerGameCenter();
     }
 
     @EventHandler
@@ -339,8 +338,6 @@ public class PacketManager {
         this.registerHandler(Incoming.GetBonusRareInfo, HotelViewRequestBonusRareEvent.class);
         this.registerHandler(Incoming.GetPromoArticles, RequestNewsListEvent.class);
         this.registerHandler(Incoming.GetCurrentTimingCode, HotelViewDataEvent.class);
-        //this.registerHandler(Incoming.HotelViewRequestBadgeRewardEvent, HotelViewRequestBadgeRewardEvent.class);
-        //this.registerHandler(Incoming.HotelViewClaimBadgeRewardEvent, HotelViewClaimBadgeRewardEvent.class);
         this.registerHandler(Incoming.GetLimitedOfferAppearingNext, HotelViewRequestLTDAvailabilityEvent.class);
         this.registerHandler(Incoming.GetSecondsUntil, HotelViewRequestSecondsUntilEvent.class);
     }
@@ -437,7 +434,6 @@ public class PacketManager {
         this.registerHandler(Incoming.MuteUser, RoomUserMuteEvent.class);
         this.registerHandler(Incoming.BanUserWithDuration, RoomUserBanEvent.class);
         this.registerHandler(Incoming.UnbanUserFromRoom, UnbanRoomUserEvent.class);
-        //this.registerHandler(Incoming._-07A, RequestRoomUserTagsEvent.class);
         this.registerHandler(Incoming.GetYoutubeDisplayStatus, YoutubeRequestPlaylists.class);
         this.registerHandler(Incoming.ControlYoutubeDisplayPlayback, YoutubeRequestStateChange.class);
         this.registerHandler(Incoming.SetYoutubeDisplayPlaylist, YoutubeRequestPlaylistChange.class);
@@ -461,13 +457,11 @@ public class PacketManager {
         this.registerHandler(Incoming.CloseIssues, ModToolCloseTicketEvent.class);
         this.registerHandler(Incoming.ReleaseIssues, ModToolReleaseTicketEvent.class);
         this.registerHandler(Incoming.ModMessage, ModToolAlertEvent.class);
-        //this.registerHandler(Incoming.ModToolWarnEvent, ModToolWarnEvent.class);
         this.registerHandler(Incoming.ModKick, ModToolKickEvent.class);
         this.registerHandler(Incoming.ModeratorAction, ModToolRoomAlertEvent.class);
         this.registerHandler(Incoming.ModerateRoom, ModToolChangeRoomSettingsEvent.class);
         this.registerHandler(Incoming.GetRoomVisits, ModToolRequestRoomVisitsEvent.class);
         this.registerHandler(Incoming.GetCfhChatlog, ModToolRequestIssueChatlogEvent.class);
-        //this.registerHandler(Incoming.ModToolRequestRoomUserChatlogEvent, ModToolRequestRoomUserChatlogEvent.class);
         this.registerHandler(Incoming.GetUserChatlog, ModToolRequestUserChatlogEvent.class);
         this.registerHandler(Incoming.ModAlert, ModToolSanctionAlertEvent.class);
         this.registerHandler(Incoming.ModMute, ModToolSanctionMuteEvent.class);
@@ -531,13 +525,6 @@ public class PacketManager {
         this.registerHandler(Incoming.ModerateThread, GuildForumModerateThreadEvent.class);
         this.registerHandler(Incoming.UpdateThread, GuildForumThreadUpdateEvent.class);
         this.registerHandler(Incoming.GetHabboGroupBadges, GetHabboGuildBadgesMessageEvent.class);
-
-//        this.registerHandler(Incoming.GetForumStats,              GuildForumModerateMessageEvent.class);
-//        this.registerHandler(Incoming.GetForumStats,              GuildForumModerateThreadEvent.class);
-//        this.registerHandler(Incoming.GetForumStats,              GuildForumPostThreadEvent.class);
-//        this.registerHandler(Incoming.GetForumStats,              GuildForumThreadsEvent.class);
-//        this.registerHandler(Incoming.GetForumStats,              GuildForumThreadsMessagesEvent.class);
-//        this.registerHandler(Incoming.GetForumStats,              GuildForumUpdateSettingsEvent.class);
     }
 
     void registerPets() throws Exception {
@@ -580,7 +567,6 @@ public class PacketManager {
 
     void registerAchievements() throws Exception {
         this.registerHandler(Incoming.GetAchievements, RequestAchievementsEvent.class);
-        //this.registerHandler(Incoming.RequestAchievementConfigurationEvent, RequestAchievementConfigurationEvent.class);
     }
 
     void registerGuides() throws Exception {
@@ -615,15 +601,5 @@ public class PacketManager {
         this.registerHandler(Incoming.PurchasePhoto, CameraPurchaseEvent.class);
         this.registerHandler(Incoming.RenderRoomThumbnail, CameraRoomThumbnailEvent.class);
         this.registerHandler(Incoming.PublishPhoto, CameraPublishToWebEvent.class);
-    }
-
-    void registerGameCenter() throws Exception {
-        //this.registerHandler(Incoming._-01o, GameCenterRequestGamesEvent.class);
-        //this.registerHandler(Incoming._-1xb, GameCenterRequestAccountStatusEvent.class);
-        //this.registerHandler(Incoming._-2nU, GameCenterJoinGameEvent.class);
-        //this.registerHandler(Incoming._-1Yj, GameCenterLoadGameEvent.class);
-        //this.registerHandler(Incoming._-5uY, GameCenterLeaveGameEvent.class);
-        //this.registerHandler(Incoming._-5sD, GameCenterEvent.class);
-        //this.registerHandler(Incoming._-5Xy, GameCenterRequestGameStatusEvent.class);
     }
 }
