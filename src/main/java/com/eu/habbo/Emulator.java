@@ -7,7 +7,6 @@ import com.eu.habbo.core.*;
 import com.eu.habbo.core.consolecommands.ConsoleCommand;
 import com.eu.habbo.database.Database;
 import com.eu.habbo.habbohotel.GameEnvironment;
-import com.eu.habbo.networking.camera.CameraClient;
 import com.eu.habbo.networking.gameserver.GameServer;
 import com.eu.habbo.networking.rconserver.RCONServer;
 import com.eu.habbo.plugin.PluginManager;
@@ -21,7 +20,9 @@ import com.eu.habbo.util.imager.badges.BadgeImager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -58,7 +59,6 @@ public final class Emulator {
     private static TextsManager texts;
     private static GameServer gameServer;
     private static RCONServer rconServer;
-    private static CameraClient cameraClient;
     private static Logging logging;
     private static Database database;
     private static DatabaseLogger databaseLogger;
@@ -211,12 +211,6 @@ public final class Emulator {
         }
 
         try {
-            if (Emulator.cameraClient != null)
-                Emulator.cameraClient.disconnect();
-        } catch (Exception e) {
-        }
-
-        try {
             if (Emulator.rconServer != null)
                 Emulator.rconServer.stop();
         } catch (Exception e) {
@@ -329,14 +323,6 @@ public final class Emulator {
 
     public static BadgeImager getBadgeImager() {
         return badgeImager;
-    }
-
-    public static CameraClient getCameraClient() {
-        return cameraClient;
-    }
-
-    public static synchronized void setCameraClient(CameraClient client) {
-        cameraClient = client;
     }
 
     public static int getTimeStarted() {
