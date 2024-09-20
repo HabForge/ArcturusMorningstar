@@ -445,9 +445,15 @@ public class ItemManager {
         return this.crackableRewards.get(itemId);
     }
 
-    public Item getCrackableReward(int itemId) {
-        return this.getItem(this.crackableRewards.get(itemId).getRandomReward());
+    public List<Integer> getCrackableReward(int itemId) {
+        CrackableReward reward = this.crackableRewards.get(itemId);
+        if (reward != null) {
+            return reward.getRandomReward();
+        } else {
+            return new ArrayList<>();
+        }
     }
+
 
 
     public void loadSoundTracks() {

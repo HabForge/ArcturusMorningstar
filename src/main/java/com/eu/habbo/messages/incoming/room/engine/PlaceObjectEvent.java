@@ -20,7 +20,7 @@ public class PlaceObjectEvent extends MessageHandler {
 
         int itemId = -1;
 
-        if (values.length != 0) itemId = Integer.parseInt(values[0]);
+        if (values.length != 0) itemId = Math.abs(Integer.parseInt(values[0]));
 
         if (!this.client.getHabbo().getRoomUnit().isInRoom()) {
             this.client.sendResponse(new NotificationDialogComposer(BubbleAlertKeys.FURNITURE_PLACEMENT_ERROR.key, FurnitureMovementError.NO_RIGHTS.errorCode));

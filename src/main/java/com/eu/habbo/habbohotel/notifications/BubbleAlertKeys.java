@@ -33,7 +33,9 @@ public enum BubbleAlertKeys {
     RECEIVED_GIFT("received.gift"),
     RECEIVED_BADGE("received.badge"),
     FIGURESET_REDEEMED("figureset.redeemed.success"),
-    FIGURESET_OWNED_ALREADY("figureset.already.redeemed");
+    FIGURESET_OWNED_ALREADY("figureset.already.redeemed"),
+    REWARD_RECEIVED("reward_received");
+
 
     public final String key;
 

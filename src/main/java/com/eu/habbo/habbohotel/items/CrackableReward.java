@@ -6,16 +6,14 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class CrackableReward {
     private static final Logger LOGGER = LoggerFactory.getLogger(CrackableReward.class);
 
     public final int itemId;
     public final int count;
-    public final Map<Integer, Map.Entry<Integer, Integer>> prizes;
+    public final Map<Integer, Map.Entry<String, Integer>> prizes;
     public final String achievementTick;
     public final String achievementCracked;
     public final int requiredEffect;
@@ -30,30 +28,22 @@ public class CrackableReward {
         this.achievementCracked = set.getString("achievement_cracked");
         this.requiredEffect = set.getInt("required_effect");
         this.subscriptionDuration = set.getInt("subscription_duration");
-        this.subscriptionType = RedeemableSubscriptionType.fromString(set.getString("subscription_type"));
+        this.subscriptionType =
+                RedeemableSubscriptionType.fromString(set.getString("subscription_type"));
 
-
-        String[] prizes = set.getString("prizes").split(";");
+        String[] prizeEntries = set.getString("prizes").split(";");
         this.prizes = new HashMap<>();
 
         if (set.getString("prizes").isEmpty()) return;
 
         this.totalChance = 0;
-        for (String prize : prizes) {
+        for (String prizeEntry : prizeEntries) {
             try {
-                int itemId = 0;
-                int chance = 100;
+                String[] parts = prizeEntry.split(":");
+                String itemsPart = parts[0];
+                int chance = (parts.length == 2) ? Integer.parseInt(parts[1]) : 100;
 
-                if (prize.contains(":") && prize.split(":").length == 2) {
-                    itemId = Integer.valueOf(prize.split(":")[0]);
-                    chance = Integer.valueOf(prize.split(":")[1]);
-                } else if (prize.contains(":")) {
-                    LOGGER.error("Invalid configuration of crackable prizes (item id: " + this.itemId + "). '" + prize + "' format should be itemId:chance.");
-                } else {
-                    itemId = Integer.valueOf(prize.replace(":", ""));
-                }
-
-                this.prizes.put(itemId, new AbstractMap.SimpleEntry<>(this.totalChance, this.totalChance + chance));
+                this.prizes.put(this.totalChance, new AbstractMap.SimpleEntry<>(itemsPart, this.totalChance + chance));
                 this.totalChance += chance;
             } catch (Exception e) {
                 LOGGER.error("Caught exception", e);
@@ -61,19 +51,41 @@ public class CrackableReward {
         }
     }
 
-    public int getRandomReward() {
-        if (this.prizes.size() == 0) return 0;
+    public List<Integer> getRandomReward() {
+        if (this.prizes.isEmpty()) return new ArrayList<>();
 
-        int random = Emulator.getRandom().nextInt(this.totalChance);
+        Random random = new Random();
+        int randInt = random.nextInt(this.totalChance);
 
-        int notFound = 0;
-        for (Map.Entry<Integer, Map.Entry<Integer, Integer>> set : this.prizes.entrySet()) {
-            notFound = set.getKey();
-            if (random >= set.getValue().getKey() && random < set.getValue().getValue()) {
-                return set.getKey();
+        for (Map.Entry<Integer, Map.Entry<String, Integer>> entry : this.prizes.entrySet()) {
+            Map.Entry<String, Integer> value = entry.getValue();
+            if (randInt >= entry.getKey() && randInt < value.getValue()) {
+                return parsePrizeString(value.getKey());
             }
         }
 
-        return notFound;
+        return new ArrayList<>();
+    }
+
+    private List<Integer> parsePrizeString(String prizeString) {
+        List<Integer> result = new ArrayList<>();
+        String[] items = prizeString.split(",");
+
+        for (String item : items) {
+            if (item.contains("|")) {
+                String[] parts = item.split("\\|");
+                int itemId = Integer.parseInt(parts[0]);
+                int quantity = Integer.parseInt(parts[1]);
+                for (int i = 0; i < quantity; i++) {
+                    result.add(itemId);
+                }
+            } else {
+                int itemId = Integer.parseInt(item);
+                result.add(itemId);
+            }
+        }
+
+        return result;
     }
 }
+

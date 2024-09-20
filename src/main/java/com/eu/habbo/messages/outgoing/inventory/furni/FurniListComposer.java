@@ -46,7 +46,7 @@ public class FurniListComposer extends MessageComposer implements TIntObjectProc
 
     @Override
     public boolean execute(int a, HabboItem habboItem) {
-        this.response.appendInt(habboItem.getGiftAdjustedId());
+        this.response.appendInt(habboItem.getBaseItem().getType().equals(FurnitureType.FLOOR) ? -habboItem.getId() : habboItem.getId()); //Habbo changed value to a negative when it's a floor item, might night a better approach. FYI: used to be roomItem.getGiftAdjustedId()
         this.response.appendString(habboItem.getBaseItem().getType().code);
         this.response.appendInt(habboItem.getId());
         this.response.appendInt(habboItem.getBaseItem().getSpriteId());

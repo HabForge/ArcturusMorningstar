@@ -8,29 +8,29 @@ import gnu.trove.map.hash.THashMap;
 import java.util.Map;
 
 public class NotificationDialogComposer extends MessageComposer {
-    private final String errorKey;
+    private final String type;
     private final THashMap<String, String> keys;
 
-    public NotificationDialogComposer(String errorKey, THashMap<String, String> keys) {
-        this.errorKey = errorKey;
+    public NotificationDialogComposer(String type, THashMap<String, String> keys) {
+        this.type = type;
         this.keys = keys;
     }
 
-    public NotificationDialogComposer(String errorKey, String message) {
-        this.errorKey = errorKey;
+    public NotificationDialogComposer(String type, String message) {
+        this.type = type;
         this.keys = new THashMap<>();
         this.keys.put("message", message);
     }
 
-    public NotificationDialogComposer(String errorKey) {
-        this.errorKey = errorKey;
+    public NotificationDialogComposer(String type) {
+        this.type = type;
         this.keys = new THashMap<>();
     }
 
     @Override
     protected ServerMessage composeInternal() {
         this.response.init(Outgoing.NotificationDialog);
-        this.response.appendString(this.errorKey);
+        this.response.appendString(this.type);
         this.response.appendInt(this.keys.size());
         for (Map.Entry<String, String> set : this.keys.entrySet()) {
             this.response.appendString(set.getKey());

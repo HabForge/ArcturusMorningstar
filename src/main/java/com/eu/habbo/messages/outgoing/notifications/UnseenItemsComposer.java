@@ -50,7 +50,7 @@ public class UnseenItemsComposer extends MessageComposer {
             this.response.appendInt(this.category.number);
             this.response.appendInt(this.ids.length);
             for (int id : this.ids) {
-                this.response.appendInt(id);
+                this.response.appendInt(-id);
             }
         } else if (this.entries != null) {
             this.response.appendInt(this.entries.size());
@@ -60,7 +60,7 @@ public class UnseenItemsComposer extends MessageComposer {
 
                 this.response.appendInt(item.getValue().size());
                 for (int id : item.getValue()) {
-                    this.response.appendInt(id);
+                    this.response.appendInt(-id);
                 }
             }
         } else if (this.item == null) {
@@ -68,7 +68,7 @@ public class UnseenItemsComposer extends MessageComposer {
             this.response.appendInt(1);
             this.response.appendInt(this.itemsList.size());
             for (HabboItem habboItem : this.itemsList) {
-                this.response.appendInt(habboItem.getId());
+                this.response.appendInt(-habboItem.getId());
             }
         } else {
             this.response.appendInt(1);
