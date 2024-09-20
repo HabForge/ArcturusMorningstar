@@ -1,7 +1,7 @@
 package com.eu.habbo.messages.incoming.game.lobby;
 
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.events.resolution.NewYearResolutionComposer;
+import com.eu.habbo.messages.outgoing.game.lobby.AchievementResolutionsComposer;
 
 public class GetResolutionAchievementsEvent extends MessageHandler {
     @Override
@@ -10,7 +10,7 @@ public class GetResolutionAchievementsEvent extends MessageHandler {
         int viewAll = this.packet.readInt();
 
         if (viewAll == 0) {
-            this.client.sendResponse(new NewYearResolutionComposer());
+            this.client.sendResponse(new AchievementResolutionsComposer());
         }
     }
 }

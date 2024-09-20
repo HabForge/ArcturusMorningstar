@@ -7,7 +7,7 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.wired.WiredConditionOperator;
 import com.eu.habbo.habbohotel.wired.WiredConditionType;
-import com.eu.habbo.messages.outgoing.wired.WiredConditionDataComposer;
+import com.eu.habbo.messages.outgoing.userdefinedroomevents.WiredFurniConditionComposer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,7 +35,7 @@ public abstract class InteractionWiredCondition extends InteractionWired {
     public void onClick(GameClient client, Room room, Object[] objects) throws Exception {
         if (client != null) {
             if (room.hasRights(client.getHabbo())) {
-                client.sendResponse(new WiredConditionDataComposer(this, room));
+                client.sendResponse(new WiredFurniConditionComposer(this, room));
                 this.activateBox(room);
             }
         }

@@ -4,10 +4,10 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guilds.Guild;
 import com.eu.habbo.habbohotel.guilds.SettingsState;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertKeys;
-import com.eu.habbo.messages.outgoing.guilds.forums.GuildForumDataComposer;
-import com.eu.habbo.messages.outgoing.handshake.ConnectionErrorComposer;
+import com.eu.habbo.messages.outgoing.error.ErrorReportComposer;
+import com.eu.habbo.habbohotel.notifications.BubbleAlertKeys;
+import com.eu.habbo.messages.outgoing.groupforums.ForumDataComposer;
+import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
 
 public class UpdateForumSettingsEvent extends MessageHandler {
     @Override
@@ -21,12 +21,12 @@ public class UpdateForumSettingsEvent extends MessageHandler {
         Guild guild = Emulator.getGameEnvironment().getGuildManager().getGuild(guildId);
 
         if (guild == null) {
-            this.client.sendResponse(new ConnectionErrorComposer(404));
+            this.client.sendResponse(new ErrorReportComposer(404));
             return;
         }
 
         if (guild.getOwnerId() != this.client.getHabbo().getHabboInfo().getId()) {
-            this.client.sendResponse(new ConnectionErrorComposer(403));
+            this.client.sendResponse(new ErrorReportComposer(403));
             return;
         }
 
@@ -39,8 +39,8 @@ public class UpdateForumSettingsEvent extends MessageHandler {
 
         Emulator.getThreading().run(guild);
 
-        this.client.sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FORUMS_FORUM_SETTINGS_UPDATED.key).compose());
+        this.client.sendResponse(new NotificationDialogComposer(BubbleAlertKeys.FORUMS_FORUM_SETTINGS_UPDATED.key).compose());
 
-        this.client.sendResponse(new GuildForumDataComposer(guild, this.client.getHabbo()));
+        this.client.sendResponse(new ForumDataComposer(guild, this.client.getHabbo()));
     }
 }

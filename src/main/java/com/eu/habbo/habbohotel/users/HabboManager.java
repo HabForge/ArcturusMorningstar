@@ -5,12 +5,16 @@ import com.eu.habbo.habbohotel.modtool.ModToolBan;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.permissions.Rank;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.outgoing.catalog.*;
-import com.eu.habbo.messages.outgoing.catalog.marketplace.MarketplaceConfigComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
-import com.eu.habbo.messages.outgoing.modtool.ModToolComposer;
-import com.eu.habbo.messages.outgoing.users.UserPerksComposer;
-import com.eu.habbo.messages.outgoing.users.UserPermissionsComposer;
+import com.eu.habbo.messages.outgoing.catalog.BuildersClubFurniCountComposer;
+import com.eu.habbo.messages.outgoing.catalog.BundleDiscountRulesetComposer;
+import com.eu.habbo.messages.outgoing.catalog.CatalogPublishedComposer;
+import com.eu.habbo.messages.outgoing.catalog.GiftWrappingConfigurationComposer;
+import com.eu.habbo.messages.outgoing.handshake.UserRightsComposer;
+import com.eu.habbo.messages.outgoing.marketplace.MarketplaceConfigurationComposer;
+import com.eu.habbo.messages.outgoing.moderation.ModeratorInitComposer;
+import com.eu.habbo.messages.outgoing.notifications.HabboBroadcastComposer;
+import com.eu.habbo.messages.outgoing.perk.PerkAllowancesComposer;
+import com.eu.habbo.messages.outgoing.recycler.RecyclerPrizesComposer;
 import com.eu.habbo.plugin.events.users.UserRankChangedEvent;
 import com.eu.habbo.plugin.events.users.UserRegisteredEvent;
 import org.slf4j.Logger;
@@ -266,20 +270,20 @@ public class HabboManager {
                 habbo.getInventory().getEffectsComponent().createRankEffect(habbo.getHabboInfo().getRank().getRoomEffect());
             }
 
-            habbo.getClient().sendResponse(new UserPermissionsComposer(habbo));
-            habbo.getClient().sendResponse(new UserPerksComposer(habbo));
+            habbo.getClient().sendResponse(new UserRightsComposer(habbo));
+            habbo.getClient().sendResponse(new PerkAllowancesComposer(habbo));
 
             if (habbo.hasPermission(Permission.ACC_SUPPORTTOOL)) {
-                habbo.getClient().sendResponse(new ModToolComposer(habbo));
+                habbo.getClient().sendResponse(new ModeratorInitComposer(habbo));
             }
             habbo.getHabboInfo().run();
 
-            habbo.getClient().sendResponse(new CatalogUpdatedComposer());
-            habbo.getClient().sendResponse(new CatalogModeComposer(0));
-            habbo.getClient().sendResponse(new DiscountComposer());
-            habbo.getClient().sendResponse(new MarketplaceConfigComposer());
-            habbo.getClient().sendResponse(new GiftConfigurationComposer());
-            habbo.getClient().sendResponse(new RecyclerLogicComposer());
+            habbo.getClient().sendResponse(new CatalogPublishedComposer());
+            habbo.getClient().sendResponse(new BuildersClubFurniCountComposer(0));
+            habbo.getClient().sendResponse(new BundleDiscountRulesetComposer());
+            habbo.getClient().sendResponse(new MarketplaceConfigurationComposer());
+            habbo.getClient().sendResponse(new GiftWrappingConfigurationComposer());
+            habbo.getClient().sendResponse(new RecyclerPrizesComposer());
             habbo.alert(Emulator.getTexts().getValue("commands.generic.cmd_give_rank.new_rank").replace("id", newRank.getName()));
         } else {
             try (Connection connection = Emulator.getDatabase().getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement("UPDATE users SET `rank` = ? WHERE id = ? LIMIT 1")) {
@@ -311,7 +315,7 @@ public class HabboManager {
 
     public void staffAlert(String message) {
         message = Emulator.getTexts().getValue("commands.generic.cmd_staffalert.title") + "\r\n" + message;
-        ServerMessage msg = new GenericAlertComposer(message).compose();
+        ServerMessage msg = new HabboBroadcastComposer(message).compose();
         Emulator.getGameEnvironment().getHabboManager().sendPacketToHabbosWithPermission(msg, "cmd_staffalert");
     }
 }

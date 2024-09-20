@@ -3,7 +3,7 @@ package com.eu.habbo.messages.incoming.talent;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.achievements.TalentTrackType;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.achievements.talenttrack.TalentTrackComposer;
+import com.eu.habbo.messages.outgoing.talent.TalentTrackComposer;
 
 public class GetTalentTrackEvent extends MessageHandler {
     @Override

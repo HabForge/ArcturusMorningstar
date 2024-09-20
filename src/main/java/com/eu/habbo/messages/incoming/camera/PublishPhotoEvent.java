@@ -3,8 +3,8 @@ package com.eu.habbo.messages.incoming.camera;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.camera.CameraPublishWaitMessageComposer;
-import com.eu.habbo.messages.outgoing.catalog.NotEnoughPointsTypeComposer;
+import com.eu.habbo.messages.outgoing.camera.CameraPublishStatusComposer;
+import com.eu.habbo.messages.outgoing.catalog.NotEnoughBalanceComposer;
 import com.eu.habbo.plugin.events.users.UserPublishPictureEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class PublishPhotoEvent extends MessageHandler {
         if (!habbo.getHabboInfo().getPhotoJSON().contains(habbo.getHabboInfo().getPhotoTimestamp() + "")) return;
 
         if (habbo.getHabboInfo().getCurrencyAmount(PublishPhotoEvent.CAMERA_PUBLISH_POINTS_TYPE) < PublishPhotoEvent.CAMERA_PUBLISH_POINTS) {
-            this.client.sendResponse(new NotEnoughPointsTypeComposer(false, true, PublishPhotoEvent.CAMERA_PUBLISH_POINTS));
+            this.client.sendResponse(new NotEnoughBalanceComposer(false, true, PublishPhotoEvent.CAMERA_PUBLISH_POINTS));
             return;
         }
 
@@ -59,6 +59,6 @@ public class PublishPhotoEvent extends MessageHandler {
             }
         }
 
-        this.client.sendResponse(new CameraPublishWaitMessageComposer(isOk, cooldownLeft, isOk ? this.client.getHabbo().getHabboInfo().getPhotoURL() : ""));
+        this.client.sendResponse(new CameraPublishStatusComposer(isOk, cooldownLeft, isOk ? this.client.getHabbo().getHabboInfo().getPhotoURL() : ""));
     }
 }

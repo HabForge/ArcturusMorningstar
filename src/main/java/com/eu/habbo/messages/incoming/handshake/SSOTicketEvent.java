@@ -14,22 +14,27 @@ import com.eu.habbo.habbohotel.users.subscriptions.SubscriptionHabboClub;
 import com.eu.habbo.messages.NoAuthMessage;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.MessagesForYouComposer;
-import com.eu.habbo.messages.outgoing.habboway.nux.NewUserIdentityComposer;
-import com.eu.habbo.messages.outgoing.handshake.AvailabilityStatusMessageComposer;
-import com.eu.habbo.messages.outgoing.handshake.EnableNotificationsComposer;
+import com.eu.habbo.messages.outgoing.availability.AvailabilityStatusComposer;
+import com.eu.habbo.messages.outgoing.callforhelp.CfhTopicsInitComposer;
+import com.eu.habbo.messages.outgoing.callforhelp.SanctionStatusComposer;
+import com.eu.habbo.messages.outgoing.catalog.BuildersClubSubscriptionStatusComposer;
+import com.eu.habbo.messages.outgoing.handshake.AuthenticationOKComposer;
+import com.eu.habbo.messages.outgoing.handshake.NoobnessLevelComposer;
 import com.eu.habbo.messages.outgoing.handshake.PingComposer;
-import com.eu.habbo.messages.outgoing.handshake.SecureLoginOKComposer;
-import com.eu.habbo.messages.outgoing.inventory.InventoryAchievementsComposer;
-import com.eu.habbo.messages.outgoing.inventory.UserEffectsListComposer;
-import com.eu.habbo.messages.outgoing.modtool.CfhTopicsMessageComposer;
-import com.eu.habbo.messages.outgoing.modtool.ModToolComposer;
-import com.eu.habbo.messages.outgoing.modtool.ModToolSanctionInfoComposer;
+import com.eu.habbo.messages.outgoing.handshake.UserRightsComposer;
+import com.eu.habbo.messages.outgoing.inventory.achievements.AchievementsScoreComposer;
+import com.eu.habbo.messages.outgoing.inventory.avatareffect.AvatarEffectsComposer;
+import com.eu.habbo.messages.outgoing.inventory.badges.BadgePointLimitsComposer;
+import com.eu.habbo.messages.outgoing.inventory.clothing.FigureSetIdsComposer;
+import com.eu.habbo.messages.outgoing.moderation.ModeratorInitComposer;
 import com.eu.habbo.messages.outgoing.mysterybox.MysteryBoxKeysComposer;
-import com.eu.habbo.messages.outgoing.navigator.NewNavigatorSavedSearchesComposer;
-import com.eu.habbo.messages.outgoing.unknown.BuildersClubExpiredComposer;
-import com.eu.habbo.messages.outgoing.users.*;
+import com.eu.habbo.messages.outgoing.navigator.FavouritesComposer;
+import com.eu.habbo.messages.outgoing.navigator.NavigatorSettingsComposer;
+import com.eu.habbo.messages.outgoing.newnavigator.NavigatorSavedSearchesComposer;
+import com.eu.habbo.messages.outgoing.notifications.HabboBroadcastComposer;
+import com.eu.habbo.messages.outgoing.notifications.InfoFeedEnableComposer;
+import com.eu.habbo.messages.outgoing.notifications.MOTDNotificationComposer;
+import com.eu.habbo.messages.outgoing.users.ScrSendUserInfoComposer;
 import com.eu.habbo.plugin.events.emulator.SSOAuthenticationEvent;
 import com.eu.habbo.plugin.events.users.UserLoginEvent;
 import gnu.trove.map.hash.THashMap;
@@ -112,7 +117,7 @@ public class SSOTicketEvent extends MessageHandler {
 
                 ArrayList<ServerMessage> messages = new ArrayList<>();
 
-                messages.add(new SecureLoginOKComposer(this.client.getHabbo().getHabboInfo().getId(), null, this.client.getHabbo().getHabboInfo().getId()).compose());
+                messages.add(new AuthenticationOKComposer(this.client.getHabbo().getHabboInfo().getId(), null, this.client.getHabbo().getHabboInfo().getId()).compose());
 
                 int roomIdToEnter = 0;
 
@@ -121,32 +126,32 @@ public class SSOTicketEvent extends MessageHandler {
                 else if (!this.client.getHabbo().getHabboStats().nux || Emulator.getConfig().getBoolean("retro.style.homeroom") && RoomManager.HOME_ROOM_ID > 0)
                     roomIdToEnter = RoomManager.HOME_ROOM_ID;
 
-                messages.add(new UserHomeRoomComposer(this.client.getHabbo().getHabboInfo().getHomeRoom(), roomIdToEnter).compose());
-                messages.add(new UserEffectsListComposer(habbo, this.client.getHabbo().getInventory().getEffectsComponent().effects.values()).compose());
-                messages.add(new UserClothesComposer(this.client.getHabbo()).compose());
-                messages.add(new NewUserIdentityComposer(habbo).compose());
-                messages.add(new UserPermissionsComposer(this.client.getHabbo()).compose());
-                messages.add(new AvailabilityStatusMessageComposer(true, false, true).compose());
+                messages.add(new NavigatorSettingsComposer(this.client.getHabbo().getHabboInfo().getHomeRoom(), roomIdToEnter).compose());
+                messages.add(new AvatarEffectsComposer(habbo, this.client.getHabbo().getInventory().getEffectsComponent().effects.values()).compose());
+                messages.add(new FigureSetIdsComposer(this.client.getHabbo()).compose());
+                messages.add(new NoobnessLevelComposer(habbo).compose());
+                messages.add(new UserRightsComposer(this.client.getHabbo()).compose());
+                messages.add(new AvailabilityStatusComposer(true, false, true).compose());
                 messages.add(new PingComposer().compose());
-                messages.add(new EnableNotificationsComposer(Emulator.getConfig().getBoolean("bubblealerts.enabled", true)).compose());
-                messages.add(new UserAchievementScoreComposer(this.client.getHabbo()).compose());
+                messages.add(new InfoFeedEnableComposer(Emulator.getConfig().getBoolean("bubblealerts.enabled", true)).compose());
+                messages.add(new AchievementsScoreComposer(this.client.getHabbo()).compose());
                 messages.add(new IsFirstLoginOfDayComposer(true).compose());
                 messages.add(new MysteryBoxKeysComposer().compose());
-                messages.add(new BuildersClubExpiredComposer().compose());
-                messages.add(new CfhTopicsMessageComposer().compose());
-                messages.add(new FavoriteRoomsCountComposer(this.client.getHabbo()).compose());
+                messages.add(new BuildersClubSubscriptionStatusComposer().compose());
+                messages.add(new CfhTopicsInitComposer().compose());
+                messages.add(new FavouritesComposer(this.client.getHabbo()).compose());
 
-                messages.add(new UserClubComposer(this.client.getHabbo(), SubscriptionHabboClub.HABBO_CLUB, UserClubComposer.RESPONSE_TYPE_LOGIN).compose());
+                messages.add(new ScrSendUserInfoComposer(this.client.getHabbo(), SubscriptionHabboClub.HABBO_CLUB, ScrSendUserInfoComposer.RESPONSE_TYPE_LOGIN).compose());
 
                 if (this.client.getHabbo().hasPermission(Permission.ACC_SUPPORTTOOL)) {
-                    messages.add(new ModToolComposer(this.client.getHabbo()).compose());
+                    messages.add(new ModeratorInitComposer(this.client.getHabbo()).compose());
                 }
 
                 this.client.sendResponses(messages);
 
                 //Hardcoded
                 //this.client.sendResponse(new ForumsTestComposer());
-                this.client.sendResponse(new InventoryAchievementsComposer());
+                this.client.sendResponse(new BadgePointLimitsComposer());
 
                 ModToolSanctions modToolSanctions = Emulator.getGameEnvironment().getModToolSanctions();
 
@@ -158,7 +163,7 @@ public class SSOTicketEvent extends MessageHandler {
                         ModToolSanctionItem item = modToolSanctionItems.get(modToolSanctionItems.size() - 1);
 
                         if (item.sanctionLevel > 0 && item.probationTimestamp != 0 && item.probationTimestamp > Emulator.getIntUnixTimestamp()) {
-                            this.client.sendResponse(new ModToolSanctionInfoComposer(this.client.getHabbo()));
+                            this.client.sendResponse(new SanctionStatusComposer(this.client.getHabbo()));
                         } else if (item.sanctionLevel > 0 && item.probationTimestamp != 0 && item.probationTimestamp <= Emulator.getIntUnixTimestamp()) {
                             modToolSanctions.updateSanction(item.id, 0);
                         }
@@ -193,9 +198,9 @@ public class SSOTicketEvent extends MessageHandler {
                     final Habbo finalHabbo = habbo;
                     Emulator.getThreading().run(() -> {
                         if (Emulator.getConfig().getBoolean("hotel.welcome.alert.oldstyle")) {
-                            SSOTicketEvent.this.client.sendResponse(new MessagesForYouComposer(HabboManager.WELCOME_MESSAGE.replace("%username%", finalHabbo.getHabboInfo().getUsername()).replace("%user%", finalHabbo.getHabboInfo().getUsername()).split("<br/>")));
+                            SSOTicketEvent.this.client.sendResponse(new MOTDNotificationComposer(HabboManager.WELCOME_MESSAGE.replace("%username%", finalHabbo.getHabboInfo().getUsername()).replace("%user%", finalHabbo.getHabboInfo().getUsername()).split("<br/>")));
                         } else {
-                            SSOTicketEvent.this.client.sendResponse(new GenericAlertComposer(HabboManager.WELCOME_MESSAGE.replace("%username%", finalHabbo.getHabboInfo().getUsername()).replace("%user%", finalHabbo.getHabboInfo().getUsername())));
+                            SSOTicketEvent.this.client.sendResponse(new HabboBroadcastComposer(HabboManager.WELCOME_MESSAGE.replace("%username%", finalHabbo.getHabboInfo().getUsername()).replace("%user%", finalHabbo.getHabboInfo().getUsername())));
                         }
                     }, Emulator.getConfig().getInt("hotel.welcome.alert.delay", 5000));
                 }
@@ -216,7 +221,7 @@ public class SSOTicketEvent extends MessageHandler {
                     habbo.getHabboInfo().addSavedSearch(new NavigatorSavedSearch("my", ""));
                     habbo.getHabboInfo().addSavedSearch(new NavigatorSavedSearch("favorites", ""));
 
-                    this.client.sendResponse(new NewNavigatorSavedSearchesComposer(this.client.getHabbo().getHabboInfo().getSavedSearches()));
+                    this.client.sendResponse(new NavigatorSavedSearchesComposer(this.client.getHabbo().getHabboInfo().getSavedSearches()));
                 }
             } else {
                 Emulator.getGameServer().getGameClientManager().disposeClient(this.client);

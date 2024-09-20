@@ -9,10 +9,10 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomUnitStatus;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.items.RemoveFloorItemComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.PetStatusUpdateComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.RoomPetHorseFigureComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserStatusComposer;
+import com.eu.habbo.messages.outgoing.room.engine.ObjectRemoveComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserUpdateComposer;
+import com.eu.habbo.messages.outgoing.room.pets.PetFigureUpdateComposer;
+import com.eu.habbo.messages.outgoing.room.pets.PetStatusUpdateComposer;
 import com.eu.habbo.threading.runnables.QueryDeleteHabboItem;
 
 public class CustomizePetWithFurniEvent extends MessageHandler {
@@ -81,10 +81,10 @@ public class CustomizePetWithFurniEvent extends MessageHandler {
 
             if (((HorsePet) pet).needsUpdate) {
                 Emulator.getThreading().run(pet);
-                this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomPetHorseFigureComposer((HorsePet) pet).compose());
+                this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new PetFigureUpdateComposer((HorsePet) pet).compose());
 
                 room.removeHabboItem(item);
-                room.sendComposer(new RemoveFloorItemComposer(item, true).compose());
+                room.sendComposer(new ObjectRemoveComposer(item, true).compose());
                 item.setRoomId(0);
                 Emulator.getGameEnvironment().getItemManager().deleteItem(item);
             }
@@ -97,8 +97,8 @@ public class CustomizePetWithFurniEvent extends MessageHandler {
                     ((MonsterplantPet) pet).packetUpdate = true;
 
                     this.client.getHabbo().getHabboInfo().getCurrentRoom().removeHabboItem(item);
-                    this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RemoveFloorItemComposer(item).compose());
-                    this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserStatusComposer(pet.getRoomUnit()).compose());
+                    this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new ObjectRemoveComposer(item).compose());
+                    this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new UserUpdateComposer(pet.getRoomUnit()).compose());
                     this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new PetStatusUpdateComposer(pet).compose());
                     this.client.getHabbo().getHabboInfo().getCurrentRoom().updateTiles(room.getLayout().getTilesAt(room.getLayout().getTile(item.getX(), item.getY()), item.getBaseItem().getWidth(), item.getBaseItem().getLength(), item.getRotation()));
                     AchievementManager.progressAchievement(this.client.getHabbo(), Emulator.getGameEnvironment().getAchievementManager().getAchievement("MonsterPlantHealer"));
@@ -113,8 +113,8 @@ public class CustomizePetWithFurniEvent extends MessageHandler {
                     pet.getRoomUnit().setStatus(RoomUnitStatus.GESTURE, "spd");
                     pet.getRoomUnit().setStatus(RoomUnitStatus.fromString("grw" + ((MonsterplantPet) pet).getGrowthStage()), "");
                     this.client.getHabbo().getHabboInfo().getCurrentRoom().removeHabboItem(item);
-                    this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RemoveFloorItemComposer(item).compose());
-                    this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserStatusComposer(pet.getRoomUnit()).compose());
+                    this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new ObjectRemoveComposer(item).compose());
+                    this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new UserUpdateComposer(pet.getRoomUnit()).compose());
                     this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new PetStatusUpdateComposer(pet).compose());
                     this.client.getHabbo().getHabboInfo().getCurrentRoom().updateTiles(room.getLayout().getTilesAt(room.getLayout().getTile(item.getX(), item.getY()), item.getBaseItem().getWidth(), item.getBaseItem().getLength(), item.getRotation()));
                     pet.getRoomUnit().removeStatus(RoomUnitStatus.GESTURE);
@@ -135,8 +135,8 @@ public class CustomizePetWithFurniEvent extends MessageHandler {
                         pet.getRoomUnit().setStatus(RoomUnitStatus.GESTURE, "reb");
 
                         this.client.getHabbo().getHabboInfo().getCurrentRoom().removeHabboItem(item);
-                        this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RemoveFloorItemComposer(item).compose());
-                        this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserStatusComposer(pet.getRoomUnit()).compose());
+                        this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new ObjectRemoveComposer(item).compose());
+                        this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new UserUpdateComposer(pet.getRoomUnit()).compose());
                         this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new PetStatusUpdateComposer(pet).compose());
                         this.client.getHabbo().getHabboInfo().getCurrentRoom().updateTiles(room.getLayout().getTilesAt(room.getLayout().getTile(item.getX(), item.getY()), item.getBaseItem().getWidth(), item.getBaseItem().getLength(), item.getRotation()));
                         pet.getRoomUnit().removeStatus(RoomUnitStatus.GESTURE);

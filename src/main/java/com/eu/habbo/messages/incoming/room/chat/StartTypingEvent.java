@@ -1,7 +1,7 @@
 package com.eu.habbo.messages.incoming.room.chat;
 
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserTypingComposer;
+import com.eu.habbo.messages.outgoing.room.chat.UserTypingComposer;
 
 public class StartTypingEvent extends MessageHandler {
     @Override
@@ -14,6 +14,6 @@ public class StartTypingEvent extends MessageHandler {
             return;
         }
 
-        this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserTypingComposer(this.client.getHabbo().getRoomUnit(), true).compose());
+        this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new UserTypingComposer(this.client.getHabbo().getRoomUnit(), true).compose());
     }
 }

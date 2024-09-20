@@ -3,9 +3,9 @@ package com.eu.habbo.messages.incoming.room.action;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.hotelview.HotelViewComposer;
-import com.eu.habbo.messages.outgoing.rooms.HideDoorbellComposer;
-import com.eu.habbo.messages.outgoing.rooms.RoomAccessDeniedComposer;
+import com.eu.habbo.messages.outgoing.navigator.FlatAccessDeniedComposer;
+import com.eu.habbo.messages.outgoing.room.session.CloseConnectionComposer;
+import com.eu.habbo.messages.outgoing.room.session.FlatAccessibleComposer;
 
 public class LetUserInEvent extends MessageHandler {
     @Override
@@ -20,11 +20,11 @@ public class LetUserInEvent extends MessageHandler {
                 this.client.getHabbo().getHabboInfo().getCurrentRoom().removeFromQueue(habbo);
 
                 if (accepted) {
-                    habbo.getClient().sendResponse(new HideDoorbellComposer(habbo.getClient().getRevision(), this.client.getHabbo().getHabboInfo().getCurrentRoom().getId(), this.client.getHabbo().getHabboInfo().getUsername()));
+                    habbo.getClient().sendResponse(new FlatAccessibleComposer(habbo.getClient().getRevision(), this.client.getHabbo().getHabboInfo().getCurrentRoom().getId(), this.client.getHabbo().getHabboInfo().getUsername()));
                     Emulator.getGameEnvironment().getRoomManager().enterRoom(habbo, this.client.getHabbo().getHabboInfo().getCurrentRoom().getId(), "", true);
                 } else {
-                    habbo.getClient().sendResponse(new RoomAccessDeniedComposer(""));
-                    habbo.getClient().sendResponse(new HotelViewComposer());
+                    habbo.getClient().sendResponse(new FlatAccessDeniedComposer(""));
+                    habbo.getClient().sendResponse(new CloseConnectionComposer());
                 }
                 habbo.getHabboInfo().setRoomQueueId(0);
             }

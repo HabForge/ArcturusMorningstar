@@ -15,14 +15,13 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboBadge;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
+import com.eu.habbo.messages.outgoing.availability.InfoHotelClosingComposer;
 import com.eu.habbo.messages.outgoing.catalog.*;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertKeys;
-import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.HotelWillCloseInMinutesComposer;
-import com.eu.habbo.messages.outgoing.inventory.AddHabboItemComposer;
-import com.eu.habbo.messages.outgoing.inventory.InventoryRefreshComposer;
-import com.eu.habbo.messages.outgoing.users.UserPointsComposer;
+import com.eu.habbo.habbohotel.notifications.BubbleAlertKeys;
+import com.eu.habbo.messages.outgoing.inventory.furni.FurniListInvalidateComposer;
+import com.eu.habbo.messages.outgoing.notifications.HabboBroadcastComposer;
+import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
+import com.eu.habbo.messages.outgoing.notifications.UnseenItemsComposer;
 import com.eu.habbo.threading.runnables.ShutdownEmulator;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.THashSet;
@@ -43,13 +42,13 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
         if (Emulator.getIntUnixTimestamp() - this.client.getHabbo().getHabboStats().lastGiftTimestamp >= CatalogManager.PURCHASE_COOLDOWN) {
             this.client.getHabbo().getHabboStats().lastGiftTimestamp = Emulator.getIntUnixTimestamp();
             if (ShutdownEmulator.timestamp > 0) {
-                this.client.sendResponse(new HotelWillCloseInMinutesComposer((ShutdownEmulator.timestamp - Emulator.getIntUnixTimestamp()) / 60));
-                this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                this.client.sendResponse(new InfoHotelClosingComposer((ShutdownEmulator.timestamp - Emulator.getIntUnixTimestamp()) / 60));
+                this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                 return;
             }
 
             if (this.client.getHabbo().getHabboStats().isPurchasingFurniture) {
-                this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                 return;
             } else {
                 this.client.getHabbo().getHabboStats().isPurchasingFurniture = true;
@@ -71,12 +70,12 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                 int userId = 0;
 
                 if (!Emulator.getGameEnvironment().getCatalogManager().giftWrappers.containsKey(spriteId) && !Emulator.getGameEnvironment().getCatalogManager().giftFurnis.containsKey(spriteId)) {
-                    this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                    this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                     return;
                 }
 
-                if (!GiftConfigurationComposer.BOX_TYPES.contains(color) || !GiftConfigurationComposer.RIBBON_TYPES.contains(ribbonId)) {
-                    this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                if (!GiftWrappingConfigurationComposer.BOX_TYPES.contains(color) || !GiftWrappingConfigurationComposer.RIBBON_TYPES.contains(ribbonId)) {
+                    this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                     return;
                 }
 
@@ -90,7 +89,7 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     iItemId = Emulator.getGameEnvironment().getCatalogManager().giftFurnis.get(spriteId);
 
                 if (iItemId == null) {
-                    this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                    this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                     return;
                 }
 
@@ -100,7 +99,7 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     giftItem = Emulator.getGameEnvironment().getItemManager().getItem((Integer) Emulator.getGameEnvironment().getCatalogManager().giftFurnis.values().toArray()[Emulator.getRandom().nextInt(Emulator.getGameEnvironment().getCatalogManager().giftFurnis.size())]);
 
                     if (giftItem == null) {
-                        this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                        this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                         return;
                     }
                 }
@@ -132,37 +131,37 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     CatalogPage page = Emulator.getGameEnvironment().getCatalogManager().catalogPages.get(pageId);
 
                     if (page == null) {
-                        this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                        this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                         return;
                     }
 
                     if (page.getRank() > this.client.getHabbo().getHabboInfo().getRank().getId() || !page.isEnabled() || !page.isVisible()) {
-                        this.client.sendResponse(new AlertPurchaseUnavailableComposer(AlertPurchaseUnavailableComposer.ILLEGAL));
+                        this.client.sendResponse(new PurchaseNotAllowedComposer(PurchaseNotAllowedComposer.ILLEGAL));
                         return;
                     }
 
                     CatalogItem item = page.getCatalogItem(itemId);
 
                     if (item == null) {
-                        this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                        this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                         return;
                     }
 
                     if (item.isClubOnly() && !this.client.getHabbo().getHabboStats().hasActiveClub()) {
-                        this.client.sendResponse(new AlertPurchaseUnavailableComposer(AlertPurchaseUnavailableComposer.REQUIRES_CLUB));
+                        this.client.sendResponse(new PurchaseNotAllowedComposer(PurchaseNotAllowedComposer.REQUIRES_CLUB));
                         return;
                     }
 
                     for (Item baseItem : item.getBaseItems()) {
                         if (!baseItem.allowGift()) {
-                            this.client.sendResponse(new AlertPurchaseUnavailableComposer(AlertPurchaseUnavailableComposer.ILLEGAL));
+                            this.client.sendResponse(new PurchaseNotAllowedComposer(PurchaseNotAllowedComposer.ILLEGAL));
                             return;
                         }
                     }
 
                     if (item.isLimited()) {
                         if (item.getLimitedStack() == item.getLimitedSells()) {
-                            this.client.sendResponse(new AlertLimitedSoldOutComposer());
+                            this.client.sendResponse(new LimitedEditionSoldOutComposer());
                             return;
                         }
                         item.sellRare();
@@ -172,7 +171,7 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     int totalPoints = item.getPoints();
 
                     if(totalCredits > this.client.getHabbo().getHabboInfo().getCredits() || totalPoints > this.client.getHabbo().getHabboInfo().getCurrencyAmount(item.getPointsType())) {
-                        this.client.sendResponse(new AlertPurchaseUnavailableComposer(AlertPurchaseUnavailableComposer.ILLEGAL));
+                        this.client.sendResponse(new PurchaseNotAllowedComposer(PurchaseNotAllowedComposer.ILLEGAL));
                         return;
                     }
 
@@ -182,7 +181,7 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     if (item.isLimited()) {
                         count = 1;
                         if (Emulator.getGameEnvironment().getCatalogManager().getLimitedConfig(item).available() == 0 && habbo != null) {
-                            habbo.getClient().sendResponse(new AlertLimitedSoldOutComposer());
+                            habbo.getClient().sendResponse(new LimitedEditionSoldOutComposer());
                             return;
                         }
 
@@ -225,18 +224,18 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     }
 
                     if (badgeFound) {
-                        this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.ALREADY_HAVE_BADGE));
+                        this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.ALREADY_HAVE_BADGE));
                         return;
                     }
 
                     if (item.getAmount() > 1 || item.getBaseItems().size() > 1) {
-                        this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                        this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                         return;
                     }
 
                     for (Item baseItem : item.getBaseItems()) {
                         if (item.getItemAmount(baseItem.getId()) > 1) {
-                            this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                            this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                             return;
                         }
 
@@ -259,10 +258,10 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                                         badgeFound = true;
                                     }
                                 } else if (item.getName().startsWith("rentable_bot_")) {
-                                    this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                                    this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                                     return;
                                 } else if (Item.isPet(baseItem)) {
-                                    this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                                    this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                                     return;
                                 } else {
                                     if (baseItem.getInteractionType().getType() == InteractionTrophy.class || baseItem.getInteractionType().getType() == InteractionBadgeDisplay.class) {
@@ -295,7 +294,7 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                                             guildId = Integer.parseInt(extraData);
                                         } catch (Exception e) {
                                             LOGGER.error("Caught exception", e);
-                                            this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR));
+                                            this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR));
                                             return;
                                         }
                                         Emulator.getThreading().run(habboItem);
@@ -307,8 +306,8 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                                     }
                                 }
                             } else {
-                                this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR));
-                                this.client.sendResponse(new GenericAlertComposer(Emulator.getTexts().getValue("error.catalog.buy.not_yet")));
+                                this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR));
+                                this.client.sendResponse(new HabboBroadcastComposer(Emulator.getTexts().getValue("error.catalog.buy.not_yet")));
                                 return;
                             }
                         }
@@ -325,7 +324,7 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     HabboItem gift = Emulator.getGameEnvironment().getItemManager().createGift(username, giftItem, giftData.toString(), 0, 0);
 
                     if (gift == null) {
-                        this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR));
+                        this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR));
                         return;
                     }
 
@@ -334,9 +333,9 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     }
 
                     if (habbo != null) {
-                        habbo.getClient().sendResponse(new AddHabboItemComposer(gift));
+                        habbo.getClient().sendResponse(new UnseenItemsComposer(gift));
                         habbo.getClient().getHabbo().getInventory().getItemsComponent().addItem(gift);
-                        habbo.getClient().sendResponse(new InventoryRefreshComposer());
+                        habbo.getClient().sendResponse(new FurniListInvalidateComposer());
                         THashMap<String, String> keys = new THashMap<>();
                         keys.put("display", "BUBBLE");
                         keys.put("image", "${image.library.url}notifications/gift.gif");
@@ -344,7 +343,7 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                         if (showName) {
                             keys.put("message", Emulator.getTexts().getValue("generic.gift.received").replace("%username%", this.client.getHabbo().getHabboInfo().getUsername()));
                         }
-                        habbo.getClient().sendResponse(new BubbleAlertComposer(BubbleAlertKeys.RECEIVED_BADGE.key, keys));
+                        habbo.getClient().sendResponse(new NotificationDialogComposer(BubbleAlertKeys.RECEIVED_BADGE.key, keys));
                     }
 
                     if (this.client.getHabbo().getHabboInfo().getId() != userId) {
@@ -367,13 +366,13 @@ public class PurchaseFromCatalogAsGiftEvent extends MessageHandler {
                     this.client.sendResponse(new PurchaseOKComposer(item));
                 } catch (Exception e) {
                     LOGGER.error("Exception caught", e);
-                    this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR));
+                    this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR));
                 }
             } finally {
                 this.client.getHabbo().getHabboStats().isPurchasingFurniture = false;
             }
         } else {
-            this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR));
+            this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR));
         }
     }
 }

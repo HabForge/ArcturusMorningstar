@@ -3,8 +3,8 @@ package com.eu.habbo.messages.rcon;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.StaffAlertWithLinkComposer;
+import com.eu.habbo.messages.outgoing.moderation.ModeratorComposer;
+import com.eu.habbo.messages.outgoing.notifications.HabboBroadcastComposer;
 import com.google.gson.Gson;
 
 import java.util.Map;
@@ -19,9 +19,9 @@ public class HotelAlert extends RCONMessage<HotelAlert.JSONHotelAlert> {
     public void handle(Gson gson, JSONHotelAlert object) {
         ServerMessage serverMessage;
         if (object.url.isEmpty()) {
-            serverMessage = new GenericAlertComposer(object.message).compose();
+            serverMessage = new HabboBroadcastComposer(object.message).compose();
         } else {
-            serverMessage = new StaffAlertWithLinkComposer(object.message, object.url).compose();
+            serverMessage = new ModeratorComposer(object.message, object.url).compose();
         }
 
         if (serverMessage != null) {

@@ -6,8 +6,8 @@ import com.eu.habbo.habbohotel.modtool.*;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.modtool.*;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserIgnoredComposer;
+import com.eu.habbo.messages.outgoing.help.*;
+import com.eu.habbo.messages.outgoing.users.IgnoreResultComposer;
 import com.eu.habbo.threading.runnables.InsertModToolIssue;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class CallForHelpEvent extends MessageHandler {
     @Override
     public void handle() throws Exception {
         if (!this.client.getHabbo().getHabboStats().allowTalk()) {
-            this.client.sendResponse(new HelperRequestDisabledComposer());
+            this.client.sendResponse(new CallForHelpDisabledNotifyComposer());
             return;
         }
 
@@ -30,8 +30,8 @@ public class CallForHelpEvent extends MessageHandler {
         Room room = Emulator.getGameEnvironment().getRoomManager().getRoom(roomId);
         List<ModToolIssue> issues = Emulator.getGameEnvironment().getModToolManager().openTicketsForHabbo(this.client.getHabbo());
         if (!issues.isEmpty()) {
-            //this.client.sendResponse(new GenericAlertComposer("You've got still a pending ticket. Wait till the moderators are done reviewing your ticket."));
-            this.client.sendResponse(new ReportRoomFormComposer(issues));
+            //this.client.sendResponse(new HabboBroadcastComposer("You've got still a pending ticket. Wait till the moderators are done reviewing your ticket."));
+            this.client.sendResponse(new CallForHelpPendingCallsComposer(issues));
             return;
         }
 
@@ -45,20 +45,20 @@ public class CallForHelpEvent extends MessageHandler {
                     GuardianTicket ticket = Emulator.getGameEnvironment().getGuideManager().getOpenReportedHabboTicket(reported);
 
                     if (ticket != null) {
-                        this.client.sendResponse(new BullyReportedMessageComposer(BullyReportedMessageComposer.ALREADY_REPORTED));
+                        this.client.sendResponse(new GuideTicketCreationResultComposer(GuideTicketCreationResultComposer.ALREADY_REPORTED));
                         return;
                     }
 
                     ArrayList<ModToolChatLog> chatLog = Emulator.getGameEnvironment().getModToolManager().getRoomChatlog(roomId);
 
                     if (chatLog.isEmpty()) {
-                        this.client.sendResponse(new BullyReportedMessageComposer(BullyReportedMessageComposer.NO_CHAT));
+                        this.client.sendResponse(new GuideTicketCreationResultComposer(GuideTicketCreationResultComposer.NO_CHAT));
                         return;
                     }
 
                     Emulator.getGameEnvironment().getGuideManager().addGuardianTicket(new GuardianTicket(this.client.getHabbo(), reported, chatLog));
 
-                    this.client.sendResponse(new BullyReportedMessageComposer(BullyReportedMessageComposer.RECEIVED));
+                    this.client.sendResponse(new GuideTicketCreationResultComposer(GuideTicketCreationResultComposer.RECEIVED));
                 } else {
                     ModToolIssue issue = new ModToolIssue(this.client.getHabbo().getHabboInfo().getId(), this.client.getHabbo().getHabboInfo().getUsername(), reported.getHabboInfo().getId(), reported.getHabboInfo().getUsername(), roomId, message, ModToolTicketType.NORMAL);
                     issue.category = topic;
@@ -66,7 +66,7 @@ public class CallForHelpEvent extends MessageHandler {
 
                     Emulator.getGameEnvironment().getModToolManager().addTicket(issue);
                     Emulator.getGameEnvironment().getModToolManager().updateTicketToMods(issue);
-                    this.client.sendResponse(new ModToolReportReceivedAlertComposer(ModToolReportReceivedAlertComposer.REPORT_RECEIVED, cfhTopic.reply));
+                    this.client.sendResponse(new CallForHelpResultComposer(CallForHelpResultComposer.REPORT_RECEIVED, cfhTopic.reply));
 
                     if (cfhTopic != null) {
                         if (cfhTopic.action != CfhActionType.MODS) {
@@ -74,11 +74,11 @@ public class CallForHelpEvent extends MessageHandler {
                                 if (issue.state == ModToolTicketState.OPEN) {
                                     if (cfhTopic.action == CfhActionType.AUTO_IGNORE) {
                                         if (CallForHelpEvent.this.client.getHabbo().getHabboStats().ignoreUser(CallForHelpEvent.this.client, reported.getHabboInfo().getId())) {
-                                            CallForHelpEvent.this.client.sendResponse(new RoomUserIgnoredComposer(reported, RoomUserIgnoredComposer.IGNORED));
+                                            CallForHelpEvent.this.client.sendResponse(new IgnoreResultComposer(reported, IgnoreResultComposer.IGNORED));
                                         }
                                     }
 
-                                    CallForHelpEvent.this.client.sendResponse(new ModToolIssueHandledComposer(cfhTopic.reply).compose());
+                                    CallForHelpEvent.this.client.sendResponse(new IssueCloseNotificationComposer(cfhTopic.reply).compose());
                                     Emulator.getGameEnvironment().getModToolManager().closeTicketAsHandled(issue, null);
                                 }
                             }, 30 * 1000);
@@ -91,7 +91,7 @@ public class CallForHelpEvent extends MessageHandler {
             issue.category = topic;
             new InsertModToolIssue(issue).run();
 
-            this.client.sendResponse(new ModToolReportReceivedAlertComposer(ModToolReportReceivedAlertComposer.REPORT_RECEIVED, message));
+            this.client.sendResponse(new CallForHelpResultComposer(CallForHelpResultComposer.REPORT_RECEIVED, message));
             Emulator.getGameEnvironment().getModToolManager().addTicket(issue);
             Emulator.getGameEnvironment().getModToolManager().updateTicketToMods(issue);
 
@@ -103,12 +103,12 @@ public class CallForHelpEvent extends MessageHandler {
                                 if (CallForHelpEvent.this.client.getHabbo().getHabboStats().ignoreUser(CallForHelpEvent.this.client, issue.reportedId)) {
                                     Habbo reported = Emulator.getGameEnvironment().getHabboManager().getHabbo(issue.reportedId);
                                     if (reported != null) {
-                                        CallForHelpEvent.this.client.sendResponse(new RoomUserIgnoredComposer(reported, RoomUserIgnoredComposer.IGNORED));
+                                        CallForHelpEvent.this.client.sendResponse(new IgnoreResultComposer(reported, IgnoreResultComposer.IGNORED));
                                     }
                                 }
                             }
 
-                            CallForHelpEvent.this.client.sendResponse(new ModToolIssueHandledComposer(cfhTopic.reply).compose());
+                            CallForHelpEvent.this.client.sendResponse(new IssueCloseNotificationComposer(cfhTopic.reply).compose());
                             Emulator.getGameEnvironment().getModToolManager().closeTicketAsHandled(issue, null);
                         }
                     }, 30 * 1000);

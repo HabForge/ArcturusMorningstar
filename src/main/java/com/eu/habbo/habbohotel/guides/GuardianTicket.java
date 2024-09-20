@@ -6,8 +6,7 @@ import com.eu.habbo.habbohotel.modtool.ModToolChatLog;
 import com.eu.habbo.habbohotel.modtool.ModToolIssue;
 import com.eu.habbo.habbohotel.modtool.ModToolTicketType;
 import com.eu.habbo.habbohotel.users.Habbo;
-import com.eu.habbo.messages.outgoing.guardians.*;
-import com.eu.habbo.messages.outgoing.guides.BullyReportClosedComposer;
+import com.eu.habbo.messages.outgoing.help.*;
 import com.eu.habbo.threading.runnables.GuardianNotAccepted;
 import com.eu.habbo.threading.runnables.GuardianVotingFinish;
 import gnu.trove.map.hash.THashMap;
@@ -41,7 +40,7 @@ public class GuardianTicket {
 
 
     public void requestToVote(Habbo guardian) {
-        guardian.getClient().sendResponse(new GuardianNewReportReceivedComposer());
+        guardian.getClient().sendResponse(new ChatReviewSessionOfferedToGuideComposer());
 
         this.votes.put(guardian, new GuardianVote(this.guardianCount, guardian));
 
@@ -53,7 +52,7 @@ public class GuardianTicket {
         GuardianVote vote = this.votes.get(guardian);
 
         if (vote != null && vote.type == GuardianVoteType.SEARCHING) {
-            guardian.getClient().sendResponse(new GuardianVotingRequestedComposer(this));
+            guardian.getClient().sendResponse(new ChatReviewSessionStartedComposer(this));
             vote.type = GuardianVoteType.WAITING;
             this.updateVotes();
         }
@@ -72,7 +71,7 @@ public class GuardianTicket {
 
         this.getVoteForGuardian(guardian).ignore = true;
 
-        guardian.getClient().sendResponse(new GuardianVotingTimeEnded());
+        guardian.getClient().sendResponse(new ChatReviewSessionDetachedComposer());
 
         this.updateVotes();
     }
@@ -95,7 +94,7 @@ public class GuardianTicket {
                 if (set.getValue().type == GuardianVoteType.WAITING || set.getValue().type == GuardianVoteType.NOT_VOTED || set.getValue().ignore || set.getValue().type == GuardianVoteType.SEARCHING)
                     continue;
 
-                set.getKey().getClient().sendResponse(new GuardianVotingVotesComposer(this, set.getKey()));
+                set.getKey().getClient().sendResponse(new ChatReviewSessionVotingStatusComposer(this, set.getKey()));
             }
         }
     }
@@ -120,7 +119,7 @@ public class GuardianTicket {
                 Emulator.getGameEnvironment().getModToolManager().addTicket(issue);
                 Emulator.getGameEnvironment().getModToolManager().updateTicketToMods(issue);
 
-                this.reporter.getClient().sendResponse(new BullyReportClosedComposer(BullyReportClosedComposer.CLOSED));
+                this.reporter.getClient().sendResponse(new GuideTicketResolutionComposer(GuideTicketResolutionComposer.CLOSED));
             } else {
                 this.timeLeft = 30;
                 Emulator.getThreading().run(new GuardianVotingFinish(this), 10000);
@@ -135,16 +134,16 @@ public class GuardianTicket {
                 if (set.getValue().type == GuardianVoteType.ACCEPTABLY ||
                         set.getValue().type == GuardianVoteType.BADLY ||
                         set.getValue().type == GuardianVoteType.AWFULLY) {
-                    set.getKey().getClient().sendResponse(new GuardianVotingResultComposer(this, set.getValue()));
+                    set.getKey().getClient().sendResponse(new ChatReviewSessionResultsComposer(this, set.getValue()));
                 }
             }
 
             Emulator.getGameEnvironment().getGuideManager().closeTicket(this);
 
             if (this.verdict == GuardianVoteType.ACCEPTABLY)
-                this.reporter.getClient().sendResponse(new BullyReportClosedComposer(BullyReportClosedComposer.MISUSE));
+                this.reporter.getClient().sendResponse(new GuideTicketResolutionComposer(GuideTicketResolutionComposer.MISUSE));
             else
-                this.reporter.getClient().sendResponse(new BullyReportClosedComposer(BullyReportClosedComposer.CLOSED));
+                this.reporter.getClient().sendResponse(new GuideTicketResolutionComposer(GuideTicketResolutionComposer.CLOSED));
         }
     }
 

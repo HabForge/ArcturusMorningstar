@@ -4,8 +4,8 @@ import com.eu.habbo.habbohotel.items.interactions.InteractionLoveLock;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.items.lovelock.LoveLockFurniFinishedComposer;
-import com.eu.habbo.messages.outgoing.rooms.items.lovelock.LoveLockFurniFriendConfirmedComposer;
+import com.eu.habbo.messages.outgoing.friendfurni.FriendFurniCancelLockComposer;
+import com.eu.habbo.messages.outgoing.friendfurni.FriendFurniOtherLockConfirmedComposer;
 
 public class FriendFurniConfirmLockEvent extends MessageHandler {
     @Override
@@ -34,10 +34,10 @@ public class FriendFurniConfirmLockEvent extends MessageHandler {
                     Habbo habbo = this.client.getHabbo().getHabboInfo().getCurrentRoom().getHabbo(userId);
 
                     if (habbo != null) {
-                        habbo.getClient().sendResponse(new LoveLockFurniFriendConfirmedComposer((InteractionLoveLock) item));
+                        habbo.getClient().sendResponse(new FriendFurniOtherLockConfirmedComposer((InteractionLoveLock) item));
 
-                        habbo.getClient().sendResponse(new LoveLockFurniFinishedComposer((InteractionLoveLock) item));
-                        this.client.sendResponse(new LoveLockFurniFinishedComposer((InteractionLoveLock) item));
+                        habbo.getClient().sendResponse(new FriendFurniCancelLockComposer((InteractionLoveLock) item));
+                        this.client.sendResponse(new FriendFurniCancelLockComposer((InteractionLoveLock) item));
 
                         ((InteractionLoveLock) item).lock(habbo, this.client.getHabbo(), this.client.getHabbo().getHabboInfo().getCurrentRoom());
                     }

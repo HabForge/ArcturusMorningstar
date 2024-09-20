@@ -2,9 +2,9 @@ package com.eu.habbo.messages.rcon;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.users.Habbo;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserDataComposer;
-import com.eu.habbo.messages.outgoing.users.MeMenuSettingsComposer;
-import com.eu.habbo.messages.outgoing.users.UpdateUserLookComposer;
+import com.eu.habbo.messages.outgoing.avatar.FigureUpdateComposer;
+import com.eu.habbo.messages.outgoing.preferences.AccountPreferencesComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserChangeComposer;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,16 +51,16 @@ public class UpdateUser extends RCONMessage<UpdateUser.JSON> {
                 if (!json.look.isEmpty()) {
                     habbo.getHabboInfo().setLook(json.look);
                     if (habbo.getClient() != null) {
-                        habbo.getClient().sendResponse(new UpdateUserLookComposer(habbo).compose());
+                        habbo.getClient().sendResponse(new FigureUpdateComposer(habbo).compose());
                     }
 
                     if (habbo.getHabboInfo().getCurrentRoom() != null) {
-                        habbo.getHabboInfo().getCurrentRoom().sendComposer(new RoomUserDataComposer(habbo).compose());
+                        habbo.getHabboInfo().getCurrentRoom().sendComposer(new UserChangeComposer(habbo).compose());
                     }
                 }
 
                 habbo.getHabboStats().run();
-                habbo.getClient().sendResponse(new MeMenuSettingsComposer(habbo));
+                habbo.getClient().sendResponse(new AccountPreferencesComposer(habbo));
             } else {
                 try (Connection connection = Emulator.getDatabase().getDataSource().getConnection()) {
                     try (PreparedStatement statement = connection.prepareStatement("UPDATE users_settings SET achievement_score = achievement_score + ? " +

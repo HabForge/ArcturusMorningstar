@@ -8,11 +8,11 @@ import com.eu.habbo.habbohotel.guilds.forums.ForumThread;
 import com.eu.habbo.habbohotel.guilds.forums.ForumThreadState;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertKeys;
-import com.eu.habbo.messages.outgoing.guilds.forums.GuildForumThreadMessagesComposer;
-import com.eu.habbo.messages.outgoing.guilds.forums.GuildForumThreadsComposer;
-import com.eu.habbo.messages.outgoing.handshake.ConnectionErrorComposer;
+import com.eu.habbo.messages.outgoing.error.ErrorReportComposer;
+import com.eu.habbo.habbohotel.notifications.BubbleAlertKeys;
+import com.eu.habbo.messages.outgoing.groupforums.ForumThreadsComposer;
+import com.eu.habbo.messages.outgoing.groupforums.PostThreadComposer;
+import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
 
 
 public class ModerateThreadEvent extends MessageHandler {
@@ -28,7 +28,7 @@ public class ModerateThreadEvent extends MessageHandler {
         ForumThread thread = ForumThread.getById(threadId);
 
         if (guild == null || thread == null) {
-            this.client.sendResponse(new ConnectionErrorComposer(404));
+            this.client.sendResponse(new ErrorReportComposer(404));
             return;
         }
 
@@ -38,11 +38,11 @@ public class ModerateThreadEvent extends MessageHandler {
 
 
         if (member == null) {
-            this.client.sendResponse(new ConnectionErrorComposer(401));
+            this.client.sendResponse(new ErrorReportComposer(401));
             return;
         }
         if (!isGuildAdmin && !hasStaffPerms) {
-            this.client.sendResponse(new ConnectionErrorComposer(403));
+            this.client.sendResponse(new ErrorReportComposer(403));
             return;
         }
 
@@ -52,14 +52,14 @@ public class ModerateThreadEvent extends MessageHandler {
         switch (state) {
             case 10:
             case 20:
-                this.client.sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FORUMS_THREAD_HIDDEN.key).compose());
+                this.client.sendResponse(new NotificationDialogComposer(BubbleAlertKeys.FORUMS_THREAD_HIDDEN.key).compose());
                 break;
             case 1:
-                this.client.sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FORUMS_THREAD_RESTORED.key).compose());
+                this.client.sendResponse(new NotificationDialogComposer(BubbleAlertKeys.FORUMS_THREAD_RESTORED.key).compose());
                 break;
         }
 
-        this.client.sendResponse(new GuildForumThreadMessagesComposer(thread));
-        this.client.sendResponse(new GuildForumThreadsComposer(guild, 0));
+        this.client.sendResponse(new PostThreadComposer(thread));
+        this.client.sendResponse(new ForumThreadsComposer(guild, 0));
     }
 }

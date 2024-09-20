@@ -1,16 +1,17 @@
 package com.eu.habbo.messages.incoming.newnavigator;
 
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.navigator.*;
+import com.eu.habbo.messages.outgoing.navigator.UserEventCatsComposer;
+import com.eu.habbo.messages.outgoing.newnavigator.*;
 
 public class NewNavigatorInitEvent extends MessageHandler {
     @Override
     public void handle() throws Exception {
-        this.client.sendResponse(new NewNavigatorSettingsComposer(this.client.getHabbo().getHabboStats().navigatorWindowSettings));
-        this.client.sendResponse(new NewNavigatorMetaDataComposer());
-        this.client.sendResponse(new NewNavigatorLiftedRoomsComposer());
-        this.client.sendResponse(new NewNavigatorCollapsedCategoriesComposer());
-        this.client.sendResponse(new NewNavigatorSavedSearchesComposer(this.client.getHabbo().getHabboInfo().getSavedSearches()));
-        this.client.sendResponse(new NewNavigatorEventCategoriesComposer());
+        this.client.sendResponse(new NewNavigatorPreferencesComposer(this.client.getHabbo().getHabboStats().navigatorWindowSettings));
+        this.client.sendResponse(new NavigatorMetaDataComposer());
+        this.client.sendResponse(new NavigatorLiftedRoomsComposer());
+        this.client.sendResponse(new NavigatorCollapsedCategoriesComposer());
+        this.client.sendResponse(new NavigatorSavedSearchesComposer(this.client.getHabbo().getHabboInfo().getSavedSearches()));
+        this.client.sendResponse(new UserEventCatsComposer());
     }
 }

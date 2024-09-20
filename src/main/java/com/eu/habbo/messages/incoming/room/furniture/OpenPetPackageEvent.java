@@ -6,10 +6,10 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomTile;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.catalog.AlertPurchaseFailedComposer;
-import com.eu.habbo.messages.outgoing.rooms.UpdateStackHeightComposer;
-import com.eu.habbo.messages.outgoing.rooms.items.RemoveFloorItemComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.PetPackageNameValidationComposer;
+import com.eu.habbo.messages.outgoing.catalog.PurchaseErrorComposer;
+import com.eu.habbo.messages.outgoing.room.engine.HeightMapUpdateComposer;
+import com.eu.habbo.messages.outgoing.room.engine.ObjectRemoveComposer;
+import com.eu.habbo.messages.outgoing.room.furniture.OpenPetPackageResultComposer;
 import com.eu.habbo.threading.runnables.QueryDeleteHabboItem;
 
 public class OpenPetPackageEvent extends MessageHandler {
@@ -59,16 +59,16 @@ public class OpenPetPackageEvent extends MessageHandler {
                             pet.getRoomUnit().setZ(item.getZ());
                             Emulator.getThreading().run(new QueryDeleteHabboItem(item.getId()));
                             room.removeHabboItem(item);
-                            room.sendComposer(new RemoveFloorItemComposer(item).compose());
+                            room.sendComposer(new ObjectRemoveComposer(item).compose());
                             RoomTile tile = room.getLayout().getTile(item.getX(), item.getY());
                             room.updateTile(room.getLayout().getTile(item.getX(), item.getY()));
-                            room.sendComposer(new UpdateStackHeightComposer(tile.x, tile.y, tile.z, tile.relativeHeight()).compose());
+                            room.sendComposer(new HeightMapUpdateComposer(tile.x, tile.y, tile.z, tile.relativeHeight()).compose());
                             item.setUserId(0);
                         } else {
-                            this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR));
+                            this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR));
                         }
                     } else {
-                        this.client.sendResponse(new PetPackageNameValidationComposer(itemId, PetPackageNameValidationComposer.CONTAINS_INVALID_CHARS, name.replaceAll("^[a-zA-Z0-9]*$", "")));
+                        this.client.sendResponse(new OpenPetPackageResultComposer(itemId, OpenPetPackageResultComposer.CONTAINS_INVALID_CHARS, name.replaceAll("^[a-zA-Z0-9]*$", "")));
                         return;
                     }
                 }
@@ -76,6 +76,6 @@ public class OpenPetPackageEvent extends MessageHandler {
         }
 
 
-        this.client.sendResponse(new PetPackageNameValidationComposer(itemId, PetPackageNameValidationComposer.CLOSE_WIDGET, ""));
+        this.client.sendResponse(new OpenPetPackageResultComposer(itemId, OpenPetPackageResultComposer.CLOSE_WIDGET, ""));
     }
 }

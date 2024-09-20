@@ -7,9 +7,9 @@ import com.eu.habbo.habbohotel.rooms.RoomTile;
 import com.eu.habbo.habbohotel.rooms.RoomTileState;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertKeys;
-import com.eu.habbo.messages.outgoing.rooms.items.FloorItemOnRollerComposer;
+import com.eu.habbo.habbohotel.notifications.BubbleAlertKeys;
+import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
+import com.eu.habbo.messages.outgoing.room.engine.SlideObjectBundleItemComposer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class ApplySnapshotEvent extends MessageHandler {
 
         // Executing Habbo has to be in a Room
         if (!this.client.getHabbo().getRoomUnit().isInRoom()) {
-            this.client.sendResponse(new BubbleAlertComposer(
+            this.client.sendResponse(new NotificationDialogComposer(
                     BubbleAlertKeys.FURNITURE_PLACEMENT_ERROR.key,
                     FurnitureMovementError.NO_RIGHTS.errorCode
             ));
@@ -89,7 +89,7 @@ public class ApplySnapshotEvent extends MessageHandler {
                                 if(newLocation != null && newLocation.state != RoomTileState.INVALID && (newLocation != oldLocation || newRotation != matchItem.getRotation()) && room.furnitureFitsAt(newLocation, matchItem, newRotation, true) == FurnitureMovementError.NONE) {
                                     if(room.moveFurniTo(matchItem, newLocation, newRotation, null, !slideAnimation) == FurnitureMovementError.NONE) {
                                         if(slideAnimation) {
-                                            room.sendComposer(new FloorItemOnRollerComposer(matchItem, null, oldLocation, oldZ, newLocation, matchItem.getZ(), 0, room).compose());
+                                            room.sendComposer(new SlideObjectBundleItemComposer(matchItem, null, oldLocation, oldZ, newLocation, matchItem.getZ(), 0, room).compose());
                                         }
                                     }
                                 }

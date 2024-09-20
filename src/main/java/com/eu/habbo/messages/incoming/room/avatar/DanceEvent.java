@@ -4,7 +4,7 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.users.DanceType;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserDanceComposer;
+import com.eu.habbo.messages.outgoing.room.action.DanceComposer;
 import com.eu.habbo.plugin.events.users.UserIdleEvent;
 
 public class DanceEvent extends MessageHandler {
@@ -40,7 +40,7 @@ public class DanceEvent extends MessageHandler {
                     }
                 }
 
-                this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserDanceComposer(habbo.getRoomUnit()).compose());
+                this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new DanceComposer(habbo.getRoomUnit()).compose());
             }
         }
     }

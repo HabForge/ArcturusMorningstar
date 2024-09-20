@@ -10,8 +10,6 @@ import com.eu.habbo.messages.incoming.MessageHandler;
 import gnu.trove.map.hash.THashMap;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 
 public class ModBanEvent extends MessageHandler {
     public static final int BAN_18_HOURS = 3;

@@ -5,14 +5,14 @@ import com.eu.habbo.habbohotel.achievements.AchievementManager;
 import com.eu.habbo.habbohotel.items.interactions.InteractionWiredHighscore;
 import com.eu.habbo.habbohotel.items.interactions.games.InteractionGameTimer;
 import com.eu.habbo.habbohotel.items.interactions.wired.extra.WiredBlob;
-import com.eu.habbo.habbohotel.wired.highscores.WiredHighscoreDataEntry;
 import com.eu.habbo.habbohotel.items.interactions.wired.triggers.WiredTriggerTeamLoses;
 import com.eu.habbo.habbohotel.items.interactions.wired.triggers.WiredTriggerTeamWins;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.habbohotel.wired.WiredHandler;
-import com.eu.habbo.messages.outgoing.guides.GuideSessionPartnerIsPlayingComposer;
+import com.eu.habbo.habbohotel.wired.highscores.WiredHighscoreDataEntry;
+import com.eu.habbo.messages.outgoing.room.session.YouArePlayingGameComposer;
 import com.eu.habbo.plugin.Event;
 import com.eu.habbo.plugin.events.games.GameHabboJoinEvent;
 import com.eu.habbo.plugin.events.games.GameHabboLeaveEvent;
@@ -71,7 +71,7 @@ public abstract class Game implements Runnable {
                     habbo.getHabboInfo().setCurrentGame(this.getClass());
                     habbo.getHabboInfo().setGamePlayer(player);
                 }
-                habbo.getClient().sendResponse(new GuideSessionPartnerIsPlayingComposer(true));
+                habbo.getClient().sendResponse(new YouArePlayingGameComposer(true));
                 return true;
             }
         } catch (Exception e) {
@@ -102,7 +102,7 @@ public abstract class Game implements Runnable {
 
                 habbo.getHabboInfo().setCurrentGame(null);
                 habbo.getHabboInfo().setGamePlayer(null);
-                habbo.getClient().sendResponse(new GuideSessionPartnerIsPlayingComposer(false));
+                habbo.getClient().sendResponse(new YouArePlayingGameComposer(false));
                 if (this.countsAchievements && this.endTime > this.startTime) {
                     AchievementManager.progressAchievement(habbo, Emulator.getGameEnvironment().getAchievementManager().getAchievement("GamePlayed"));
                 }

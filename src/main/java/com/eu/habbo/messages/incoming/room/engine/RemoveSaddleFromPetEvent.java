@@ -7,9 +7,9 @@ import com.eu.habbo.habbohotel.pets.Pet;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.inventory.AddHabboItemComposer;
-import com.eu.habbo.messages.outgoing.inventory.InventoryRefreshComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.RoomPetHorseFigureComposer;
+import com.eu.habbo.messages.outgoing.inventory.furni.FurniListInvalidateComposer;
+import com.eu.habbo.messages.outgoing.notifications.UnseenItemsComposer;
+import com.eu.habbo.messages.outgoing.room.pets.PetFigureUpdateComposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,13 +56,13 @@ public class RemoveSaddleFromPetEvent extends MessageHandler {
         horse.hasSaddle(false);
         horse.needsUpdate = true;
         Emulator.getThreading().run(pet);
-        this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomPetHorseFigureComposer(horse).compose());
+        this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new PetFigureUpdateComposer(horse).compose());
 
         HabboItem saddle = Emulator.getGameEnvironment().getItemManager().createItem(this.client.getHabbo().getHabboInfo().getId(), saddleItem, 0, 0, "");
 
         this.client.getHabbo().getInventory().getItemsComponent().addItem(saddle);
 
-        this.client.sendResponse(new AddHabboItemComposer(saddle));
-        this.client.sendResponse(new InventoryRefreshComposer());
+        this.client.sendResponse(new UnseenItemsComposer(saddle));
+        this.client.sendResponse(new FurniListInvalidateComposer());
     }
 }

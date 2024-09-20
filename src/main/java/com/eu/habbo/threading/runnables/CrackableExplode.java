@@ -7,10 +7,10 @@ import com.eu.habbo.habbohotel.items.interactions.InteractionCrackable;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
-import com.eu.habbo.messages.outgoing.inventory.AddHabboItemComposer;
-import com.eu.habbo.messages.outgoing.inventory.InventoryRefreshComposer;
-import com.eu.habbo.messages.outgoing.rooms.items.AddFloorItemComposer;
-import com.eu.habbo.messages.outgoing.rooms.items.RemoveFloorItemComposer;
+import com.eu.habbo.messages.outgoing.inventory.furni.FurniListInvalidateComposer;
+import com.eu.habbo.messages.outgoing.notifications.UnseenItemsComposer;
+import com.eu.habbo.messages.outgoing.room.engine.ObjectAddComposer;
+import com.eu.habbo.messages.outgoing.room.engine.ObjectRemoveComposer;
 
 public class CrackableExplode implements Runnable {
     private final Room room;
@@ -38,7 +38,7 @@ public class CrackableExplode implements Runnable {
 
         if (!this.habboItem.resetable()) {
             this.room.removeHabboItem(this.habboItem);
-            this.room.sendComposer(new RemoveFloorItemComposer(this.habboItem, true).compose());
+            this.room.sendComposer(new ObjectRemoveComposer(this.habboItem, true).compose());
             this.habboItem.setRoomId(0);
             Emulator.getGameEnvironment().getItemManager().deleteItem(this.habboItem);
         } else {
@@ -54,8 +54,8 @@ public class CrackableExplode implements Runnable {
                 //Add to inventory in case if isn't possible place the item or in case is wall item
                 if (this.toInventory || newItem.getBaseItem().getType() == FurnitureType.WALL) {
                     this.habbo.getInventory().getItemsComponent().addItem(newItem);
-                    this.habbo.getClient().sendResponse(new AddHabboItemComposer(newItem));
-                    this.habbo.getClient().sendResponse(new InventoryRefreshComposer());
+                    this.habbo.getClient().sendResponse(new UnseenItemsComposer(newItem));
+                    this.habbo.getClient().sendResponse(new FurniListInvalidateComposer());
                 } else {
                     newItem.setX(this.x);
                     newItem.setY(this.y);
@@ -64,7 +64,7 @@ public class CrackableExplode implements Runnable {
                     newItem.needsUpdate(true);
                     this.room.addHabboItem(newItem);
                     this.room.updateItem(newItem);
-                    this.room.sendComposer(new AddFloorItemComposer(newItem, this.room.getFurniOwnerNames().get(newItem.getUserId())).compose());
+                    this.room.sendComposer(new ObjectAddComposer(newItem, this.room.getFurniOwnerNames().get(newItem.getUserId())).compose());
                 }
             }
         }

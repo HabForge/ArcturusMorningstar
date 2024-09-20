@@ -6,8 +6,8 @@ import com.eu.habbo.habbohotel.rooms.RoomRightLevels;
 import com.eu.habbo.habbohotel.rooms.RoomUnitStatus;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.RoomRightsComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserRemoveRightsComposer;
+import com.eu.habbo.messages.outgoing.room.permissions.YouAreControllerComposer;
+import com.eu.habbo.messages.outgoing.roomsettings.NoSuchFlatComposer;
 import gnu.trove.procedure.TIntProcedure;
 
 public class RemoveAllRightsEvent extends MessageHandler {
@@ -25,9 +25,9 @@ public class RemoveAllRightsEvent extends MessageHandler {
                     Habbo habbo = room.getHabbo(value);
 
                     if (habbo != null) {
-                        room.sendComposer(new RoomUserRemoveRightsComposer(room, value).compose());
+                        room.sendComposer(new NoSuchFlatComposer(room, value).compose());
                         habbo.getRoomUnit().removeStatus(RoomUnitStatus.FLAT_CONTROL);
-                        habbo.getClient().sendResponse(new RoomRightsComposer(habbo.getClient().getRevision(), room.getId(), RoomRightLevels.NONE));
+                        habbo.getClient().sendResponse(new YouAreControllerComposer(habbo.getClient().getRevision(), room.getId(), RoomRightLevels.NONE));
                     }
 
                     return true;

@@ -7,11 +7,11 @@ import com.eu.habbo.habbohotel.rooms.RoomUnitStatus;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.outgoing.inventory.AddHabboItemComposer;
-import com.eu.habbo.messages.outgoing.inventory.InventoryRefreshComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.PetStatusUpdateComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.RoomPetRespectComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserStatusComposer;
+import com.eu.habbo.messages.outgoing.inventory.furni.FurniListInvalidateComposer;
+import com.eu.habbo.messages.outgoing.notifications.UnseenItemsComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserUpdateComposer;
+import com.eu.habbo.messages.outgoing.room.pets.PetStatusUpdateComposer;
+import com.eu.habbo.messages.outgoing.users.PetRespectNotificationComposer;
 import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -311,8 +311,8 @@ public class MonsterplantPet extends Pet implements IPetLook {
             this.getRoomUnit().setStatus(RoomUnitStatus.GESTURE, "reb");
             pet.getRoomUnit().setStatus(RoomUnitStatus.GESTURE, "reb");
 
-            this.room.sendComposer(new RoomUserStatusComposer(this.getRoomUnit()).compose());
-            this.room.sendComposer(new RoomUserStatusComposer(pet.getRoomUnit()).compose());
+            this.room.sendComposer(new UserUpdateComposer(this.getRoomUnit()).compose());
+            this.room.sendComposer(new UserUpdateComposer(pet.getRoomUnit()).compose());
 
             this.getRoomUnit().removeStatus(RoomUnitStatus.GESTURE);
             pet.getRoomUnit().removeStatus(RoomUnitStatus.GESTURE);
@@ -338,16 +338,16 @@ public class MonsterplantPet extends Pet implements IPetLook {
                     AchievementManager.progressAchievement(ownerOne, Emulator.getGameEnvironment().getAchievementManager().getAchievement("MonsterPlantBreeder"), 5);
                     seed = Emulator.getGameEnvironment().getItemManager().createItem(ownerOne.getHabboInfo().getId(), seedBase, 0, 0, "");
                     ownerOne.getInventory().getItemsComponent().addItem(seed);
-                    ownerOne.getClient().sendResponse(new AddHabboItemComposer(seed));
-                    ownerOne.getClient().sendResponse(new InventoryRefreshComposer());
+                    ownerOne.getClient().sendResponse(new UnseenItemsComposer(seed));
+                    ownerOne.getClient().sendResponse(new FurniListInvalidateComposer());
                 }
 
                 if (ownerTwo != null) {
                     AchievementManager.progressAchievement(ownerTwo, Emulator.getGameEnvironment().getAchievementManager().getAchievement("MonsterPlantBreeder"), 5);
                     seed = Emulator.getGameEnvironment().getItemManager().createItem(ownerTwo.getHabboInfo().getId(), seedBase, 0, 0, "");
                     ownerTwo.getInventory().getItemsComponent().addItem(seed);
-                    ownerTwo.getClient().sendResponse(new AddHabboItemComposer(seed));
-                    ownerTwo.getClient().sendResponse(new InventoryRefreshComposer());
+                    ownerTwo.getClient().sendResponse(new UnseenItemsComposer(seed));
+                    ownerTwo.getClient().sendResponse(new FurniListInvalidateComposer());
                 }
             }
         }
@@ -388,7 +388,7 @@ public class MonsterplantPet extends Pet implements IPetLook {
             this.addHappyness(10);
             this.addExperience(10);
             this.room.sendComposer(new PetStatusUpdateComposer(this).compose());
-            this.room.sendComposer(new RoomPetRespectComposer(this, RoomPetRespectComposer.PET_TREATED).compose());
+            this.room.sendComposer(new PetRespectNotificationComposer(this, PetRespectNotificationComposer.PET_TREATED).compose());
         }
     }
 

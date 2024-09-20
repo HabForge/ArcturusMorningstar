@@ -6,7 +6,7 @@ import com.eu.habbo.habbohotel.guilds.GuildMember;
 import com.eu.habbo.habbohotel.guilds.GuildRank;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.guilds.GuildMembersComposer;
+import com.eu.habbo.messages.outgoing.users.GuildMembersComposer;
 
 public class GetGuildMembersEvent extends MessageHandler {
     @Override

@@ -3,7 +3,7 @@ package com.eu.habbo.messages.incoming.friendlist;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.friends.RoomInviteComposer;
+import com.eu.habbo.messages.outgoing.friendlist.RoomInviteComposer;
 
 public class SendRoomInviteEvent extends MessageHandler {
     @Override

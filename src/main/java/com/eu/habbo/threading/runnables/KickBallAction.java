@@ -6,7 +6,7 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomTile;
 import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.rooms.RoomUserRotation;
-import com.eu.habbo.messages.outgoing.rooms.items.FloorItemOnRollerComposer;
+import com.eu.habbo.messages.outgoing.room.engine.SlideObjectBundleItemComposer;
 
 
 public class KickBallAction implements Runnable {
@@ -61,7 +61,7 @@ public class KickBallAction implements Runnable {
                 if (this.ball.canStillMove(this.room, this.room.getLayout().getTile(this.ball.getX(), this.ball.getY()), next, this.currentDirection, this.kicker, delay, this.currentStep, this.totalSteps)) {
                     this.ball.onMove(this.room, this.room.getLayout().getTile(this.ball.getX(), this.ball.getY()), next, this.currentDirection, this.kicker, delay, this.currentStep, this.totalSteps);
 
-                    this.room.sendComposer(new FloorItemOnRollerComposer(this.ball, null, next, next.getStackHeight() - this.ball.getZ(), this.room).compose());
+                    this.room.sendComposer(new SlideObjectBundleItemComposer(this.ball, null, next, next.getStackHeight() - this.ball.getZ(), this.room).compose());
 
                     Emulator.getThreading().run(this, (long) delay);
                 } else {

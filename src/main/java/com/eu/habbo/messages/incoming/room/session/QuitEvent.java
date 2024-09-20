@@ -3,7 +3,7 @@ package com.eu.habbo.messages.incoming.room.session;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.hotelview.HotelViewComposer;
+import com.eu.habbo.messages.outgoing.room.session.CloseConnectionComposer;
 
 public class QuitEvent extends MessageHandler {
     @Override
@@ -22,7 +22,7 @@ public class QuitEvent extends MessageHandler {
             } else {
                 this.client.getHabbo().getHabboInfo().setRoomQueueId(0);
             }
-            this.client.sendResponse(new HotelViewComposer());
+            this.client.sendResponse(new CloseConnectionComposer());
         }
 
         if (this.client.getHabbo().getRoomUnit() != null) {

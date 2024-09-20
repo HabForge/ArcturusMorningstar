@@ -35,9 +35,9 @@ import com.eu.habbo.messages.incoming.catalog.GetLimitedOfferAppearingNextEvent;
 import com.eu.habbo.messages.incoming.catalog.PurchaseRoomAdEvent;
 import com.eu.habbo.messages.incoming.room.layout.UpdateFloorPropertiesEvent;
 import com.eu.habbo.messages.incoming.users.ApproveNameEvent;
-import com.eu.habbo.messages.outgoing.catalog.DiscountComposer;
-import com.eu.habbo.messages.outgoing.catalog.GiftConfigurationComposer;
-import com.eu.habbo.messages.outgoing.navigator.NewNavigatorEventCategoriesComposer;
+import com.eu.habbo.messages.outgoing.catalog.BundleDiscountRulesetComposer;
+import com.eu.habbo.messages.outgoing.catalog.GiftWrappingConfigurationComposer;
+import com.eu.habbo.messages.outgoing.navigator.UserEventCatsComposer;
 import com.eu.habbo.plugin.events.emulator.EmulatorConfigUpdatedEvent;
 import com.eu.habbo.plugin.events.emulator.EmulatorLoadedEvent;
 import com.eu.habbo.plugin.events.roomunit.RoomUnitLookAtPointEvent;
@@ -87,11 +87,11 @@ public class PluginManager {
         RoomTrade.TRADING_ENABLED = Emulator.getConfig().getBoolean("hotel.trading.enabled") && !ShutdownEmulator.instantiated;
         RoomTrade.TRADING_REQUIRES_PERK = Emulator.getConfig().getBoolean("hotel.trading.requires.perk");
         WordFilter.ENABLED_FRIENDCHAT = Emulator.getConfig().getBoolean("hotel.wordfilter.messenger");
-        DiscountComposer.MAXIMUM_ALLOWED_ITEMS = Emulator.getConfig().getInt("discount.max.allowed.items", 100);
-        DiscountComposer.DISCOUNT_BATCH_SIZE = Emulator.getConfig().getInt("discount.batch.size", 6);
-        DiscountComposer.DISCOUNT_AMOUNT_PER_BATCH = Emulator.getConfig().getInt("discount.batch.free.items", 1);
-        DiscountComposer.MINIMUM_DISCOUNTS_FOR_BONUS = Emulator.getConfig().getInt("discount.bonus.min.discounts", 1);
-        DiscountComposer.ADDITIONAL_DISCOUNT_THRESHOLDS = Arrays.stream(Emulator.getConfig().getValue("discount.additional.thresholds", "40;99").split(";")).mapToInt(Integer::parseInt).toArray();
+        BundleDiscountRulesetComposer.MAXIMUM_ALLOWED_ITEMS = Emulator.getConfig().getInt("discount.max.allowed.items", 100);
+        BundleDiscountRulesetComposer.DISCOUNT_BATCH_SIZE = Emulator.getConfig().getInt("discount.batch.size", 6);
+        BundleDiscountRulesetComposer.DISCOUNT_AMOUNT_PER_BATCH = Emulator.getConfig().getInt("discount.batch.free.items", 1);
+        BundleDiscountRulesetComposer.MINIMUM_DISCOUNTS_FOR_BONUS = Emulator.getConfig().getInt("discount.bonus.min.discounts", 1);
+        BundleDiscountRulesetComposer.ADDITIONAL_DISCOUNT_THRESHOLDS = Arrays.stream(Emulator.getConfig().getValue("discount.additional.thresholds", "40;99").split(";")).mapToInt(Integer::parseInt).toArray();
 
         BotManager.MINIMUM_CHAT_SPEED = Emulator.getConfig().getInt("hotel.bot.chat.minimum.interval");
         BotManager.MAXIMUM_CHAT_LENGTH = Emulator.getConfig().getInt("hotel.bot.max.chatlength");
@@ -211,18 +211,18 @@ public class PluginManager {
         }
 
 
-        NewNavigatorEventCategoriesComposer.CATEGORIES.clear();
+        UserEventCatsComposer.CATEGORIES.clear();
         for (String category : Emulator.getConfig().getValue("navigator.eventcategories", "").split(";")) {
             try {
-                NewNavigatorEventCategoriesComposer.CATEGORIES.add(new EventCategory(category));
+                UserEventCatsComposer.CATEGORIES.add(new EventCategory(category));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
         if (Emulator.isReady) {
-            GiftConfigurationComposer.BOX_TYPES = Arrays.stream(Emulator.getConfig().getValue("hotel.gifts.box_types").split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-            GiftConfigurationComposer.RIBBON_TYPES = Arrays.stream(Emulator.getConfig().getValue("hotel.gifts.ribbon_types").split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            GiftWrappingConfigurationComposer.BOX_TYPES = Arrays.stream(Emulator.getConfig().getValue("hotel.gifts.box_types").split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            GiftWrappingConfigurationComposer.RIBBON_TYPES = Arrays.stream(Emulator.getConfig().getValue("hotel.gifts.ribbon_types").split(",")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
 
             Emulator.getGameEnvironment().getCreditsScheduler().reloadConfig();
             Emulator.getGameEnvironment().getPointsScheduler().reloadConfig();

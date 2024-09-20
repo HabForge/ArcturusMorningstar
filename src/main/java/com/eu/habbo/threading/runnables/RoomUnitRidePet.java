@@ -5,8 +5,8 @@ import com.eu.habbo.habbohotel.pets.PetTasks;
 import com.eu.habbo.habbohotel.pets.RideablePet;
 import com.eu.habbo.habbohotel.rooms.RoomTile;
 import com.eu.habbo.habbohotel.users.Habbo;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserEffectComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserStatusComposer;
+import com.eu.habbo.messages.outgoing.room.action.AvatarEffectComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserUpdateComposer;
 
 public class RoomUnitRidePet implements Runnable {
     private RideablePet pet;
@@ -35,8 +35,8 @@ public class RoomUnitRidePet implements Runnable {
             habbo.getRoomUnit().setRotation(this.pet.getRoomUnit().getBodyRotation());
             habbo.getRoomUnit().statusUpdate(true);
             pet.setRider(habbo);
-            habbo.getHabboInfo().getCurrentRoom().sendComposer(new RoomUserStatusComposer(habbo.getRoomUnit()).compose());
-            habbo.getHabboInfo().getCurrentRoom().sendComposer(new RoomUserEffectComposer(habbo.getRoomUnit()).compose());
+            habbo.getHabboInfo().getCurrentRoom().sendComposer(new UserUpdateComposer(habbo.getRoomUnit()).compose());
+            habbo.getHabboInfo().getCurrentRoom().sendComposer(new AvatarEffectComposer(habbo.getRoomUnit()).compose());
             pet.setTask(PetTasks.RIDE);
         } else {
             pet.getRoomUnit().setWalkTimeOut(3 + Emulator.getIntUnixTimestamp());

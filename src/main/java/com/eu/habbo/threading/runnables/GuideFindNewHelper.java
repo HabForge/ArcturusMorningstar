@@ -3,7 +3,7 @@ package com.eu.habbo.threading.runnables;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guides.GuideTour;
 import com.eu.habbo.habbohotel.users.Habbo;
-import com.eu.habbo.messages.outgoing.guides.GuideSessionDetachedComposer;
+import com.eu.habbo.messages.outgoing.help.GuideSessionDetachedComposer;
 
 public class GuideFindNewHelper implements Runnable {
     private final GuideTour tour;

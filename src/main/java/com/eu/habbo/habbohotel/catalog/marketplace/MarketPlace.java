@@ -6,11 +6,11 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.incoming.marketplace.GetMarketplaceOffersEvent;
-import com.eu.habbo.messages.outgoing.catalog.marketplace.MarketplaceBuyErrorComposer;
-import com.eu.habbo.messages.outgoing.catalog.marketplace.MarketplaceCancelSaleComposer;
-import com.eu.habbo.messages.outgoing.inventory.AddHabboItemComposer;
-import com.eu.habbo.messages.outgoing.inventory.InventoryRefreshComposer;
-import com.eu.habbo.messages.outgoing.inventory.RemoveHabboItemComposer;
+import com.eu.habbo.messages.outgoing.inventory.furni.FurniListInvalidateComposer;
+import com.eu.habbo.messages.outgoing.inventory.furni.FurniListRemoveComposer;
+import com.eu.habbo.messages.outgoing.marketplace.MarketplaceBuyOfferResultComposer;
+import com.eu.habbo.messages.outgoing.marketplace.MarketplaceCancelOfferResultComposer;
+import com.eu.habbo.messages.outgoing.notifications.UnseenItemsComposer;
 import com.eu.habbo.plugin.events.marketplace.MarketPlaceItemCancelledEvent;
 import com.eu.habbo.plugin.events.marketplace.MarketPlaceItemOfferedEvent;
 import com.eu.habbo.plugin.events.marketplace.MarketPlaceItemSoldEvent;
@@ -92,9 +92,9 @@ public class MarketPlace {
                                             while (set.next()) {
                                                 HabboItem item = Emulator.getGameEnvironment().getItemManager().loadHabboItem(set);
                                                 habbo.getInventory().getItemsComponent().addItem(item);
-                                                habbo.getClient().sendResponse(new MarketplaceCancelSaleComposer(offer, true));
-                                                habbo.getClient().sendResponse(new AddHabboItemComposer(item));
-                                                habbo.getClient().sendResponse(new InventoryRefreshComposer());
+                                                habbo.getClient().sendResponse(new MarketplaceCancelOfferResultComposer(offer, true));
+                                                habbo.getClient().sendResponse(new UnseenItemsComposer(item));
+                                                habbo.getClient().sendResponse(new FurniListInvalidateComposer());
                                             }
                                         }
                                     }
@@ -105,7 +105,7 @@ public class MarketPlace {
                 }
             } catch (SQLException e) {
                 LOGGER.error("Caught SQL exception", e);
-                habbo.getClient().sendResponse(new MarketplaceCancelSaleComposer(offer, false));
+                habbo.getClient().sendResponse(new MarketplaceCancelOfferResultComposer(offer, false));
             }
         }
     }
@@ -255,7 +255,7 @@ public class MarketPlace {
                                     if (set.getInt("state") != 1) {
                                         sendErrorMessage(client, set.getInt("item_id"), offerId);
                                     } else if ((MARKETPLACE_CURRENCY == 0 && price > client.getHabbo().getHabboInfo().getCredits()) || (MARKETPLACE_CURRENCY > 0 && price > client.getHabbo().getHabboInfo().getCurrencyAmount(MARKETPLACE_CURRENCY))) {
-                                        client.sendResponse(new MarketplaceBuyErrorComposer(MarketplaceBuyErrorComposer.NOT_ENOUGH_CREDITS, 0, offerId, price));
+                                        client.sendResponse(new MarketplaceBuyOfferResultComposer(MarketplaceBuyOfferResultComposer.NOT_ENOUGH_CREDITS, 0, offerId, price));
                                     } else {
                                         try (PreparedStatement updateOffer = connection.prepareStatement("UPDATE marketplace_items SET state = 2, sold_timestamp = ? WHERE id = ?")) {
                                             updateOffer.setInt(1, Emulator.getIntUnixTimestamp());
@@ -283,9 +283,9 @@ public class MarketPlace {
                                             client.getHabbo().givePoints(MARKETPLACE_CURRENCY, -event.price);
                                         }
 
-                                        client.sendResponse(new AddHabboItemComposer(item));
-                                        client.sendResponse(new InventoryRefreshComposer());
-                                        client.sendResponse(new MarketplaceBuyErrorComposer(MarketplaceBuyErrorComposer.REFRESH, 0, offerId, price));
+                                        client.sendResponse(new UnseenItemsComposer(item));
+                                        client.sendResponse(new FurniListInvalidateComposer());
+                                        client.sendResponse(new MarketplaceBuyOfferResultComposer(MarketplaceBuyOfferResultComposer.REFRESH, 0, offerId, price));
 
                                         if (habbo != null) {
                                             habbo.getInventory().getOffer(offerId).setState(MarketPlaceState.SOLD);
@@ -318,10 +318,10 @@ public class MarketPlace {
             try (ResultSet countSet = statement.executeQuery()) {
                 countSet.last();
                 if (countSet.getRow() == 0)
-                    client.sendResponse(new MarketplaceBuyErrorComposer(MarketplaceBuyErrorComposer.SOLD_OUT, 0, offerId, 0));
+                    client.sendResponse(new MarketplaceBuyOfferResultComposer(MarketplaceBuyOfferResultComposer.SOLD_OUT, 0, offerId, 0));
                 else {
                     countSet.first();
-                    client.sendResponse(new MarketplaceBuyErrorComposer(MarketplaceBuyErrorComposer.UPDATES, countSet.getInt("count"), countSet.getInt("id"), MarketPlace.calculateCommision(countSet.getInt("price"))));
+                    client.sendResponse(new MarketplaceBuyOfferResultComposer(MarketplaceBuyOfferResultComposer.UPDATES, countSet.getInt("count"), countSet.getInt("id"), MarketPlace.calculateCommision(countSet.getInt("price"))));
                 }
             }
         } catch (SQLException e) {
@@ -344,8 +344,8 @@ public class MarketPlace {
 
         GetMarketplaceOffersEvent.cachedResults.clear();
 
-        client.sendResponse(new RemoveHabboItemComposer(event.item.getGiftAdjustedId()));
-        client.sendResponse(new InventoryRefreshComposer());
+        client.sendResponse(new FurniListRemoveComposer(event.item.getGiftAdjustedId()));
+        client.sendResponse(new FurniListInvalidateComposer());
 
         event.item.setFromGift(false);
 

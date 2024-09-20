@@ -3,7 +3,7 @@ package com.eu.habbo.messages.incoming.help;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guides.GuideTour;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.guides.GuideSessionErrorComposer;
+import com.eu.habbo.messages.outgoing.help.GuideSessionErrorComposer;
 
 public class GuideSessionCreateEvent extends MessageHandler {
     @Override

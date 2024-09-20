@@ -8,11 +8,10 @@ import com.eu.habbo.habbohotel.pets.MonsterplantPet;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.items.RemoveFloorItemComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.PetPackageComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserStatusComposer;
+import com.eu.habbo.messages.outgoing.room.engine.ObjectRemoveComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserUpdateComposer;
+import com.eu.habbo.messages.outgoing.room.furniture.OpenPetPackageRequestedComposer;
 import com.eu.habbo.plugin.Event;
-import com.eu.habbo.plugin.events.furniture.FurniturePickedUpEvent;
 import com.eu.habbo.plugin.events.furniture.FurnitureToggleEvent;
 import com.eu.habbo.threading.runnables.QueryDeleteHabboItem;
 import org.slf4j.Logger;
@@ -107,12 +106,12 @@ public class UseFurnitureEvent extends MessageHandler {
                     }
                 }
                 MonsterplantPet pet = Emulator.getGameEnvironment().getPetManager().createMonsterplant(room, this.client.getHabbo(), isRare, room.getLayout().getTile(item.getX(), item.getY()), rarity);
-                room.sendComposer(new RemoveFloorItemComposer(item, true).compose());
+                room.sendComposer(new ObjectRemoveComposer(item, true).compose());
                 room.removeHabboItem(item);
                 room.updateTile(room.getLayout().getTile(item.getX(), item.getY()));
                 room.placePet(pet, item.getX(), item.getY(), item.getZ(), item.getRotation());
                 pet.cycle();
-                room.sendComposer(new RoomUserStatusComposer(pet.getRoomUnit()).compose());
+                room.sendComposer(new UserUpdateComposer(pet.getRoomUnit()).compose());
                 return;
             }
 
@@ -123,7 +122,7 @@ public class UseFurnitureEvent extends MessageHandler {
                             item.getBaseItem().getName().equalsIgnoreCase("velociraptor_egg") ||
                             item.getBaseItem().getName().equalsIgnoreCase("pterosaur_egg") ||
                             item.getBaseItem().getName().equalsIgnoreCase("petbox_epic")) && room.getCurrentPets().size() < Room.MAXIMUM_PETS) {
-                this.client.sendResponse(new PetPackageComposer(item));
+                this.client.sendResponse(new OpenPetPackageRequestedComposer(item));
                 return;
             }
 

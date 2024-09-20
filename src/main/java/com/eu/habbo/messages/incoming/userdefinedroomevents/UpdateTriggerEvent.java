@@ -7,8 +7,8 @@ import com.eu.habbo.habbohotel.items.interactions.wired.WiredSettings;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.UpdateFailedComposer;
-import com.eu.habbo.messages.outgoing.wired.WiredSavedComposer;
+import com.eu.habbo.messages.outgoing.userdefinedroomevents.WiredSaveSuccessComposer;
+import com.eu.habbo.messages.outgoing.userdefinedroomevents.WiredValidationErrorComposer;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -34,26 +34,26 @@ public class UpdateTriggerEvent extends MessageHandler {
                             WiredSettings settings = InteractionWired.readSettings(this.packet, false);
 
                             if (trigger.saveData(settings)) {
-                                this.client.sendResponse(new WiredSavedComposer());
+                                this.client.sendResponse(new WiredSaveSuccessComposer());
 
                                 trigger.needsUpdate(true);
 
                                 Emulator.getThreading().run(trigger);
                             } else {
-                                this.client.sendResponse(new UpdateFailedComposer("There was an error while saving that trigger"));
+                                this.client.sendResponse(new WiredValidationErrorComposer("There was an error while saving that trigger"));
                             }
                         } else {
                             if ((boolean) saveMethod.get().invoke(trigger, this.packet)) {
-                                this.client.sendResponse(new WiredSavedComposer());
+                                this.client.sendResponse(new WiredSaveSuccessComposer());
                                 trigger.needsUpdate(true);
                                 Emulator.getThreading().run(trigger);
                             } else {
-                                this.client.sendResponse(new UpdateFailedComposer("There was an error while saving that trigger"));
+                                this.client.sendResponse(new WiredValidationErrorComposer("There was an error while saving that trigger"));
                             }
                         }
                     }
                     else {
-                        this.client.sendResponse(new UpdateFailedComposer("Save method was not found"));
+                        this.client.sendResponse(new WiredValidationErrorComposer("Save method was not found"));
                     }
                 }
             }

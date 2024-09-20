@@ -6,13 +6,9 @@ import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.users.subscriptions.Subscription;
 import com.eu.habbo.habbohotel.users.subscriptions.SubscriptionHabboClub;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.catalog.AlertPurchaseFailedComposer;
+import com.eu.habbo.messages.outgoing.catalog.PurchaseErrorComposer;
 import com.eu.habbo.messages.outgoing.catalog.PurchaseOKComposer;
-import com.eu.habbo.messages.outgoing.inventory.InventoryRefreshComposer;
-import com.eu.habbo.messages.outgoing.unknown.ExtendClubMessageComposer;
-import com.eu.habbo.messages.outgoing.users.UserClubComposer;
-import com.eu.habbo.messages.outgoing.users.UserCreditsComposer;
-import com.eu.habbo.messages.outgoing.users.UserCurrencyComposer;
+import com.eu.habbo.messages.outgoing.inventory.furni.FurniListInvalidateComposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,12 +61,12 @@ public class PurchaseVipMembershipExtensionEvent extends MessageHandler {
 
 
                         if(this.client.getHabbo().getHabboStats().createSubscription(Subscription.HABBO_CLUB, (totalDays * 86400)) == null) {
-                            this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR).compose());
+                            this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR).compose());
                             throw new Exception("Unable to create or extend subscription");
                         }
 
                         this.client.sendResponse(new PurchaseOKComposer(null));
-                        this.client.sendResponse(new InventoryRefreshComposer());
+                        this.client.sendResponse(new FurniListInvalidateComposer());
 
                         this.client.getHabbo().getHabboStats().run();
                     }

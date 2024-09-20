@@ -7,10 +7,10 @@ import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomRightLevels;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.catalog.AlertPurchaseFailedComposer;
+import com.eu.habbo.messages.outgoing.catalog.PurchaseErrorComposer;
 import com.eu.habbo.messages.outgoing.catalog.PurchaseOKComposer;
-import com.eu.habbo.messages.outgoing.navigator.NewNavigatorEventCategoriesComposer;
-import com.eu.habbo.messages.outgoing.rooms.promotions.RoomPromotionMessageComposer;
+import com.eu.habbo.messages.outgoing.navigator.RoomEventComposer;
+import com.eu.habbo.messages.outgoing.navigator.UserEventCatsComposer;
 
 public class PurchaseRoomAdEvent extends MessageHandler {
     public static String ROOM_PROMOTION_BADGE = "RADZZ";
@@ -25,7 +25,7 @@ public class PurchaseRoomAdEvent extends MessageHandler {
         String description = this.packet.readString();
         int categoryId = this.packet.readInt();
 
-        if (NewNavigatorEventCategoriesComposer.CATEGORIES.stream().noneMatch(c -> c.getId() == categoryId))
+        if (UserEventCatsComposer.CATEGORIES.stream().noneMatch(c -> c.getId() == categoryId))
             return;
 
         CatalogPage page = Emulator.getGameEnvironment().getCatalogManager().getCatalogPage(pageId);
@@ -58,13 +58,13 @@ public class PurchaseRoomAdEvent extends MessageHandler {
                     }
 
                     this.client.sendResponse(new PurchaseOKComposer());
-                    room.sendComposer(new RoomPromotionMessageComposer(room, room.getPromotion()).compose());
+                    room.sendComposer(new RoomEventComposer(room, room.getPromotion()).compose());
 
                     if (!this.client.getHabbo().getInventory().getBadgesComponent().hasBadge(PurchaseRoomAdEvent.ROOM_PROMOTION_BADGE)) {
                         this.client.getHabbo().addBadge(PurchaseRoomAdEvent.ROOM_PROMOTION_BADGE);
                     }
                 } else {
-                    this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR));
+                    this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR));
                 }
             }
         }

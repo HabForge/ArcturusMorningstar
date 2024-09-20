@@ -1,18 +1,11 @@
 package com.eu.habbo.messages.incoming.catalog;
 
 import com.eu.habbo.Emulator;
-import com.eu.habbo.habbohotel.catalog.CatalogItem;
-import com.eu.habbo.habbohotel.catalog.CatalogPage;
-import com.eu.habbo.habbohotel.catalog.CatalogPageLayouts;
 import com.eu.habbo.habbohotel.catalog.ClubOffer;
-import com.eu.habbo.habbohotel.items.Item;
 import com.eu.habbo.habbohotel.users.subscriptions.Subscription;
 import com.eu.habbo.habbohotel.users.subscriptions.SubscriptionHabboClub;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.catalog.AlertPurchaseFailedComposer;
-import com.eu.habbo.messages.outgoing.unknown.ExtendClubMessageComposer;
-import com.eu.habbo.messages.outgoing.users.ClubGiftReceivedComposer;
-import gnu.trove.set.hash.THashSet;
+import com.eu.habbo.messages.outgoing.catalog.HabboClubExtendOfferComposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +38,7 @@ public class GetHabboClubExtendOfferEvent extends MessageHandler {
             if(deal != null) {
                 ClubOffer regular = Emulator.getGameEnvironment().getCatalogManager().getClubOffers().stream().filter(x -> x.getDays() == deal.getDays()).findAny().orElse(null);
                 if(regular != null) {
-                    this.client.sendResponse(new ExtendClubMessageComposer(this.client.getHabbo(), deal, regular.getCredits(), regular.getPoints(), regular.getPointsType(), Math.max(0, days)));
+                    this.client.sendResponse(new HabboClubExtendOfferComposer(this.client.getHabbo(), deal, regular.getCredits(), regular.getPoints(), regular.getPointsType(), Math.max(0, days)));
                 }
             }
         }

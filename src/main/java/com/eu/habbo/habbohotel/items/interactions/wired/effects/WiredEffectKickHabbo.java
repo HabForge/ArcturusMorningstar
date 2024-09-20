@@ -16,7 +16,7 @@ import com.eu.habbo.habbohotel.wired.WiredEffectType;
 import com.eu.habbo.habbohotel.wired.WiredHandler;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.incoming.userdefinedroomevents.WiredSaveException;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserWhisperComposer;
+import com.eu.habbo.messages.outgoing.room.chat.WhisperComposer;
 import com.eu.habbo.threading.runnables.RoomUnitKick;
 import gnu.trove.procedure.TObjectProcedure;
 
@@ -59,7 +59,7 @@ public class WiredEffectKickHabbo extends InteractionWiredEffect {
             room.giveEffect(habbo, 4, 2);
 
             if (!this.message.isEmpty())
-                habbo.getClient().sendResponse(new RoomUserWhisperComposer(new RoomChatMessage(this.message, habbo, habbo, RoomChatMessageBubbles.ALERT)));
+                habbo.getClient().sendResponse(new WhisperComposer(new RoomChatMessage(this.message, habbo, habbo, RoomChatMessageBubbles.ALERT)));
 
             Emulator.getThreading().run(new RoomUnitKick(habbo, room, true), 2000);
 

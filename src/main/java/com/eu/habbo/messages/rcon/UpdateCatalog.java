@@ -1,8 +1,12 @@
 package com.eu.habbo.messages.rcon;
 
 import com.eu.habbo.Emulator;
-import com.eu.habbo.messages.outgoing.catalog.*;
-import com.eu.habbo.messages.outgoing.catalog.marketplace.MarketplaceConfigComposer;
+import com.eu.habbo.messages.outgoing.catalog.BuildersClubFurniCountComposer;
+import com.eu.habbo.messages.outgoing.catalog.BundleDiscountRulesetComposer;
+import com.eu.habbo.messages.outgoing.catalog.CatalogPublishedComposer;
+import com.eu.habbo.messages.outgoing.catalog.GiftWrappingConfigurationComposer;
+import com.eu.habbo.messages.outgoing.marketplace.MarketplaceConfigurationComposer;
+import com.eu.habbo.messages.outgoing.recycler.RecyclerPrizesComposer;
 import com.google.gson.Gson;
 
 public class UpdateCatalog extends RCONMessage<UpdateCatalog.JSONUpdateCatalog> {
@@ -14,12 +18,12 @@ public class UpdateCatalog extends RCONMessage<UpdateCatalog.JSONUpdateCatalog> 
     @Override
     public void handle(Gson gson, JSONUpdateCatalog json) {
         Emulator.getGameEnvironment().getCatalogManager().initialize();
-        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new CatalogUpdatedComposer());
-        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new CatalogModeComposer(0));
-        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new DiscountComposer());
-        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new MarketplaceConfigComposer());
-        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new GiftConfigurationComposer());
-        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new RecyclerLogicComposer());
+        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new CatalogPublishedComposer());
+        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new BuildersClubFurniCountComposer(0));
+        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new BundleDiscountRulesetComposer());
+        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new MarketplaceConfigurationComposer());
+        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new GiftWrappingConfigurationComposer());
+        Emulator.getGameServer().getGameClientManager().sendBroadcastResponse(new RecyclerPrizesComposer());
         Emulator.getGameEnvironment().getCraftingManager().reload();
     }
 

@@ -1,8 +1,7 @@
 package com.eu.habbo.messages.incoming.room.layout;
 
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.floorplaneditor.FloorPlanEditorDoorSettingsComposer;
-import com.eu.habbo.messages.outgoing.rooms.RoomFloorThicknessUpdatedComposer;
+import com.eu.habbo.messages.outgoing.room.layout.RoomEntryTileComposer;
 
 public class GetRoomEntryTileEvent extends MessageHandler {
     @Override
@@ -10,7 +9,6 @@ public class GetRoomEntryTileEvent extends MessageHandler {
         if (this.client.getHabbo().getHabboInfo().getCurrentRoom() == null)
             return;
 
-        this.client.sendResponse(new FloorPlanEditorDoorSettingsComposer(this.client.getHabbo().getHabboInfo().getCurrentRoom()));
-        this.client.sendResponse(new RoomFloorThicknessUpdatedComposer(this.client.getHabbo().getHabboInfo().getCurrentRoom()));
+        this.client.sendResponse(new RoomEntryTileComposer(this.client.getHabbo().getHabboInfo().getCurrentRoom()));
     }
 }

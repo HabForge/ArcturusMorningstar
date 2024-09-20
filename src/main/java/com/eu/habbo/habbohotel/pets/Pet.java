@@ -7,11 +7,11 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.ISerialize;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.outgoing.rooms.pets.PetLevelUpdatedComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.RoomPetExperienceComposer;
-import com.eu.habbo.messages.outgoing.rooms.pets.RoomPetRespectComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserRemoveComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserTalkComposer;
+import com.eu.habbo.messages.outgoing.room.chat.ChatComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserRemoveComposer;
+import com.eu.habbo.messages.outgoing.room.pets.PetExperienceComposer;
+import com.eu.habbo.messages.outgoing.room.pets.PetLevelUpdateComposer;
+import com.eu.habbo.messages.outgoing.users.PetRespectNotificationComposer;
 import com.eu.habbo.plugin.events.pets.PetTalkEvent;
 import gnu.trove.map.hash.THashMap;
 import org.slf4j.Logger;
@@ -109,7 +109,7 @@ public class Pet implements ISerialize, Runnable {
             RoomChatMessage chatMessage = new RoomChatMessage(message, this.roomUnit, RoomChatMessageBubbles.NORMAL);
             PetTalkEvent talkEvent = new PetTalkEvent(this, chatMessage);
             if (!Emulator.getPluginManager().fireEvent(talkEvent).isCancelled()) {
-                this.room.petChat(new RoomUserTalkComposer(chatMessage).compose());
+                this.room.petChat(new ChatComposer(chatMessage).compose());
             }
         }
     }
@@ -517,7 +517,7 @@ public class Pet implements ISerialize, Runnable {
         this.experience += amount;
 
         if (this.room != null) {
-            this.room.sendComposer(new RoomPetExperienceComposer(this, amount).compose());
+            this.room.sendComposer(new PetExperienceComposer(this, amount).compose());
 
             if(this.level < PetManager.experiences.length + 1 && this.experience >= PetManager.experiences[this.level - 1]) {
                 this.levelUp();
@@ -539,7 +539,7 @@ public class Pet implements ISerialize, Runnable {
             this.roomUnit.setStatus(RoomUnitStatus.GESTURE, "exp");
             this.gestureTickTimeout = Emulator.getIntUnixTimestamp();
             AchievementManager.progressAchievement(Emulator.getGameEnvironment().getHabboManager().getHabbo(this.userId), Emulator.getGameEnvironment().getAchievementManager().getAchievement("PetLevelUp"));
-            this.room.sendComposer(new PetLevelUpdatedComposer(this).compose());
+            this.room.sendComposer(new PetLevelUpdateComposer(this).compose());
         }
 
 
@@ -582,7 +582,7 @@ public class Pet implements ISerialize, Runnable {
 
         if (habbo != null) {
             habbo.getHabboStats().petRespectPointsToGive--;
-            habbo.getHabboInfo().getCurrentRoom().sendComposer(new RoomPetRespectComposer(this).compose());
+            habbo.getHabboInfo().getCurrentRoom().sendComposer(new PetRespectNotificationComposer(this).compose());
 
             AchievementManager.progressAchievement(habbo, Emulator.getGameEnvironment().getAchievementManager().getAchievement("PetRespectGiver"));
         }
@@ -738,7 +738,7 @@ public class Pet implements ISerialize, Runnable {
         }
 
         if (!dontSendPackets) {
-            room.sendComposer(new RoomUserRemoveComposer(this.roomUnit).compose());
+            room.sendComposer(new UserRemoveComposer(this.roomUnit).compose());
             room.removePet(this.id);
         }
 

@@ -5,7 +5,7 @@ import com.eu.habbo.habbohotel.modtool.ScripterManager;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertComposer;
+import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
 import com.eu.habbo.plugin.events.support.SupportUserAlertedEvent;
 import com.eu.habbo.plugin.events.support.SupportUserAlertedReason;
 
@@ -29,6 +29,6 @@ public class AmbassadorAlertEvent extends MessageHandler {
         if (Emulator.getPluginManager().fireEvent(alertedEvent).isCancelled())
             return;
 
-        habbo.getClient().sendResponse(new BubbleAlertComposer("ambassador.alert.warning"));
+        habbo.getClient().sendResponse(new NotificationDialogComposer("ambassador.alert.warning"));
     }
 }

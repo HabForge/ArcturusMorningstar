@@ -6,7 +6,6 @@ import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.rooms.RoomUnitStatus;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserStatusComposer;
 
 public class LookToEvent extends MessageHandler {
     @Override
@@ -52,7 +51,7 @@ public class LookToEvent extends MessageHandler {
         if (tile != null) {
             roomUnit.lookAtPoint(tile);
             roomUnit.statusUpdate(true);
-            //room.sendComposer(new RoomUserStatusComposer(roomUnit).compose());
+            //room.sendComposer(new UserUpdateComposer(roomUnit).compose());
         }
     }
 }

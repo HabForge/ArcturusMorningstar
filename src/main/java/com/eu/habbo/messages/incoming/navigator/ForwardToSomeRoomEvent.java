@@ -3,8 +3,8 @@ package com.eu.habbo.messages.incoming.navigator;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.ForwardToRoomComposer;
-import com.eu.habbo.messages.outgoing.users.UserHomeRoomComposer;
+import com.eu.habbo.messages.outgoing.navigator.NavigatorSettingsComposer;
+import com.eu.habbo.messages.outgoing.room.session.RoomForwardComposer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,12 +18,12 @@ public class ForwardToSomeRoomEvent extends MessageHandler {
             ArrayList<Room> rooms = Emulator.getGameEnvironment().getRoomManager().getActiveRooms();
             if (!rooms.isEmpty()) {
                 Collections.shuffle(rooms);
-                this.client.sendResponse(new ForwardToRoomComposer(rooms.get(0).getId()));
+                this.client.sendResponse(new RoomForwardComposer(rooms.get(0).getId()));
             }
         } else if (data.equalsIgnoreCase("predefined_noob_lobby")) {
-            this.client.sendResponse(new ForwardToRoomComposer(Emulator.getConfig().getInt("hotel.room.nooblobby")));
+            this.client.sendResponse(new RoomForwardComposer(Emulator.getConfig().getInt("hotel.room.nooblobby")));
         } else {
-            this.client.sendResponse(new UserHomeRoomComposer(this.client.getHabbo().getHabboInfo().getHomeRoom(), this.client.getHabbo().getHabboInfo().getHomeRoom()));
+            this.client.sendResponse(new NavigatorSettingsComposer(this.client.getHabbo().getHabboInfo().getHomeRoom(), this.client.getHabbo().getHabboInfo().getHomeRoom()));
         }
     }
 }

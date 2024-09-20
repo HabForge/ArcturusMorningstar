@@ -4,16 +4,15 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guilds.Guild;
 import com.eu.habbo.habbohotel.guilds.GuildMember;
 import com.eu.habbo.habbohotel.guilds.GuildRank;
-import com.eu.habbo.habbohotel.guilds.GuildState;
 import com.eu.habbo.habbohotel.guilds.forums.ForumThread;
 import com.eu.habbo.habbohotel.guilds.forums.ForumThreadState;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertKeys;
-import com.eu.habbo.messages.outgoing.guilds.forums.GuildForumCommentsComposer;
-import com.eu.habbo.messages.outgoing.guilds.forums.GuildForumDataComposer;
-import com.eu.habbo.messages.outgoing.handshake.ConnectionErrorComposer;
+import com.eu.habbo.messages.outgoing.error.ErrorReportComposer;
+import com.eu.habbo.habbohotel.notifications.BubbleAlertKeys;
+import com.eu.habbo.messages.outgoing.groupforums.ForumDataComposer;
+import com.eu.habbo.messages.outgoing.groupforums.ThreadMessagesComposer;
+import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
 
 
 
@@ -30,18 +29,18 @@ public class GetMessagesEvent extends MessageHandler {
         ForumThread thread = ForumThread.getById(threadId);
         boolean hasStaffPermissions = this.client.getHabbo().hasPermission(Permission.ACC_MODTOOL_TICKET_Q);
         if (guild == null || thread == null) {
-            this.client.sendResponse(new ConnectionErrorComposer(404));
+            this.client.sendResponse(new ErrorReportComposer(404));
             return;
         }
         GuildMember member = Emulator.getGameEnvironment().getGuildManager().getGuildMember(guildId, this.client.getHabbo().getHabboInfo().getId());
         boolean isGuildAdministrator = (guild.getOwnerId() == this.client.getHabbo().getHabboInfo().getId() || member.getRank().equals(GuildRank.ADMIN));
 
         if (thread.getState() != ForumThreadState.HIDDEN_BY_GUILD_ADMIN || hasStaffPermissions || isGuildAdministrator) {
-            this.client.sendResponse(new GuildForumCommentsComposer(guildId, threadId, index, thread.getComments(limit, index)));
-            this.client.sendResponse(new GuildForumDataComposer(guild, this.client.getHabbo()));
+            this.client.sendResponse(new ThreadMessagesComposer(guildId, threadId, index, thread.getComments(limit, index)));
+            this.client.sendResponse(new ForumDataComposer(guild, this.client.getHabbo()));
         }
         else {
-            this.client.sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FORUMS_ACCESS_DENIED.key).compose());
+            this.client.sendResponse(new NotificationDialogComposer(BubbleAlertKeys.FORUMS_ACCESS_DENIED.key).compose());
         }
     }
 }

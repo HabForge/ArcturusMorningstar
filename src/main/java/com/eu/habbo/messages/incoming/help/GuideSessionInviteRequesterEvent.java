@@ -4,7 +4,7 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guides.GuideTour;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.guides.GuideSessionInvitedToGuideRoomComposer;
+import com.eu.habbo.messages.outgoing.help.GuideSessionInvitedToGuideRoomComposer;
 
 public class GuideSessionInviteRequesterEvent extends MessageHandler {
     @Override

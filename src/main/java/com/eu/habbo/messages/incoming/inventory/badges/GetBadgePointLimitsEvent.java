@@ -1,7 +1,7 @@
 package com.eu.habbo.messages.incoming.inventory.badges;
 
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.unknown.IgnoredUsersComposer;
+import com.eu.habbo.messages.outgoing.users.IgnoredUsersComposer;
 
 public class GetBadgePointLimitsEvent extends MessageHandler {
     @Override

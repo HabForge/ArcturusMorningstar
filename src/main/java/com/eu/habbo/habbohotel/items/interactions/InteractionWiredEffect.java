@@ -7,7 +7,7 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.wired.WiredEffectType;
 import com.eu.habbo.messages.incoming.userdefinedroomevents.WiredSaveException;
-import com.eu.habbo.messages.outgoing.wired.WiredEffectDataComposer;
+import com.eu.habbo.messages.outgoing.userdefinedroomevents.WiredFurniActionComposer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,7 +37,7 @@ public abstract class InteractionWiredEffect extends InteractionWired {
     public void onClick(GameClient client, Room room, Object[] objects) throws Exception {
         if (client != null) {
             if (room.hasRights(client.getHabbo())) {
-                client.sendResponse(new WiredEffectDataComposer(this, room));
+                client.sendResponse(new WiredFurniActionComposer(this, room));
                 this.activateBox(room);
             }
         }

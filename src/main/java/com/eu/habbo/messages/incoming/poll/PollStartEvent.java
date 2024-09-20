@@ -3,7 +3,7 @@ package com.eu.habbo.messages.incoming.poll;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.polls.Poll;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.polls.PollQuestionsComposer;
+import com.eu.habbo.messages.outgoing.poll.PollContentsComposer;
 
 public class PollStartEvent extends MessageHandler {
     @Override
@@ -13,7 +13,7 @@ public class PollStartEvent extends MessageHandler {
         Poll poll = Emulator.getGameEnvironment().getPollManager().getPoll(pollId);
 
         if (poll != null) {
-            this.client.sendResponse(new PollQuestionsComposer(poll));
+            this.client.sendResponse(new PollContentsComposer(poll));
         }
     }
 }

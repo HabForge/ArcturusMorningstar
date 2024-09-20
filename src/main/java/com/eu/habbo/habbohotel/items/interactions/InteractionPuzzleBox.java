@@ -5,7 +5,7 @@ import com.eu.habbo.habbohotel.items.Item;
 import com.eu.habbo.habbohotel.rooms.*;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.outgoing.rooms.items.FloorItemOnRollerComposer;
+import com.eu.habbo.messages.outgoing.room.engine.SlideObjectBundleItemComposer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -64,7 +64,7 @@ public class InteractionPuzzleBox extends HabboItem {
         this.needsUpdate(true);
         room.updateItem(this);
 
-        room.scheduledComposers.add(new FloorItemOnRollerComposer(this, null, tile, 0, room).compose());
+        room.scheduledComposers.add(new SlideObjectBundleItemComposer(this, null, tile, 0, room).compose());
         room.scheduledTasks.add(() -> {
             client.getHabbo().getRoomUnit().setGoalLocation(boxLocation);
 

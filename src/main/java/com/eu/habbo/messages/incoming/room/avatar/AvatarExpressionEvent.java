@@ -5,7 +5,7 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomUserAction;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserActionComposer;
+import com.eu.habbo.messages.outgoing.room.action.ExpressionComposer;
 import com.eu.habbo.plugin.events.users.UserIdleEvent;
 
 public class AvatarExpressionEvent extends MessageHandler {
@@ -50,7 +50,7 @@ public class AvatarExpressionEvent extends MessageHandler {
 
             }
 
-            room.sendComposer(new RoomUserActionComposer(habbo.getRoomUnit(), RoomUserAction.fromValue(action)).compose());
+            room.sendComposer(new ExpressionComposer(habbo.getRoomUnit(), RoomUserAction.fromValue(action)).compose());
         }
     }
 }

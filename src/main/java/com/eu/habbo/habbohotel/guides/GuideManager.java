@@ -4,7 +4,7 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.achievements.AchievementManager;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.outgoing.guides.*;
+import com.eu.habbo.messages.outgoing.help.*;
 import com.eu.habbo.threading.runnables.GuardianTicketFindMoreSlaves;
 import com.eu.habbo.threading.runnables.GuideFindNewHelper;
 import gnu.trove.map.hash.THashMap;
@@ -123,7 +123,7 @@ public class GuideManager {
                     this.activeHelpers.put(tour.getHelper(), false);
                     tour.getHelper().getClient().sendResponse(new GuideSessionEndedComposer(GuideSessionEndedComposer.HELP_CASE_CLOSED));
                     tour.getHelper().getClient().sendResponse(new GuideSessionDetachedComposer());
-                    tour.getHelper().getClient().sendResponse(new GuideToolsComposer(true));
+                    tour.getHelper().getClient().sendResponse(new GuideOnDutyStatusComposer(true));
                 }
             }
         }

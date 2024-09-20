@@ -4,7 +4,7 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
-import com.eu.habbo.messages.outgoing.rooms.RoomDataComposer;
+import com.eu.habbo.messages.outgoing.navigator.GetGuestRoomResultComposer;
 
 public class StalkCommand extends Command {
     public StalkCommand() {
@@ -39,8 +39,8 @@ public class StalkCommand extends Command {
                 return true;
             }
 
-            gameClient.sendResponse(new RoomDataComposer(habbo.getHabboInfo().getCurrentRoom(), gameClient.getHabbo(), true, false));
-            //gameClient.sendResponse(new ForwardToRoomComposer(habbo.getHabboInfo().getCurrentRoom().getId()));
+            gameClient.sendResponse(new GetGuestRoomResultComposer(habbo.getHabboInfo().getCurrentRoom(), gameClient.getHabbo(), true, false));
+            //gameClient.sendResponse(new RoomForwardComposer(habbo.getHabboInfo().getCurrentRoom().getId()));
             return true;
         } else {
             gameClient.getHabbo().whisper(Emulator.getTexts().getValue("commands.error.cmd_stalk.forgot_username"), RoomChatMessageBubbles.ALERT);

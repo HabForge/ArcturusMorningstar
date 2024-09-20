@@ -7,8 +7,8 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.items.youtube.YoutubeStateChangeComposer;
-import com.eu.habbo.messages.outgoing.rooms.items.youtube.YoutubeVideoComposer;
+import com.eu.habbo.messages.outgoing.room.furniture.YoutubeControlVideoComposer;
+import com.eu.habbo.messages.outgoing.room.furniture.YoutubeDisplayVideoComposer;
 import com.eu.habbo.threading.runnables.YoutubeAdvanceVideo;
 
 public class ControlYoutubeDisplayPlaybackEvent extends MessageHandler {
@@ -75,13 +75,13 @@ public class ControlYoutubeDisplayPlaybackEvent extends MessageHandler {
                 tv.playing = false;
                 tv.offset += Emulator.getIntUnixTimestamp() - tv.startedWatchingAt;
                 if (tv.autoAdvance != null) tv.autoAdvance.cancel(true);
-                room.sendComposer(new YoutubeStateChangeComposer(tv.getId(), 2).compose());
+                room.sendComposer(new YoutubeControlVideoComposer(tv.getId(), 2).compose());
                 break;
             case RESUME:
                 tv.playing = true;
                 tv.startedWatchingAt = Emulator.getIntUnixTimestamp();
                 tv.autoAdvance = Emulator.getThreading().run(new YoutubeAdvanceVideo(tv), (tv.currentVideo.getDuration() - tv.offset) * 1000);
-                room.sendComposer(new YoutubeStateChangeComposer(tv.getId(), 1).compose());
+                room.sendComposer(new YoutubeControlVideoComposer(tv.getId(), 1).compose());
                 break;
             case PREVIOUS:
                 int previousIndex = tv.currentPlaylist.getVideos().indexOf(tv.currentVideo) - 1;
@@ -96,7 +96,7 @@ public class ControlYoutubeDisplayPlaybackEvent extends MessageHandler {
         }
 
         if (state == YoutubeState.PREVIOUS || state == YoutubeState.NEXT) {
-            room.sendComposer(new YoutubeVideoComposer(tv.getId(), tv.currentVideo, true, 0).compose());
+            room.sendComposer(new YoutubeDisplayVideoComposer(tv.getId(), tv.currentVideo, true, 0).compose());
 
             tv.cancelAdvancement();
             tv.autoAdvance = Emulator.getThreading().run(new YoutubeAdvanceVideo(tv), tv.currentVideo.getDuration() * 1000);

@@ -3,7 +3,7 @@ package com.eu.habbo.messages.incoming.navigator;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.RoomDataComposer;
+import com.eu.habbo.messages.outgoing.navigator.GetGuestRoomResultComposer;
 
 public class GetGuestRoomEvent extends MessageHandler {
     @Override
@@ -20,7 +20,7 @@ public class GetGuestRoomEvent extends MessageHandler {
             }
 
             //this.client.getHabbo().getHabboInfo().getCurrentRoom() != room
-            this.client.sendResponse(new RoomDataComposer(room, this.client.getHabbo(), true, unknown));
+            this.client.sendResponse(new GetGuestRoomResultComposer(room, this.client.getHabbo(), true, unknown));
         }
     }
 }

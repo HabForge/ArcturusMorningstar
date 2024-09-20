@@ -3,7 +3,7 @@ package com.eu.habbo.messages.incoming.users;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guilds.Guild;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.guilds.GuildListComposer;
+import com.eu.habbo.messages.outgoing.users.GuildMembershipsComposer;
 import gnu.trove.set.hash.THashSet;
 
 public class GetGuildMembershipsEvent extends MessageHandler {
@@ -22,6 +22,6 @@ public class GetGuildMembershipsEvent extends MessageHandler {
             }
         }
 
-        this.client.sendResponse(new GuildListComposer(guilds, this.client.getHabbo()));
+        this.client.sendResponse(new GuildMembershipsComposer(guilds, this.client.getHabbo()));
     }
 }

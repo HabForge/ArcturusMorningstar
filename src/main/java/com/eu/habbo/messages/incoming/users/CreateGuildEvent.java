@@ -7,11 +7,11 @@ import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.catalog.AlertPurchaseFailedComposer;
+import com.eu.habbo.messages.outgoing.catalog.PurchaseErrorComposer;
 import com.eu.habbo.messages.outgoing.catalog.PurchaseOKComposer;
-import com.eu.habbo.messages.outgoing.guilds.GuildBoughtComposer;
-import com.eu.habbo.messages.outgoing.guilds.GuildEditFailComposer;
-import com.eu.habbo.messages.outgoing.guilds.GuildInfoComposer;
+import com.eu.habbo.messages.outgoing.users.GuildCreatedComposer;
+import com.eu.habbo.messages.outgoing.users.GuildEditFailedComposer;
+import com.eu.habbo.messages.outgoing.users.HabboGroupDetailsComposer;
 import com.eu.habbo.plugin.events.guilds.GuildPurchasedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class CreateGuildEvent extends MessageHandler {
             return;
 
         if (Emulator.getConfig().getBoolean("catalog.guild.hc_required", true) && !this.client.getHabbo().getHabboStats().hasActiveClub()) {
-            this.client.sendResponse(new GuildEditFailComposer(GuildEditFailComposer.HC_REQUIRED));
+            this.client.sendResponse(new GuildEditFailedComposer(GuildEditFailedComposer.HC_REQUIRED));
             return;
         }
 
@@ -37,7 +37,7 @@ public class CreateGuildEvent extends MessageHandler {
             if (this.client.getHabbo().getHabboInfo().getCredits() >= guildPrice) {
                 this.client.getHabbo().giveCredits(-guildPrice);
             } else {
-                this.client.sendResponse(new AlertPurchaseFailedComposer(AlertPurchaseFailedComposer.SERVER_ERROR));
+                this.client.sendResponse(new PurchaseErrorComposer(PurchaseErrorComposer.SERVER_ERROR));
                 return;
             }
         }
@@ -48,7 +48,7 @@ public class CreateGuildEvent extends MessageHandler {
 
         if (r != null) {
             if (r.hasGuild()) {
-                this.client.sendResponse(new GuildEditFailComposer(GuildEditFailComposer.ROOM_ALREADY_IN_USE));
+                this.client.sendResponse(new GuildEditFailedComposer(GuildEditFailedComposer.ROOM_ALREADY_IN_USE));
                 return;
             }
 
@@ -80,7 +80,7 @@ public class CreateGuildEvent extends MessageHandler {
                     }
 
                     if(name.length() > 29){
-                        this.client.sendResponse(new GuildEditFailComposer(GuildEditFailComposer.INVALID_GUILD_NAME));
+                        this.client.sendResponse(new GuildEditFailedComposer(GuildEditFailedComposer.INVALID_GUILD_NAME));
                         return;
                     }
                     if(description.length() > 254){
@@ -97,9 +97,9 @@ public class CreateGuildEvent extends MessageHandler {
                     }
 
                     this.client.sendResponse(new PurchaseOKComposer());
-                    this.client.sendResponse(new GuildBoughtComposer(guild));
+                    this.client.sendResponse(new GuildCreatedComposer(guild));
                     for (Habbo habbo : r.getHabbos()) {
-                        habbo.getClient().sendResponse(new GuildInfoComposer(guild, habbo.getClient(), false, null));
+                        habbo.getClient().sendResponse(new HabboGroupDetailsComposer(guild, habbo.getClient(), false, null));
                     }
                     r.refreshGuild(guild);
 

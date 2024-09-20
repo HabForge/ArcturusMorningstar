@@ -6,9 +6,9 @@ import com.eu.habbo.habbohotel.rooms.RoomLayout;
 import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.wired.WiredHandler;
 import com.eu.habbo.habbohotel.wired.WiredTriggerType;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserRemoveComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserStatusComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUsersComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserRemoveComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserUpdateComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UsersComposer;
 import com.eu.habbo.threading.runnables.RoomUnitTeleport;
 
 public class InvisibleCommand extends Command {
@@ -28,8 +28,8 @@ public class InvisibleCommand extends Command {
             roomUnit.setInvisible(false);
             roomUnit.setInRoom(true);
 
-            roomUnit.getRoom().sendComposer(new RoomUsersComposer(gameClient.getHabbo()).compose());
-            roomUnit.getRoom().sendComposer(new RoomUserStatusComposer(roomUnit).compose());
+            roomUnit.getRoom().sendComposer(new UsersComposer(gameClient.getHabbo()).compose());
+            roomUnit.getRoom().sendComposer(new UserUpdateComposer(roomUnit).compose());
 
             WiredHandler.handle(WiredTriggerType.ENTER_ROOM, roomUnit, roomUnit.getRoom(), null);
             roomUnit.getRoom().habboEntered(gameClient.getHabbo());
@@ -41,7 +41,7 @@ public class InvisibleCommand extends Command {
 
         roomUnit.setInvisible(true);
         gameClient.getHabbo().whisper(Emulator.getTexts().getValue("commands.succes.cmd_invisible.updated"));
-        gameClient.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserRemoveComposer(roomUnit).compose());
+        gameClient.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new UserRemoveComposer(roomUnit).compose());
 
         return true;
     }

@@ -9,7 +9,7 @@ import com.eu.habbo.habbohotel.rooms.RoomUnitStatus;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUnitOnRollerComposer;
+import com.eu.habbo.messages.outgoing.room.engine.SlideObjectBundleRoomUnitComposer;
 import com.eu.habbo.plugin.events.users.UserIdleEvent;
 import gnu.trove.set.hash.THashSet;
 import org.slf4j.Logger;
@@ -150,10 +150,10 @@ public class MoveAvatarEvent extends MessageHandler {
                         }
                     } else {
                         RoomTile t = room.getLayout().getTile((short) x, (short) y);
-                        room.sendComposer(new RoomUnitOnRollerComposer(roomUnit, t, room).compose());
+                        room.sendComposer(new SlideObjectBundleRoomUnitComposer(roomUnit, t, room).compose());
 
                         if (habbo.getHabboInfo().getRiding() != null) {
-                            room.sendComposer(new RoomUnitOnRollerComposer(habbo.getHabboInfo().getRiding().getRoomUnit(), t, room).compose());
+                            room.sendComposer(new SlideObjectBundleRoomUnitComposer(habbo.getHabboInfo().getRiding().getRoomUnit(), t, room).compose());
                         }
                     }
                 }

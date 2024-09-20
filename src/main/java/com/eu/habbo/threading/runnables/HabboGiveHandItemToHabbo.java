@@ -1,8 +1,8 @@
 package com.eu.habbo.threading.runnables;
 
 import com.eu.habbo.habbohotel.users.Habbo;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserHandItemComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserReceivedHandItemComposer;
+import com.eu.habbo.messages.outgoing.room.action.CarryObjectComposer;
+import com.eu.habbo.messages.outgoing.users.HandItemReceivedComposer;
 
 public class HabboGiveHandItemToHabbo implements Runnable {
     private final Habbo target;
@@ -25,12 +25,12 @@ public class HabboGiveHandItemToHabbo implements Runnable {
 
         if (itemId > 0) {
             this.from.getRoomUnit().setHandItem(0);
-            this.from.getHabboInfo().getCurrentRoom().sendComposer(new RoomUserHandItemComposer(this.from.getRoomUnit()).compose());
+            this.from.getHabboInfo().getCurrentRoom().sendComposer(new CarryObjectComposer(this.from.getRoomUnit()).compose());
             this.target.getRoomUnit().lookAtPoint(this.from.getRoomUnit().getCurrentLocation());
             this.target.getRoomUnit().statusUpdate(true);
-            this.target.getClient().sendResponse(new RoomUserReceivedHandItemComposer(this.from.getRoomUnit(), itemId));
+            this.target.getClient().sendResponse(new HandItemReceivedComposer(this.from.getRoomUnit(), itemId));
             this.target.getRoomUnit().setHandItem(itemId);
-            this.target.getHabboInfo().getCurrentRoom().sendComposer(new RoomUserHandItemComposer(this.target.getRoomUnit()).compose());
+            this.target.getHabboInfo().getCurrentRoom().sendComposer(new CarryObjectComposer(this.target.getRoomUnit()).compose());
         }
     }
 }

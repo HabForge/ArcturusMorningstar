@@ -3,9 +3,9 @@ package com.eu.habbo.messages.incoming.groupforums;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guilds.Guild;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.guilds.forums.GuildForumDataComposer;
-import com.eu.habbo.messages.outgoing.guilds.forums.GuildForumThreadsComposer;
-import com.eu.habbo.messages.outgoing.handshake.ConnectionErrorComposer;
+import com.eu.habbo.messages.outgoing.error.ErrorReportComposer;
+import com.eu.habbo.messages.outgoing.groupforums.ForumDataComposer;
+import com.eu.habbo.messages.outgoing.groupforums.ForumThreadsComposer;
 
 public class GetThreadsEvent extends MessageHandler {
     @Override
@@ -16,11 +16,11 @@ public class GetThreadsEvent extends MessageHandler {
         Guild guild = Emulator.getGameEnvironment().getGuildManager().getGuild(guildId);
 
         if (guild == null) {
-            this.client.sendResponse(new ConnectionErrorComposer(404));
+            this.client.sendResponse(new ErrorReportComposer(404));
             return;
         }
 
-        this.client.sendResponse(new GuildForumDataComposer(guild, this.client.getHabbo()));
-        this.client.sendResponse(new GuildForumThreadsComposer(guild, index));
+        this.client.sendResponse(new ForumDataComposer(guild, this.client.getHabbo()));
+        this.client.sendResponse(new ForumThreadsComposer(guild, index));
     }
 }

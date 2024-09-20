@@ -1,6 +1,5 @@
 package com.eu.habbo.habbohotel.items.interactions;
 
-import com.eu.habbo.habbohotel.bots.Bot;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.items.Item;
 import com.eu.habbo.habbohotel.rooms.*;
@@ -9,16 +8,11 @@ import com.eu.habbo.habbohotel.users.HabboGender;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.habbohotel.wired.WiredEffectType;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserStatusComposer;
 import gnu.trove.set.hash.THashSet;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class InteractionMultiHeight extends HabboItem {
     public InteractionMultiHeight(int id, int userId, Item item, String extradata, int limitedStack, int limitedSells) {
@@ -73,7 +67,7 @@ public class InteractionMultiHeight extends HabboItem {
                     this.needsUpdate(true);
                     room.updateTiles(room.getLayout().getTilesAt(room.getLayout().getTile(this.getX(), this.getY()), this.getBaseItem().getWidth(), this.getBaseItem().getLength(), this.getRotation()));
                     room.updateItemState(this);
-                    //room.sendComposer(new UpdateStackHeightComposer(this.getX(), this.getY(), this.getBaseItem().getMultiHeights()[Integer.valueOf(this.getExtradata())] * 256.0D).compose());
+                    //room.sendComposer(new HeightMapUpdateComposer(this.getX(), this.getY(), this.getBaseItem().getMultiHeights()[Integer.valueOf(this.getExtradata())] * 256.0D).compose());
                 }
             }
         }
@@ -101,7 +95,7 @@ public class InteractionMultiHeight extends HabboItem {
             }
         }
 
-        //room.sendComposer(new RoomUserStatusComposer(updatedUnits, true).compose());
+        //room.sendComposer(new UserUpdateComposer(updatedUnits, true).compose());
     }
 
     @Override

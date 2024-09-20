@@ -6,7 +6,7 @@ import com.eu.habbo.habbohotel.rooms.RoomTile;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.ServerMessage;
-import com.eu.habbo.messages.outgoing.rooms.items.FloorItemOnRollerComposer;
+import com.eu.habbo.messages.outgoing.room.engine.SlideObjectBundleItemComposer;
 import com.eu.habbo.plugin.EventHandler;
 import com.eu.habbo.plugin.events.users.UserTakeStepEvent;
 import gnu.trove.set.hash.THashSet;
@@ -58,7 +58,7 @@ public class RoomTrashing implements Runnable {
                     for (HabboItem item : items) {
                         double offsetZ = (INSTANCE.room.getTopHeightAt(t.x, t.y)) - item.getZ();
 
-                        messages.add(new FloorItemOnRollerComposer(item, null, t, offsetZ, INSTANCE.room).compose());
+                        messages.add(new SlideObjectBundleItemComposer(item, null, t, offsetZ, INSTANCE.room).compose());
                     }
 
 
@@ -84,7 +84,7 @@ public class RoomTrashing implements Runnable {
                     for (HabboItem item : items) {
                         double offsetZ = (INSTANCE.room.getTopHeightAt(t.x, t.y)) - item.getZ();
 
-                        messages.add(new FloorItemOnRollerComposer(item, null, t, offsetZ, INSTANCE.room).compose());
+                        messages.add(new SlideObjectBundleItemComposer(item, null, t, offsetZ, INSTANCE.room).compose());
                     }
 
                     offset = Emulator.getRandom().nextInt(4) + 2;
@@ -106,7 +106,7 @@ public class RoomTrashing implements Runnable {
                     for (HabboItem item : items) {
                         double offsetZ = (INSTANCE.room.getTopHeightAt(t.x, t.y)) - item.getZ();
 
-                        messages.add(new FloorItemOnRollerComposer(item, null, t, offsetZ, INSTANCE.room).compose());
+                        messages.add(new SlideObjectBundleItemComposer(item, null, t, offsetZ, INSTANCE.room).compose());
                     }
 
                     for (ServerMessage message : messages) {

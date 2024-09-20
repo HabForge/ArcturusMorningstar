@@ -7,8 +7,8 @@ import com.eu.habbo.habbohotel.items.interactions.wired.WiredSettings;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.UpdateFailedComposer;
-import com.eu.habbo.messages.outgoing.wired.WiredSavedComposer;
+import com.eu.habbo.messages.outgoing.userdefinedroomevents.WiredSaveSuccessComposer;
+import com.eu.habbo.messages.outgoing.userdefinedroomevents.WiredValidationErrorComposer;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -35,26 +35,26 @@ public class UpdateActionEvent extends MessageHandler {
                         if(saveMethod.get().getParameterTypes()[0] == WiredSettings.class) {
                             WiredSettings settings = InteractionWired.readSettings(this.packet, true);
                             if (effect.saveData(settings, this.client)) {
-                                this.client.sendResponse(new WiredSavedComposer());
+                                this.client.sendResponse(new WiredSaveSuccessComposer());
                                 effect.needsUpdate(true);
                                 Emulator.getThreading().run(effect);
                             }
                         }
                         else {
                             if ((boolean) saveMethod.get().invoke(effect, this.packet, this.client)) {
-                                this.client.sendResponse(new WiredSavedComposer());
+                                this.client.sendResponse(new WiredSaveSuccessComposer());
                                 effect.needsUpdate(true);
                                 Emulator.getThreading().run(effect);
                             }
                         }
                     } else {
-                        this.client.sendResponse(new UpdateFailedComposer("Save method was not found"));
+                        this.client.sendResponse(new WiredValidationErrorComposer("Save method was not found"));
                     }
 
 
                 }
                 catch (WiredSaveException e) {
-                    this.client.sendResponse(new UpdateFailedComposer(e.getMessage()));
+                    this.client.sendResponse(new WiredValidationErrorComposer(e.getMessage()));
                 }
             }
         }

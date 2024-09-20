@@ -7,10 +7,10 @@ import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.DanceType;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.generic.alerts.BotErrorComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserDanceComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserNameChangedComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUsersComposer;
+import com.eu.habbo.messages.outgoing.room.action.DanceComposer;
+import com.eu.habbo.messages.outgoing.room.bots.BotErrorComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UsersComposer;
+import com.eu.habbo.messages.outgoing.users.UserNameChangedComposer;
 import com.eu.habbo.plugin.events.bots.BotSavedChatEvent;
 import com.eu.habbo.plugin.events.bots.BotSavedLookEvent;
 import com.eu.habbo.plugin.events.bots.BotSavedNameEvent;
@@ -123,7 +123,7 @@ public class CommandBotEvent extends MessageHandler {
 
                 case 4:
                     bot.getRoomUnit().setDanceType(DanceType.values()[(bot.getRoomUnit().getDanceType().getType() + 1) % DanceType.values().length]);
-                    room.sendComposer(new RoomUserDanceComposer(bot.getRoomUnit()).compose());
+                    room.sendComposer(new DanceComposer(bot.getRoomUnit()).compose());
                     bot.needsUpdate(true);
                     break;
 
@@ -143,7 +143,7 @@ public class CommandBotEvent extends MessageHandler {
 
                             bot.setName(nameEvent.name);
                             bot.needsUpdate(true);
-                            room.sendComposer(new RoomUserNameChangedComposer(bot.getRoomUnit().getId(), bot.getRoomUnit().getId(), nameEvent.name).compose());
+                            room.sendComposer(new UserNameChangedComposer(bot.getRoomUnit().getId(), bot.getRoomUnit().getId(), nameEvent.name).compose());
                         }
                     }
 
@@ -158,7 +158,7 @@ public class CommandBotEvent extends MessageHandler {
 
                     bot.setMotto(motto);
                     bot.needsUpdate(true);
-                    room.sendComposer(new RoomUsersComposer(bot).compose());
+                    room.sendComposer(new UsersComposer(bot).compose());
                     break;
             }
 

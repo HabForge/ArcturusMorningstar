@@ -7,7 +7,7 @@ public class GetMOTDEvent extends MessageHandler {
     public void handle() throws Exception {
 
 
-        //this.client.sendResponse(new FriendsComposer(this.client.getHabbo()));
+        //this.client.sendResponse(new FriendListFragmentComposer(this.client.getHabbo()));
 
         //this.client.sendResponse(new MessengerInitComposer(this.client.getHabbo()));
     }

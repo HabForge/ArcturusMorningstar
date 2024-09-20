@@ -1,7 +1,7 @@
 package com.eu.habbo.messages.incoming.marketplace;
 
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.catalog.marketplace.MarketplaceItemInfoComposer;
+import com.eu.habbo.messages.outgoing.marketplace.MarketplaceItemStatsComposer;
 
 public class GetMarketplaceItemStatsEvent extends MessageHandler {
     @Override
@@ -9,6 +9,6 @@ public class GetMarketplaceItemStatsEvent extends MessageHandler {
         this.packet.readInt();
         int id = this.packet.readInt();
 
-        this.client.sendResponse(new MarketplaceItemInfoComposer(id));
+        this.client.sendResponse(new MarketplaceItemStatsComposer(id));
     }
 }

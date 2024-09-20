@@ -4,10 +4,10 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.achievements.AchievementManager;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.camera.CameraPurchaseSuccesfullComposer;
-import com.eu.habbo.messages.outgoing.catalog.NotEnoughPointsTypeComposer;
-import com.eu.habbo.messages.outgoing.inventory.AddHabboItemComposer;
-import com.eu.habbo.messages.outgoing.inventory.InventoryRefreshComposer;
+import com.eu.habbo.messages.outgoing.camera.CameraPurchaseOKComposer;
+import com.eu.habbo.messages.outgoing.catalog.NotEnoughBalanceComposer;
+import com.eu.habbo.messages.outgoing.inventory.furni.FurniListInvalidateComposer;
+import com.eu.habbo.messages.outgoing.notifications.UnseenItemsComposer;
 import com.eu.habbo.plugin.events.users.UserPurchasePictureEvent;
 
 public class PurchasePhotoEvent extends MessageHandler {
@@ -18,12 +18,12 @@ public class PurchasePhotoEvent extends MessageHandler {
     @Override
     public void handle() throws Exception {
         if (this.client.getHabbo().getHabboInfo().getCredits() < PurchasePhotoEvent.CAMERA_PURCHASE_CREDITS) {
-            this.client.sendResponse(new NotEnoughPointsTypeComposer(true, false, 0));
+            this.client.sendResponse(new NotEnoughBalanceComposer(true, false, 0));
             return;
         }
 
         if (this.client.getHabbo().getHabboInfo().getCurrencyAmount(PurchasePhotoEvent.CAMERA_PURCHASE_POINTS_TYPE) < PurchasePhotoEvent.CAMERA_PURCHASE_POINTS) {
-            this.client.sendResponse(new NotEnoughPointsTypeComposer(false, true, PurchasePhotoEvent.CAMERA_PURCHASE_POINTS_TYPE));
+            this.client.sendResponse(new NotEnoughBalanceComposer(false, true, PurchasePhotoEvent.CAMERA_PURCHASE_POINTS_TYPE));
             return;
         }
 
@@ -44,9 +44,9 @@ public class PurchasePhotoEvent extends MessageHandler {
 
             this.client.getHabbo().getInventory().getItemsComponent().addItem(photoItem);
 
-            this.client.sendResponse(new CameraPurchaseSuccesfullComposer());
-            this.client.sendResponse(new AddHabboItemComposer(photoItem));
-            this.client.sendResponse(new InventoryRefreshComposer());
+            this.client.sendResponse(new CameraPurchaseOKComposer());
+            this.client.sendResponse(new UnseenItemsComposer(photoItem));
+            this.client.sendResponse(new FurniListInvalidateComposer());
 
             this.client.getHabbo().giveCredits(-PurchasePhotoEvent.CAMERA_PURCHASE_CREDITS);
             this.client.getHabbo().givePoints(PurchasePhotoEvent.CAMERA_PURCHASE_POINTS_TYPE, -PurchasePhotoEvent.CAMERA_PURCHASE_POINTS);

@@ -3,8 +3,8 @@ package com.eu.habbo.messages.incoming.users;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guilds.Guild;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.guilds.GuildFavoriteRoomUserUpdateComposer;
-import com.eu.habbo.messages.outgoing.users.UserProfileComposer;
+import com.eu.habbo.messages.outgoing.room.engine.FavoriteMembershipUpdateComposer;
+import com.eu.habbo.messages.outgoing.users.ExtendedProfileComposer;
 import com.eu.habbo.plugin.events.guilds.GuildRemovedFavoriteEvent;
 
 public class DeselectFavouriteHabboGroupEvent extends MessageHandler {
@@ -22,10 +22,10 @@ public class DeselectFavouriteHabboGroupEvent extends MessageHandler {
             this.client.getHabbo().getHabboStats().guild = 0;
 
             if (this.client.getHabbo().getHabboInfo().getCurrentRoom() != null && guild != null) {
-                this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new GuildFavoriteRoomUserUpdateComposer(this.client.getHabbo().getRoomUnit(), null).compose());
+                this.client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new FavoriteMembershipUpdateComposer(this.client.getHabbo().getRoomUnit(), null).compose());
             }
 
-            this.client.sendResponse(new UserProfileComposer(this.client.getHabbo(), this.client));
+            this.client.sendResponse(new ExtendedProfileComposer(this.client.getHabbo(), this.client));
         }
     }
 }

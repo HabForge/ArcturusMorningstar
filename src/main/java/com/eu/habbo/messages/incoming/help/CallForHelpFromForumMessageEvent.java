@@ -7,7 +7,7 @@ import com.eu.habbo.habbohotel.modtool.ModToolIssue;
 import com.eu.habbo.habbohotel.modtool.ModToolTicketType;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.modtool.ModToolReportReceivedAlertComposer;
+import com.eu.habbo.messages.outgoing.help.CallForHelpResultComposer;
 import com.eu.habbo.threading.runnables.InsertModToolIssue;
 
 public class CallForHelpFromForumMessageEvent extends MessageHandler {
@@ -36,7 +36,7 @@ public class CallForHelpFromForumMessageEvent extends MessageHandler {
         issue.commentId = commentId;
         new InsertModToolIssue(issue).run();
 
-        this.client.sendResponse(new ModToolReportReceivedAlertComposer(ModToolReportReceivedAlertComposer.REPORT_RECEIVED, message));
+        this.client.sendResponse(new CallForHelpResultComposer(CallForHelpResultComposer.REPORT_RECEIVED, message));
         Emulator.getGameEnvironment().getModToolManager().addTicket(issue);
         Emulator.getGameEnvironment().getModToolManager().updateTicketToMods(issue);
     }

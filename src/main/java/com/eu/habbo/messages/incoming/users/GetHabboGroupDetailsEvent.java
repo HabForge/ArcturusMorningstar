@@ -3,7 +3,7 @@ package com.eu.habbo.messages.incoming.users;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.guilds.Guild;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.guilds.GuildInfoComposer;
+import com.eu.habbo.messages.outgoing.users.HabboGroupDetailsComposer;
 
 public class GetHabboGroupDetailsEvent extends MessageHandler {
     @Override
@@ -14,7 +14,7 @@ public class GetHabboGroupDetailsEvent extends MessageHandler {
         Guild guild = Emulator.getGameEnvironment().getGuildManager().getGuild(guildId);
 
         if (guild != null) {
-            this.client.sendResponse(new GuildInfoComposer(guild, this.client, newWindow, Emulator.getGameEnvironment().getGuildManager().getGuildMember(guild, this.client.getHabbo())));
+            this.client.sendResponse(new HabboGroupDetailsComposer(guild, this.client, newWindow, Emulator.getGameEnvironment().getGuildManager().getGuildMember(guild, this.client.getHabbo())));
         }
     }
 }

@@ -8,9 +8,9 @@ import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.incoming.MessageHandler;
-import com.eu.habbo.messages.outgoing.guilds.GuildInfoComposer;
-import com.eu.habbo.messages.outgoing.guilds.GuildMembersComposer;
-import com.eu.habbo.messages.outgoing.guilds.GuildRefreshMembersListComposer;
+import com.eu.habbo.messages.outgoing.users.GuildMembersComposer;
+import com.eu.habbo.messages.outgoing.users.GuildMembershipRejectedComposer;
+import com.eu.habbo.messages.outgoing.users.HabboGroupDetailsComposer;
 import com.eu.habbo.plugin.events.guilds.GuildDeclinedMembershipEvent;
 
 public class RejectMembershipRequestEvent extends MessageHandler {
@@ -27,7 +27,7 @@ public class RejectMembershipRequestEvent extends MessageHandler {
                 guild.decreaseRequestCount();
                 Emulator.getGameEnvironment().getGuildManager().removeMember(guild, userId);
                 this.client.sendResponse(new GuildMembersComposer(guild, Emulator.getGameEnvironment().getGuildManager().getGuildMembers(guild, 0, 0, ""), this.client.getHabbo(), 0, 0, "", true, Emulator.getGameEnvironment().getGuildManager().getGuildMembersCount(guild, 0, 0, "")));
-                this.client.sendResponse(new GuildRefreshMembersListComposer(guild));
+                this.client.sendResponse(new GuildMembershipRejectedComposer(guild));
 
                 Habbo habbo = Emulator.getGameEnvironment().getHabboManager().getHabbo(userId);
                 Emulator.getPluginManager().fireEvent(new GuildDeclinedMembershipEvent(guild, userId, habbo, this.client.getHabbo()));
@@ -36,7 +36,7 @@ public class RejectMembershipRequestEvent extends MessageHandler {
                     Room room = habbo.getHabboInfo().getCurrentRoom();
                     if (room != null) {
                         if (room.getGuildId() == guildId) {
-                            habbo.getClient().sendResponse(new GuildInfoComposer(guild, habbo.getClient(), false, null));
+                            habbo.getClient().sendResponse(new HabboGroupDetailsComposer(guild, habbo.getClient(), false, null));
                         }
                     }
                 }

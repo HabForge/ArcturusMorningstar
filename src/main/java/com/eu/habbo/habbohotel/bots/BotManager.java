@@ -1,19 +1,18 @@
 package com.eu.habbo.habbohotel.bots;
 
 import com.eu.habbo.Emulator;
-import com.eu.habbo.habbohotel.items.Item;
+import com.eu.habbo.habbohotel.notifications.BubbleAlertKeys;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.rooms.*;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboInfo;
 import com.eu.habbo.habbohotel.users.HabboItem;
-import com.eu.habbo.messages.outgoing.generic.alerts.BotErrorComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertComposer;
-import com.eu.habbo.messages.outgoing.generic.alerts.BubbleAlertKeys;
-import com.eu.habbo.messages.outgoing.inventory.AddBotComposer;
-import com.eu.habbo.messages.outgoing.inventory.RemoveBotComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUserStatusComposer;
-import com.eu.habbo.messages.outgoing.rooms.users.RoomUsersComposer;
+import com.eu.habbo.messages.outgoing.inventory.bots.BotAddedToInventoryComposer;
+import com.eu.habbo.messages.outgoing.inventory.bots.BotRemovedFromInventoryComposer;
+import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
+import com.eu.habbo.messages.outgoing.room.bots.BotErrorComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UserUpdateComposer;
+import com.eu.habbo.messages.outgoing.room.engine.UsersComposer;
 import com.eu.habbo.plugin.events.bots.BotPickUpEvent;
 import com.eu.habbo.plugin.events.bots.BotPlacedEvent;
 import gnu.trove.map.hash.THashMap;
@@ -139,10 +138,10 @@ public class BotManager {
                 bot.needsUpdate(true);
                 room.addBot(bot);
                 Emulator.getThreading().run(bot);
-                room.sendComposer(new RoomUsersComposer(bot).compose());
-                room.sendComposer(new RoomUserStatusComposer(bot.getRoomUnit()).compose());
+                room.sendComposer(new UsersComposer(bot).compose());
+                room.sendComposer(new UserUpdateComposer(bot.getRoomUnit()).compose());
                 habbo.getInventory().getBotsComponent().removeBot(bot);
-                habbo.getClient().sendResponse(new RemoveBotComposer(bot));
+                habbo.getClient().sendResponse(new BotRemovedFromInventoryComposer(bot));
                 bot.onPlace(habbo, room);
 
                 HabboItem topItem = room.getTopItemAt(location.x, location.y);
@@ -157,7 +156,7 @@ public class BotManager {
 
                 bot.cycle(false);
             } else {
-                habbo.getClient().sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FURNITURE_PLACEMENT_ERROR.key, FurnitureMovementError.NO_RIGHTS.errorCode));
+                habbo.getClient().sendResponse(new NotificationDialogComposer(BubbleAlertKeys.FURNITURE_PLACEMENT_ERROR.key, FurnitureMovementError.NO_RIGHTS.errorCode));
             }
         }
     }
@@ -195,7 +194,7 @@ public class BotManager {
                 Habbo receiver = habbo == null ? Emulator.getGameEnvironment().getHabboManager().getHabbo(receiverInfo.getId()) : habbo;
                 if (receiver != null) {
                     receiver.getInventory().getBotsComponent().addBot(bot);
-                    receiver.getClient().sendResponse(new AddBotComposer(bot));
+                    receiver.getClient().sendResponse(new BotAddedToInventoryComposer(bot));
                 }
             }
         }
