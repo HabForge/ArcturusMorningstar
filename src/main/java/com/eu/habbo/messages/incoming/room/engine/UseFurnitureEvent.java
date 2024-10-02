@@ -1,6 +1,7 @@
 package com.eu.habbo.messages.incoming.room.engine;
 
 import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.items.interactions.InteractionAreaHider;
 import com.eu.habbo.habbohotel.items.interactions.InteractionDice;
 import com.eu.habbo.habbohotel.items.interactions.InteractionWired;
 import com.eu.habbo.habbohotel.items.interactions.pets.InteractionMonsterPlantSeed;
@@ -123,6 +124,10 @@ public class UseFurnitureEvent extends MessageHandler {
                             item.getBaseItem().getName().equalsIgnoreCase("pterosaur_egg") ||
                             item.getBaseItem().getName().equalsIgnoreCase("petbox_epic")) && room.getCurrentPets().size() < Room.MAXIMUM_PETS) {
                 this.client.sendResponse(new OpenPetPackageRequestedComposer(item));
+                return;
+            }
+            if (item instanceof InteractionAreaHider) {
+                item.onClick(this.client, room, new Object[]{state});
                 return;
             }
 
