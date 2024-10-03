@@ -18,6 +18,8 @@ import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.avatar.FigureUpdateComposer;
 import com.eu.habbo.messages.outgoing.room.action.DanceComposer;
 import com.eu.habbo.messages.outgoing.room.engine.UserChangeComposer;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import gnu.trove.set.hash.THashSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.util.Pair;
@@ -556,4 +558,39 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
                 this.getBaseItem().getLength() + (marginY * 2),
                 this.getRotation());
     }
+
+    public boolean isItemHiddenByAreaHider() {
+
+        if (this instanceof InteractionAreaHider) {
+            return false;
+        }
+
+        Room room = Emulator.getGameEnvironment().getRoomManager().getRoom(this.getRoomId());
+        List<HabboItem> areaHiders = room.getAreaHiders(true);
+        Gson gson = new Gson();
+
+        RoomTile tile = room.getLayout().getTile(this.getX(), this.getY());
+
+        for (HabboItem areaHider : areaHiders) {
+            String extraData = areaHider.getExtradata();
+
+            if (extraData != null && extraData.trim().startsWith("{")) {
+                try {
+                    InteractionAreaHider.JsonData data = gson.fromJson(extraData, InteractionAreaHider.JsonData.class);
+
+                    Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
+                    boolean isInRectangle = RoomLayout.tileInSquare(rectangle, tile);
+
+                    if (data.invertEnabled != isInRectangle) {
+                        return true;
+                    }
+
+                } catch (JsonSyntaxException e) {
+                    LOGGER.error("Error upon parsing extradata of AreaHider({}), error: {}", areaHider.getId(), e.getMessage());
+                }
+            }
+        }
+        return false;
+    }
+
 }

@@ -126,6 +126,7 @@ public class UseFurnitureEvent extends MessageHandler {
                 this.client.sendResponse(new OpenPetPackageRequestedComposer(item));
                 return;
             }
+
             if (item instanceof InteractionAreaHider) {
                 item.onClick(this.client, room, new Object[]{state});
                 return;

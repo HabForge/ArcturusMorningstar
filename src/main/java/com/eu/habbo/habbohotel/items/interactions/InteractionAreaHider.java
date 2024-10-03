@@ -45,14 +45,14 @@ public class InteractionAreaHider extends InteractionDefault {
             JsonData data = getExtradataAsJson();
 
             if (data != null) {
-
                 data.on = 1 - data.on;
                 updateExtradata(data);
-
+                room.toggleAreaHiderItemsVisibility();
                 room.sendComposer(new AreaHideMessageComposer(this).compose());
                 room.sendComposer(new ObjectDataUpdateComposer(this).compose());
             }
         }
+
     }
 
     @Override
@@ -60,12 +60,12 @@ public class InteractionAreaHider extends InteractionDefault {
         JsonData data = getExtradataAsJson();
 
         if (data == null) {
-
             data = new JsonData();
         }
 
         serverMessage.appendInt(5);  // itemType
         serverMessage.appendInt(8);  // length of int
+
         serverMessage.appendInt(data.on);
         serverMessage.appendInt(data.rootX);
         serverMessage.appendInt(data.rootY);
@@ -77,8 +77,9 @@ public class InteractionAreaHider extends InteractionDefault {
     }
 
     public void saveData(ClientMessage message) {
+
         JsonData data = new JsonData(
-                message.readInt(),
+                0,
                 message.readInt(),
                 message.readInt(),
                 message.readInt(),

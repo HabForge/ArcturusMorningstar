@@ -7,8 +7,11 @@ import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.eu.habbo.messages.outgoing.Outgoing;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AreaHideMessageComposer extends MessageComposer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AreaHideMessageComposer.class);
 
     private final HabboItem item;
     private static final Gson gson = new Gson();
@@ -25,23 +28,19 @@ public class AreaHideMessageComposer extends MessageComposer {
         InteractionAreaHider.JsonData data = parseExtradata(this.item.getExtradata());
 
         if (data != null) {
-            this.response.appendInt(data.on);
+            this.response.appendBoolean(data.on == 1);
             this.response.appendInt(data.rootX);
             this.response.appendInt(data.rootY);
             this.response.appendInt(data.width);
             this.response.appendInt(data.length);
-            this.response.appendInt(data.invisibility ? 1 : 0);
-            this.response.appendInt(data.wallItemsEnabled ? 1 : 0);
-            this.response.appendInt(data.invertEnabled ? 1 : 0);
+            this.response.appendBoolean(data.invertEnabled);
         } else {
             this.response.appendInt(0);
             this.response.appendInt(0);
             this.response.appendInt(0);
             this.response.appendInt(0);
             this.response.appendInt(0);
-            this.response.appendInt(0);
-            this.response.appendInt(0);
-            this.response.appendInt(0);
+            this.response.appendBoolean(false);
         }
 
         return this.response;
@@ -52,7 +51,7 @@ public class AreaHideMessageComposer extends MessageComposer {
             try {
                 return gson.fromJson(extradata, InteractionAreaHider.JsonData.class);
             } catch (JsonSyntaxException e) {
-                // e.getMessage());
+                LOGGER.error("Error upon parsing extradata {}", e.getMessage());
             }
         }
         return null;

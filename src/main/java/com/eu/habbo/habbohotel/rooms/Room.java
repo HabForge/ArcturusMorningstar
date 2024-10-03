@@ -69,6 +69,8 @@ import com.eu.habbo.plugin.events.rooms.RoomUnloadedEvent;
 import com.eu.habbo.plugin.events.rooms.RoomUnloadingEvent;
 import com.eu.habbo.plugin.events.users.*;
 import com.eu.habbo.threading.runnables.YouAreAPirate;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import gnu.trove.TCollections;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.array.TIntArrayList;
@@ -4873,4 +4875,97 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
         THashSet<RoomUnit> roomUnits = getRoomUnits();
         return roomUnits.stream().filter(unit -> unit.getCurrentLocation() == tile).collect(Collectors.toSet());
     }
+
+    public List<HabboItem> getAreaHiders(boolean onlyActive) {
+        TIntObjectIterator<HabboItem> iterator = this.roomItems.iterator();
+        List<HabboItem> foundItems = new ArrayList<>();
+        Gson gson = new Gson();
+
+        for (int i = this.roomItems.size(); i > 0; i--) {
+            try {
+                iterator.advance();
+                HabboItem object = iterator.value();
+
+                if (object instanceof InteractionAreaHider && object.getExtradata() != null && object.getExtradata().trim().startsWith("{")) {
+                    try {
+                        InteractionAreaHider.JsonData data = gson.fromJson(object.getExtradata(), InteractionAreaHider.JsonData.class);
+
+                        if (!onlyActive || (onlyActive && data.on == 1)) {
+                            foundItems.add(object);
+                        }
+                    } catch (JsonSyntaxException e) {
+                        LOGGER.error("An error occurred: ", e);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("An error occurred: ", e);
+            }
+        }
+        return foundItems;
+    }
+
+    public void toggleAreaHiderItemsVisibility() {
+        List<HabboItem> areaHiders = this.getAreaHiders(false);
+        Gson gson = new Gson();
+
+        for (HabboItem areaHider : areaHiders) {
+            String extraData = areaHider.getExtradata();
+
+            if (extraData != null && extraData.trim().startsWith("{")) {
+                try {
+                    InteractionAreaHider.JsonData data = gson.fromJson(extraData, InteractionAreaHider.JsonData.class);
+
+                    Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
+                    THashSet<HabboItem> foundItems = getItemsInRectangle(rectangle, data.invertEnabled);
+                    TIntObjectMap<String> furniOwnerNames = new TIntObjectHashMap<>();
+
+                    for (HabboItem item : foundItems) {
+                        if (!furniOwnerNames.containsKey(item.getUserId())) {
+                            HabboInfo habbo = Emulator.getGameEnvironment().getHabboManager().getHabboInfo(item.getUserId());
+                            furniOwnerNames.put(item.getUserId(), habbo.getUsername());
+                        }
+                    }
+
+                    if (data.on == 1) {
+                        this.sendComposer(new ObjectRemoveMultipleComposer(foundItems).compose());
+                    } else if (data.on == 0) {
+                        this.sendComposer(new ObjectsComposer(furniOwnerNames, foundItems).compose());
+                    }
+
+                } catch (JsonSyntaxException e) {
+                    LOGGER.error("Error upon parsing extradata of AreaHider({}), error: {}", areaHider.getId(), e.getMessage());
+                }
+            }
+        }
+    }
+
+    public THashSet<HabboItem> getItemsInRectangle(Rectangle rectangle, boolean invert) {
+        TIntObjectIterator<HabboItem> iterator = this.roomItems.iterator();
+        THashSet<HabboItem> foundItems = new THashSet<>();
+
+        for (int i = this.roomItems.size(); i > 0; i--) {
+            try {
+                iterator.advance();
+                HabboItem object = iterator.value();
+
+                // Skip AreaHiders
+                if (object instanceof InteractionAreaHider) {
+                    continue;
+                }
+
+                RoomTile tile = this.getLayout().getTile(object.getX(), object.getY());
+                boolean isInRectangle = RoomLayout.tileInSquare(rectangle, tile);
+
+                // Add item to the set if condition is met
+                if (invert != isInRectangle) {
+                    foundItems.add(object);
+                }
+            } catch (Exception e) {
+                LOGGER.error("An error occurred: ", e);
+            }
+        }
+        return foundItems;
+    }
+
+
 }
