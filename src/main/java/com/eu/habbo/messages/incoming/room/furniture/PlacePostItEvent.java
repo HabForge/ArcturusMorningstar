@@ -13,9 +13,6 @@ import com.eu.habbo.messages.outgoing.inventory.furni.FurniListRemoveComposer;
 import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
 import com.eu.habbo.messages.outgoing.room.engine.ItemAddComposer;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class PlacePostItEvent extends MessageHandler {
     @Override
     public void handle() throws Exception {
@@ -35,17 +32,7 @@ public class PlacePostItEvent extends MessageHandler {
                         item.setExtradata("FFFF33");
                         item.setRoomId(this.client.getHabbo().getHabboInfo().getCurrentRoom().getId());
 
-                        Pattern wallPostitonPattern = Pattern.compile(":w=(\\d+),(\\d+) l=(\\d+),(\\d+) (l|r)");
-                        Matcher wallPositionString = wallPostitonPattern.matcher(wallPosition);
-
-                        if (wallPositionString.find()) {
-                            item.setX((short) Integer.parseInt(wallPositionString.group(1)));
-                            item.setY((short) Integer.parseInt(wallPositionString.group(2)));
-                            item.setZ(Integer.parseInt(wallPositionString.group(4)));
-                            item.setRotation(wallPositionString.group(5).equals("l") ? 0 : 1);
-                            item.setWallItemOffset((short)Integer.parseInt(wallPositionString.group(3)));
-                        }
-
+                        item.parseWallItemPosition(wallPosition, item);
                         item.setUserId(this.client.getHabbo().getHabboInfo().getId());
                         item.needsUpdate(true);
                         room.sendComposer(new ItemAddComposer(item, this.client.getHabbo().getHabboInfo().getUsername()).compose());
@@ -69,4 +56,5 @@ public class PlacePostItEvent extends MessageHandler {
             }
         }
     }
+
 }

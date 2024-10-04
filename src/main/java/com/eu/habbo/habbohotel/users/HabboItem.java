@@ -34,6 +34,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class HabboItem implements Runnable, IEventTriggers {
 
@@ -600,6 +602,19 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
         }
 
         return false;
+    }
+
+    public void parseWallItemPosition(String wallPosition, HabboItem item) {
+        Pattern wallPostitonPattern = Pattern.compile(":w=(\\d+),(\\d+) l=(\\d+),(\\d+) (l|r)");
+        Matcher wallPositionString = wallPostitonPattern.matcher(wallPosition);
+
+        if (wallPositionString.find()) {
+            item.setX((short) Integer.parseInt(wallPositionString.group(1)));
+            item.setY((short) Integer.parseInt(wallPositionString.group(2)));
+            item.setZ(Integer.parseInt(wallPositionString.group(4)));
+            item.setRotation(wallPositionString.group(5).equals("l") ? 0 : 1);
+            item.setWallItemOffset((short)Integer.parseInt(wallPositionString.group(3)));
+        }
     }
 
 }

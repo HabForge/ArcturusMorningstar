@@ -97,7 +97,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -4628,17 +4627,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 return FurnitureMovementError.CANCEL_PLUGIN_PLACE;
         }
 
-        Pattern wallPostitonPattern = Pattern.compile(":w=(\\d+),(\\d+) l=(\\d+),(\\d+) (l|r)");
-        Matcher wallPositionString = wallPostitonPattern.matcher(wallPosition);
-
-        if (wallPositionString.find()) {
-            item.setX((short) Integer.parseInt(wallPositionString.group(1)));
-            item.setY((short) Integer.parseInt(wallPositionString.group(2)));
-            item.setZ(Integer.parseInt(wallPositionString.group(4)));
-            item.setRotation(wallPositionString.group(5).equals("l") ? 0 : 1);
-            item.setWallItemOffset((short)Integer.parseInt(wallPositionString.group(3)));
-        }
-
+        item.parseWallItemPosition(wallPosition, item);
         if (!this.furniOwnerNames.containsKey(item.getUserId()) && owner != null) {
             this.furniOwnerNames.put(item.getUserId(), owner.getHabboInfo().getUsername());
         }
