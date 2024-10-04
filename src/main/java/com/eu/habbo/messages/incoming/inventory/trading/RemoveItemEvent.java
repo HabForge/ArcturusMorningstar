@@ -26,7 +26,7 @@ public class RemoveItemEvent extends MessageHandler {
             if (item.getUserId() == this.client.getHabbo().getHabboInfo().getId() ||  this.client.getHabbo().hasPermission(Permission.ACC_ANYROOMOWNER)) {
                 item.setRoomId(0);
                 room.removeHabboItem(item);
-                room.sendComposer(new ItemRemoveComposer(item).compose());
+                room.sendComposer(new ItemRemoveComposer(item, false).compose());
                 Emulator.getThreading().run(new QueryDeleteHabboItem(item.getId()));
             }
         }

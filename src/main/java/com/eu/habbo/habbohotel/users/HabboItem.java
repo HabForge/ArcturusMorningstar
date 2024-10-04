@@ -50,7 +50,7 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
     private int userId;
     private int roomId;
     private Item baseItem;
-    private String wallPosition;
+    private short wallItemOffset;
     private short x;
     private short y;
     private double z;
@@ -67,12 +67,12 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
         this.userId = set.getInt("user_id");
         this.roomId = set.getInt("room_id");
         this.baseItem = baseItem;
-        this.wallPosition = set.getString("wall_pos");
         this.x = set.getShort("x");
         this.y = set.getShort("y");
         this.z = set.getDouble("z");
         this.rotation = set.getInt("rot");
         this.extradata = set.getString("extra_data").isEmpty() ? "0" : set.getString("extra_data");
+        this.wallItemOffset = set.getShort("wallitem_offset");
 
         String ltdData = set.getString("limited_data");
         if (!ltdData.isEmpty()) {
@@ -86,12 +86,12 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
         this.userId = userId;
         this.roomId = 0;
         this.baseItem = item;
-        this.wallPosition = "";
         this.x = 0;
         this.y = 0;
         this.z = 0;
         this.rotation = 0;
         this.extradata = extradata.isEmpty() ? "0" : extradata;
+        this.wallItemOffset = 0;
         this.limitedSells = limitedSells;
         this.limitedStack = limitedStack;
     }
@@ -127,7 +127,7 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
     public void serializeWallData(ServerMessage serverMessage) {
         serverMessage.appendString(this.getId() + "");
         serverMessage.appendInt(this.baseItem.getSpriteId());
-        serverMessage.appendString(this.wallPosition);
+        serverMessage.appendString(String.format(":w=%d,%d l=%d,%d %s", this.x, this.y, this.wallItemOffset, (int) this.z, this.rotation == 0 ? "l" : "r"));
 
         if (this instanceof InteractionPostIt)
             serverMessage.appendString(this.extradata.split(" ")[0]);
@@ -168,20 +168,20 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
         return this.baseItem;
     }
 
-    public String getWallPosition() {
-        return this.wallPosition;
-    }
-
-    public void setWallPosition(String wallPosition) {
-        this.wallPosition = wallPosition;
-    }
-
     public short getX() {
         return this.x;
     }
 
     public void setX(short x) {
         this.x = x;
+    }
+
+    public short getWallItemOffset() {
+        return this.wallItemOffset;
+    }
+
+    public void setWallItemOffset(short wallItemOffset) {
+        this.wallItemOffset = wallItemOffset;
     }
 
     public short getY() {
@@ -259,16 +259,16 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
                     statement.execute();
                 }
             } else if (this.needsUpdate) {
-                try (PreparedStatement statement = connection.prepareStatement("UPDATE items SET user_id = ?, room_id = ?, wall_pos = ?, x = ?, y = ?, z = ?, rot = ?, extra_data = ?, limited_data = ? WHERE id = ?")) {
+                try (PreparedStatement statement = connection.prepareStatement("UPDATE items SET user_id = ?, room_id = ?, x = ?, y = ?, z = ?, rot = ?, extra_data = ?, limited_data = ?, wallitem_offset = ? WHERE id = ?")) {
                     statement.setInt(1, this.userId);
                     statement.setInt(2, this.roomId);
-                    statement.setString(3, this.wallPosition);
-                    statement.setInt(4, this.x);
-                    statement.setInt(5, this.y);
-                    statement.setDouble(6, Math.max(-9999, Math.min(9999, Math.round(this.z * Math.pow(10, 6)) / Math.pow(10, 6))));
-                    statement.setInt(7, this.rotation);
-                    statement.setString(8, this instanceof InteractionGuildGate ? "" : this.getDatabaseExtraData());
-                    statement.setString(9, this.limitedStack + ":" + this.limitedSells);
+                    statement.setInt(3, this.x);
+                    statement.setInt(4, this.y);
+                    statement.setDouble(5, Math.max(-9999, Math.min(9999, Math.round(this.z * Math.pow(10, 6)) / Math.pow(10, 6))));
+                    statement.setInt(6, this.rotation);
+                    statement.setString(7, this instanceof InteractionGuildGate ? "" : this.getDatabaseExtraData());
+                    statement.setString(8, this.limitedStack + ":" + this.limitedSells);
+                    statement.setInt(9, this.wallItemOffset);
                     statement.setInt(10, this.id);
                     statement.execute();
                 } catch (SQLException e) {
@@ -569,7 +569,15 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
         List<HabboItem> areaHiders = room.getAreaHiders(true);
         Gson gson = new Gson();
 
-        RoomTile tile = room.getLayout().getTile(this.getX(), this.getY());
+        short x = this.getX();
+        short y = this.getY();
+
+        if (this.getBaseItem().getType() == FurnitureType.WALL) {
+            x += (short) (this.getRotation() == 0 ? 1 : 0);
+            y += (short) (this.getRotation() == 1 ? 1 : 0);
+        }
+
+        RoomTile tile = room.getLayout().getTile(x, y);
 
         for (HabboItem areaHider : areaHiders) {
             String extraData = areaHider.getExtradata();
@@ -586,10 +594,11 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
                     }
 
                 } catch (JsonSyntaxException e) {
-                    LOGGER.error("Error upon parsing extradata of AreaHider({}), error: {}", areaHider.getId(), e.getMessage());
+                    LOGGER.error("Error parsing extradata for AreaHider ({}): {}", areaHider.getId(), e.getMessage());
                 }
             }
         }
+
         return false;
     }
 

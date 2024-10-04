@@ -97,8 +97,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Room implements Comparable<Room>, ISerialize, Runnable {
 
@@ -715,7 +717,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 this.updateBotsAt(tile.x, tile.y);
             }
         } else if (item.getBaseItem().getType() == FurnitureType.WALL) {
-            this.sendComposer(new ItemRemoveComposer(item).compose());
+            this.sendComposer(new ItemRemoveComposer(item, false).compose());
         }
 
         Habbo habbo = (picker != null && picker.getHabboInfo().getId() == item.getId() ? picker : Emulator.getGameServer().getGameClientManager().getHabbo(item.getUserId()));
@@ -2616,7 +2618,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
 
     }
 
-    public THashSet<HabboItem> getWallItems() {
+    public THashSet<HabboItem> getWallItems(boolean includingHiddenItems) {
         THashSet<HabboItem> items = new THashSet<>();
         TIntObjectIterator<HabboItem> iterator = this.roomItems.iterator();
 
@@ -2627,7 +2629,8 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 break;
             }
 
-            if (iterator.value().getBaseItem().getType() == FurnitureType.WALL)
+            if (iterator.value().getBaseItem().getType() == FurnitureType.WALL && !iterator.value().isItemHiddenByAreaHider())
+
                 items.add(iterator.value());
         }
 
@@ -4625,7 +4628,17 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 return FurnitureMovementError.CANCEL_PLUGIN_PLACE;
         }
 
-        item.setWallPosition(wallPosition);
+        Pattern wallPostitonPattern = Pattern.compile(":w=(\\d+),(\\d+) l=(\\d+),(\\d+) (l|r)");
+        Matcher wallPositionString = wallPostitonPattern.matcher(wallPosition);
+
+        if (wallPositionString.find()) {
+            item.setX((short) Integer.parseInt(wallPositionString.group(1)));
+            item.setY((short) Integer.parseInt(wallPositionString.group(2)));
+            item.setZ(Integer.parseInt(wallPositionString.group(4)));
+            item.setRotation(wallPositionString.group(5).equals("l") ? 0 : 1);
+            item.setWallItemOffset((short)Integer.parseInt(wallPositionString.group(3)));
+        }
+
         if (!this.furniOwnerNames.containsKey(item.getUserId()) && owner != null) {
             this.furniOwnerNames.put(item.getUserId(), owner.getHabboInfo().getUsername());
         }
@@ -4916,20 +4929,34 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                     InteractionAreaHider.JsonData data = gson.fromJson(extraData, InteractionAreaHider.JsonData.class);
 
                     Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
-                    THashSet<HabboItem> foundItems = getItemsInRectangle(rectangle, data.invertEnabled);
-                    TIntObjectMap<String> furniOwnerNames = new TIntObjectHashMap<>();
+                    Map<String, THashSet<HabboItem>> items = getItemsInRectangle(rectangle, data.invertEnabled, data.wallItemsEnabled);
+                    THashSet<HabboItem> floorItems = items.get("floorItems");
+                    THashSet<HabboItem> wallItems = items.get("wallItems");
 
-                    for (HabboItem item : foundItems) {
+
+                    for (HabboItem item : Stream.concat(floorItems.stream(), wallItems.stream()).collect(Collectors.toSet())) {
                         if (!furniOwnerNames.containsKey(item.getUserId())) {
                             HabboInfo habbo = Emulator.getGameEnvironment().getHabboManager().getHabboInfo(item.getUserId());
-                            furniOwnerNames.put(item.getUserId(), habbo.getUsername());
+                            if (habbo != null) {
+                                furniOwnerNames.put(item.getUserId(), habbo.getUsername());
+                            }
                         }
                     }
 
                     if (data.on == 1) {
-                        this.sendComposer(new ObjectRemoveMultipleComposer(foundItems).compose());
-                    } else if (data.on == 0) {
-                        this.sendComposer(new ObjectsComposer(furniOwnerNames, foundItems).compose());
+                        if (!floorItems.isEmpty()) {
+                            this.sendComposer(new ObjectRemoveMultipleComposer(floorItems).compose());
+                        }
+                        if (!wallItems.isEmpty()) {
+                            wallItems.stream().forEach(item -> this.sendComposer(new ItemRemoveComposer(item, true).compose()));
+                        }
+                    } else {
+                        if (!floorItems.isEmpty()) {
+                            this.sendComposer(new ObjectsComposer(furniOwnerNames, floorItems).compose());
+                        }
+                        if (!wallItems.isEmpty()) {
+                            this.sendComposer(new ItemsComposer(this).compose());
+                        }
                     }
 
                 } catch (JsonSyntaxException e) {
@@ -4939,33 +4966,50 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
         }
     }
 
-    public THashSet<HabboItem> getItemsInRectangle(Rectangle rectangle, boolean invert) {
+    public Map<String, THashSet<HabboItem>> getItemsInRectangle(Rectangle rectangle, boolean invert, boolean wallitems) {
         TIntObjectIterator<HabboItem> iterator = this.roomItems.iterator();
-        THashSet<HabboItem> foundItems = new THashSet<>();
+        THashSet<HabboItem> foundFloorItems = new THashSet<>();
+        THashSet<HabboItem> foundWallItems = new THashSet<>();
 
-        for (int i = this.roomItems.size(); i > 0; i--) {
+        while (iterator.hasNext()) {
             try {
                 iterator.advance();
                 HabboItem object = iterator.value();
 
-                // Skip AreaHiders
                 if (object instanceof InteractionAreaHider) {
                     continue;
                 }
 
-                RoomTile tile = this.getLayout().getTile(object.getX(), object.getY());
+                short x = object.getX();
+                short y = object.getY();
+
+                if (object.getBaseItem().getType() == FurnitureType.WALL) {
+                    x += (short) ((object.getRotation() == 0) ? 1 : 0);
+                    y += (short) ((object.getRotation() == 1) ? 1 : 0);
+                }
+
+                RoomTile tile = this.getLayout().getTile(x, y);
                 boolean isInRectangle = RoomLayout.tileInSquare(rectangle, tile);
 
-                // Add item to the set if condition is met
-                if (invert != isInRectangle) {
-                    foundItems.add(object);
+                if (object.getBaseItem().getType() == FurnitureType.FLOOR && ((invert && !isInRectangle) || (!invert && isInRectangle))) {
+                    foundFloorItems.add(object);
                 }
+
+                if (wallitems && object.getBaseItem().getType() == FurnitureType.WALL && ((invert && !isInRectangle) || (!invert && isInRectangle))) {
+                    foundWallItems.add(object);
+                    LOGGER.info(String.valueOf(foundWallItems));
+                }
+
             } catch (Exception e) {
                 LOGGER.error("An error occurred: ", e);
             }
         }
-        return foundItems;
-    }
 
+        Map<String, THashSet<HabboItem>> resultMap = new HashMap<>();
+        resultMap.put("floorItems", foundFloorItems);
+        resultMap.put("wallItems", foundWallItems);
+
+        return resultMap;
+    }
 
 }

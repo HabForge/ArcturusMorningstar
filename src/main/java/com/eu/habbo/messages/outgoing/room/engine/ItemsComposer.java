@@ -43,7 +43,7 @@ public class ItemsComposer extends MessageComposer {
             this.response.appendString(set.getValue());
         }
 
-        THashSet<HabboItem> items = this.room.getWallItems();
+        THashSet<HabboItem> items = this.room.getWallItems(false);
 
         this.response.appendInt(items.size());
         for (HabboItem item : items) {

@@ -9,6 +9,9 @@ import com.eu.habbo.messages.incoming.MessageHandler;
 import com.eu.habbo.habbohotel.notifications.BubbleAlertKeys;
 import com.eu.habbo.messages.outgoing.notifications.NotificationDialogComposer;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MoveWallItemEvent extends MessageHandler {
     @Override
     public void handle() throws Exception {
@@ -33,7 +36,17 @@ public class MoveWallItemEvent extends MessageHandler {
         if (item == null)
             return;
 
-        item.setWallPosition(wallPosition);
+        Pattern wallPostitonPattern = Pattern.compile(":w=(\\d+),(\\d+) l=(\\d+),(\\d+) (l|r)");
+        Matcher wallPositionString = wallPostitonPattern.matcher(wallPosition);
+
+        if (wallPositionString.find()) {
+            item.setX((short) Integer.parseInt(wallPositionString.group(1)));
+            item.setY((short) Integer.parseInt(wallPositionString.group(2)));
+            item.setZ(Integer.parseInt(wallPositionString.group(4)));
+            item.setRotation(wallPositionString.group(5).equals("l") ? 0 : 1);
+            item.setWallItemOffset((short)Integer.parseInt(wallPositionString.group(3)));
+        }
+
         item.needsUpdate(true);
         room.updateItem(item);
     }
