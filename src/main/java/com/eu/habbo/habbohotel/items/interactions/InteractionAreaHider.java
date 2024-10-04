@@ -38,6 +38,15 @@ public class InteractionAreaHider extends InteractionDefault {
     }
 
     @Override
+    public void onPickUp(Room room) {
+        room.resetAreaHiderItems(this);
+        JsonData data = new JsonData();
+        updateExtradata(data);
+        room.sendComposer(new AreaHideMessageComposer(this).compose());
+        room.sendComposer(new ObjectDataUpdateComposer(this).compose());
+    }
+
+    @Override
     public void onClick(GameClient client, Room room, Object[] objects) throws Exception {
         super.onClick(client, room, objects);
 

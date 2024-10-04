@@ -4994,12 +4994,9 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 if (object.getBaseItem().getType() == FurnitureType.FLOOR && ((invert && !isInRectangle) || (!invert && isInRectangle))) {
                     foundFloorItems.add(object);
                 }
-
                 if (wallitems && object.getBaseItem().getType() == FurnitureType.WALL && ((invert && !isInRectangle) || (!invert && isInRectangle))) {
                     foundWallItems.add(object);
-                    LOGGER.info(String.valueOf(foundWallItems));
                 }
-
             } catch (Exception e) {
                 LOGGER.error("An error occurred: ", e);
             }
@@ -5011,5 +5008,42 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
 
         return resultMap;
     }
+
+    public void resetAreaHiderItems(HabboItem areaHider) {
+        Gson gson = new Gson();
+        String extraData = areaHider.getExtradata();
+
+        if (extraData != null && extraData.trim().startsWith("{")) {
+            try {
+                InteractionAreaHider.JsonData data = gson.fromJson(extraData, InteractionAreaHider.JsonData.class);
+
+                Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
+                Map<String, THashSet<HabboItem>> items = getItemsInRectangle(rectangle, data.invertEnabled, data.wallItemsEnabled);
+                THashSet<HabboItem> floorItems = items.get("floorItems");
+                THashSet<HabboItem> wallItems = items.get("wallItems");
+
+                for (HabboItem item : Stream.concat(floorItems.stream(), wallItems.stream()).collect(Collectors.toSet())) {
+                    if (!furniOwnerNames.containsKey(item.getUserId())) {
+                        HabboInfo habbo = Emulator.getGameEnvironment().getHabboManager().getHabboInfo(item.getUserId());
+                        if (habbo != null) {
+                            furniOwnerNames.put(item.getUserId(), habbo.getUsername());
+                        }
+                    }
+                }
+
+                if (!floorItems.isEmpty()) {
+                    this.sendComposer(new ObjectsComposer(furniOwnerNames, floorItems).compose());
+                }
+
+                if (!wallItems.isEmpty()) {
+                    this.sendComposer(new ItemsComposer(this).compose());
+                }
+
+            } catch (JsonSyntaxException e) {
+                LOGGER.error("Error upon parsing extradata of AreaHider({}), error: {}", areaHider.getId(), e.getMessage());
+            }
+        }
+    }
+
 
 }

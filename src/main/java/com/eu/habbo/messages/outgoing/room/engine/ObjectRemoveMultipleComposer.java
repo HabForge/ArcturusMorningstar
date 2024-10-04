@@ -21,7 +21,7 @@ public class ObjectRemoveMultipleComposer extends MessageComposer {
         for (HabboItem item : this.items) {
             this.response.appendInt(item.getId());
         }
-        this.response.appendInt(-1); // pickerId (-1 by default)
+        this.response.appendInt(-1); // pickerId (-1 by default for AreaHiders)
         return this.response;
     }
 }
