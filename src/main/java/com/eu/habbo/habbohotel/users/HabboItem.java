@@ -48,6 +48,8 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
             InteractionMultiHeight.class
     };
 
+    private static final Pattern WALL_POSITION_PATTERN = Pattern.compile(":w=(\\d+),(\\d+) l=(\\d+),(\\d+) (l|r)");
+
     private int id;
     private int userId;
     private int roomId;
@@ -605,8 +607,7 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
     }
 
     public void parseWallItemPosition(String wallPosition, HabboItem item) {
-        Pattern wallPostitonPattern = Pattern.compile(":w=(\\d+),(\\d+) l=(\\d+),(\\d+) (l|r)");
-        Matcher wallPositionString = wallPostitonPattern.matcher(wallPosition);
+        Matcher wallPositionString = WALL_POSITION_PATTERN.matcher(wallPosition);
 
         if (wallPositionString.find()) {
             item.setX((short) Integer.parseInt(wallPositionString.group(1)));

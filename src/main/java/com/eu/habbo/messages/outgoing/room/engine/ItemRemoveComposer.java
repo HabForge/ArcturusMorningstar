@@ -18,7 +18,7 @@ public class ItemRemoveComposer extends MessageComposer {
     protected ServerMessage composeInternal() {
         this.response.init(Outgoing.ItemRemove);
         this.response.appendString(this.item.getId() + "");
-        this.response.appendInt(this.hideAnimation ? -1 : this.item.getUserId());
+        this.response.appendInt(this.hideAnimation ? -1 : this.item.getUserId()); // Set the item ID to -1 when items are hidden while users are present in the room. This instructs the client to skip the "return to inventory" animation.
         return this.response;
     }
 }

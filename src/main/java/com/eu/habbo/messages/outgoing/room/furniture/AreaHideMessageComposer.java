@@ -11,10 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AreaHideMessageComposer extends MessageComposer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AreaHideMessageComposer.class);
 
     private final HabboItem item;
-    private static final Gson gson = new Gson();
 
     public AreaHideMessageComposer(HabboItem item) {
         this.item = item;
@@ -25,10 +23,10 @@ public class AreaHideMessageComposer extends MessageComposer {
         this.response.init(Outgoing.AreaHide);
         this.response.appendInt(this.item.getId());
 
-        InteractionAreaHider.JsonData data = parseExtradata(this.item.getExtradata());
+        InteractionAreaHider.JsonData data = InteractionAreaHider.parseExtradata(item);
 
         if (data != null) {
-            this.response.appendBoolean(data.on == 1);
+            this.response.appendBoolean(data.on);
             this.response.appendInt(data.rootX);
             this.response.appendInt(data.rootY);
             this.response.appendInt(data.width);
@@ -44,16 +42,5 @@ public class AreaHideMessageComposer extends MessageComposer {
         }
 
         return this.response;
-    }
-
-    private InteractionAreaHider.JsonData parseExtradata(String extradata) {
-        if (extradata != null && extradata.trim().startsWith("{")) {
-            try {
-                return gson.fromJson(extradata, InteractionAreaHider.JsonData.class);
-            } catch (JsonSyntaxException e) {
-                LOGGER.error("Error upon parsing extradata {}", e.getMessage());
-            }
-        }
-        return null;
     }
 }

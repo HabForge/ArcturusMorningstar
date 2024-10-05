@@ -31,27 +31,17 @@ public class FloorHeightMapComposer extends MessageComposer {
 
         List<HabboItem> areaHiders = this.room.getAreaHiders(true);
         this.response.appendInt(areaHiders.size());
-        Gson gson = new Gson();
 
         for (HabboItem areaHider : areaHiders) {
-            String extraData = areaHider.getExtradata();
+            InteractionAreaHider.JsonData data = InteractionAreaHider.parseExtradata(areaHider);
 
-            if (extraData != null && extraData.trim().startsWith("{")) {
-                try {
-                    InteractionAreaHider.JsonData data = gson.fromJson(extraData, InteractionAreaHider.JsonData.class);
-
-                    this.response.appendInt(areaHider.getId());
-                    this.response.appendBoolean(data.on == 1);
-                    this.response.appendInt(data.rootX);
-                    this.response.appendInt(data.rootY);
-                    this.response.appendInt(data.width);
-                    this.response.appendInt(data.length);
-                    this.response.appendBoolean(data.invertEnabled);
-
-                } catch (JsonSyntaxException e) {
-                    LOGGER.error("Error upon parsing extradata of AreaHider({}), error: {}", areaHider.getId(), e.getMessage());
-                }
-            }
+            this.response.appendInt(areaHider.getId());
+            this.response.appendBoolean(data.on);
+            this.response.appendInt(data.rootX);
+            this.response.appendInt(data.rootY);
+            this.response.appendInt(data.width);
+            this.response.appendInt(data.length);
+            this.response.appendBoolean(data.invertEnabled);
         }
 
         return this.response;
