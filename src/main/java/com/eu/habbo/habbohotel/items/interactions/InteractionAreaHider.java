@@ -52,7 +52,7 @@ public class InteractionAreaHider extends InteractionDefault {
         super.onClick(client, room, objects);
 
         if ((objects.length >= 2 && objects[1] instanceof WiredEffectType) || (client != null && room.hasRights(client.getHabbo()))) {
-            JsonData data = getExtradataAsJson();
+            JsonData data = parseExtradata(this);
 
             if (data != null) {
                 data.on = !data.on;
@@ -67,7 +67,7 @@ public class InteractionAreaHider extends InteractionDefault {
 
     @Override
     public void serializeExtradata(ServerMessage serverMessage) {
-        JsonData data = getExtradataAsJson();
+        JsonData data = parseExtradata(this);
 
         if (data == null) {
             data = new JsonData();
@@ -82,44 +82,42 @@ public class InteractionAreaHider extends InteractionDefault {
         serverMessage.appendInt(data.width);
         serverMessage.appendInt(data.length);
         serverMessage.appendInt(data.invisibility ? 1 : 0);
-        serverMessage.appendInt(data.wallItemsEnabled ? 1 : 0);
+        serverMessage.appendInt(data.hideWallItems ? 1 : 0);
         serverMessage.appendInt(data.invertEnabled ? 1 : 0);
     }
 
     public void saveData(ClientMessage message) {
 
         JsonData data = new JsonData(
-                false,
-                message.readInt(),
-                message.readInt(),
-                message.readInt(),
-                message.readInt(),
-                message.readBoolean(),
-                message.readBoolean(),
-                message.readBoolean()
+                false,                 // Initial state of 'on' is set to false
+                message.readInt(),         // rootX position from the client
+                message.readInt(),         // rootY position from the client
+                message.readInt(),         // width of the area from the client
+                message.readInt(),         // length of the area from the client
+                message.readBoolean(),     // invisibility status from the client
+                message.readBoolean(),     // hideWallItems status from the client
+                message.readBoolean()      // invertEnabled status from the client
         );
 
         updateExtradata(data);
     }
 
-
-    private JsonData getExtradataAsJson() {
-        String jsonString = this.getExtradata();
-        if (jsonString != null && jsonString.trim().startsWith("{")) {
-            try {
-                return gson.fromJson(jsonString, JsonData.class);
-            } catch (JsonSyntaxException e) {
-                LOGGER.error(e.getMessage());
-            }
-        }
-        return null;
-    }
-
-
     private void updateExtradata(JsonData data) {
         this.setExtradata(gson.toJson(data));
         this.needsUpdate(true);
         Emulator.getThreading().run(this);
+    }
+
+    public static JsonData parseExtradata(HabboItem item) {
+
+        if (item.getExtradata() != null && item.getExtradata().trim().startsWith("{")) {
+            try {
+                return gson.fromJson(item.getExtradata(), JsonData.class);
+            } catch (JsonSyntaxException e) {
+                LOGGER.error("Error upon parsing extradata {}", e.getMessage());
+            }
+        }
+        return null;
     }
 
     public static class JsonData {
@@ -129,7 +127,7 @@ public class InteractionAreaHider extends InteractionDefault {
         public int width;
         public int length;
         public boolean invisibility;
-        public boolean wallItemsEnabled;
+        public boolean hideWallItems;
         public boolean invertEnabled;
 
         public JsonData() {
@@ -139,30 +137,19 @@ public class InteractionAreaHider extends InteractionDefault {
             this.width = 0;
             this.length = 0;
             this.invisibility = false;
-            this.wallItemsEnabled = false;
+            this.hideWallItems = true; // wallitems are hidden by default on Habbo
             this.invertEnabled = false;
         }
 
-        public JsonData(boolean on, int rootX, int rootY, int width, int length, boolean invisibility, boolean wallItemsEnabled, boolean invertEnabled) {
+        public JsonData(boolean on, int rootX, int rootY, int width, int length, boolean invisibility, boolean hideWallItems, boolean invertEnabled) {
             this.on = on;
             this.rootX = rootX;
             this.rootY = rootY;
             this.width = width;
             this.length = length;
             this.invisibility = invisibility;
-            this.wallItemsEnabled = wallItemsEnabled;
+            this.hideWallItems = hideWallItems;
             this.invertEnabled = invertEnabled;
         }
-    }
-
-    public static JsonData parseExtradata(HabboItem item) {
-        if (item.getExtradata() != null && item.getExtradata().trim().startsWith("{")) {
-            try {
-                return gson.fromJson(item.getExtradata(), JsonData.class);
-            } catch (JsonSyntaxException e) {
-                LOGGER.error("Error upon parsing extradata {}", e.getMessage());
-            }
-        }
-        return null;
     }
 }

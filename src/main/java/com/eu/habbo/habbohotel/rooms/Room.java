@@ -4881,6 +4881,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
     }
 
     public List<HabboItem> getAreaHiders(boolean onlyActive) {
+
         TIntObjectIterator<HabboItem> iterator = this.roomItems.iterator();
         List<HabboItem> foundItems = new ArrayList<>();
 
@@ -4890,20 +4891,24 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 HabboItem object = iterator.value();
 
                 if (object instanceof InteractionAreaHider && object.getExtradata() != null && object.getExtradata().trim().startsWith("{")) {
+
                     InteractionAreaHider.JsonData data = InteractionAreaHider.parseExtradata(object);
 
-                        if (!onlyActive || (onlyActive && data.on)) {
-                            foundItems.add(object);
-                        }
+                    if (!onlyActive || (onlyActive && data.on)) {
+                        foundItems.add(object);
+                    }
                 }
             } catch (Exception e) {
-                LOGGER.error("An error occurred: ", e);
+                LOGGER.error("An error occurred while processing AreaHiders: ", e);
             }
         }
+
+
         return foundItems;
     }
 
     public void toggleAreaHiderItemsVisibility() {
+
         List<HabboItem> areaHiders = this.getAreaHiders(false);
 
         for (HabboItem areaHider : areaHiders) {
@@ -4914,10 +4919,10 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                     InteractionAreaHider.JsonData data = InteractionAreaHider.parseExtradata(areaHider);
 
                     Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
-                    Map<String, THashSet<HabboItem>> items = getItemsInRectangle(rectangle, data.invertEnabled, data.wallItemsEnabled);
+
+                    Map<String, THashSet<HabboItem>> items = getItemsInRectangle(rectangle, data.invertEnabled, data.hideWallItems);
                     THashSet<HabboItem> floorItems = items.get("floorItems");
                     THashSet<HabboItem> wallItems = items.get("wallItems");
-
 
                     for (HabboItem item : Stream.concat(floorItems.stream(), wallItems.stream()).collect(Collectors.toSet())) {
                         if (!furniOwnerNames.containsKey(item.getUserId())) {
@@ -4935,7 +4940,9 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                         if (!wallItems.isEmpty()) {
                             wallItems.stream().forEach(item -> this.sendComposer(new ItemRemoveComposer(item, true).compose()));
                         }
-                    } else {
+                    }
+
+                    else {
                         if (!floorItems.isEmpty()) {
                             this.sendComposer(new ObjectsComposer(furniOwnerNames, floorItems).compose());
                         }
@@ -4943,7 +4950,6 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                             this.sendComposer(new ItemsComposer(this).compose());
                         }
                     }
-
                 } catch (JsonSyntaxException e) {
                     LOGGER.error("Error upon parsing extradata of AreaHider({}), error: {}", areaHider.getId(), e.getMessage());
                 }
@@ -4961,6 +4967,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 iterator.advance();
                 HabboItem object = iterator.value();
 
+                // Exclude AreaHiders themselves from being hidden, as their visibility is controlled by the Invisible Furni Controller
                 if (object instanceof InteractionAreaHider) {
                     continue;
                 }
@@ -4979,11 +4986,12 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 if (object.getBaseItem().getType() == FurnitureType.FLOOR && ((invert && !isInRectangle) || (!invert && isInRectangle))) {
                     foundFloorItems.add(object);
                 }
+
                 if (wallitems && object.getBaseItem().getType() == FurnitureType.WALL && ((invert && !isInRectangle) || (!invert && isInRectangle))) {
                     foundWallItems.add(object);
                 }
             } catch (Exception e) {
-                LOGGER.error("An error occurred: ", e);
+                LOGGER.error("An error occurred while processing item: ", e);
             }
         }
 
@@ -5002,7 +5010,9 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 InteractionAreaHider.JsonData data = InteractionAreaHider.parseExtradata(areaHider);
 
                 Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
-                Map<String, THashSet<HabboItem>> items = getItemsInRectangle(rectangle, data.invertEnabled, data.wallItemsEnabled);
+
+                Map<String, THashSet<HabboItem>> items = getItemsInRectangle(rectangle, data.invertEnabled, data.hideWallItems);
+
                 THashSet<HabboItem> floorItems = items.get("floorItems");
                 THashSet<HabboItem> wallItems = items.get("wallItems");
 

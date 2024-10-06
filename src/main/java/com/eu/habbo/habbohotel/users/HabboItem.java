@@ -565,20 +565,26 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
 
     public boolean isItemHiddenByAreaHider() {
 
+        // Exclude AreaHiders themselves from being hidden, as their visibility is controlled by the Invisible Furni Controller
         if (this instanceof InteractionAreaHider) {
             return false;
         }
 
         Room room = Emulator.getGameEnvironment().getRoomManager().getRoom(this.getRoomId());
+
         List<HabboItem> areaHiders = room.getAreaHiders(true);
         Gson gson = new Gson();
 
         short x = this.getX();
         short y = this.getY();
 
+        // Adjust coordinates for wall items based on their rotation
+        // Wall items are positioned starting at tile 0 instead of tile 1.
+        // By adding 1 to the relevant coordinate, we align the wall item's position correctly within the AreaHider's area,
+        // ensuring they are correctly checked for inclusion in the area.
         if (this.getBaseItem().getType() == FurnitureType.WALL) {
-            x += (short) (this.getRotation() == 0 ? 1 : 0);
-            y += (short) (this.getRotation() == 1 ? 1 : 0);
+            x += (short) (this.getRotation() == 0 ? 1 : 0);  // Add 1 to x if rotation is 0 (left wall)
+            y += (short) (this.getRotation() == 1 ? 1 : 0);  // Add 1 to y if rotation is 1 (right wall)
         }
 
         RoomTile tile = room.getLayout().getTile(x, y);
@@ -591,6 +597,7 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
                     InteractionAreaHider.JsonData data = gson.fromJson(extraData, InteractionAreaHider.JsonData.class);
 
                     Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
+
                     boolean isInRectangle = RoomLayout.tileInSquare(rectangle, tile);
 
                     if (data.invertEnabled != isInRectangle) {
@@ -613,9 +620,10 @@ public abstract class HabboItem implements Runnable, IEventTriggers {
             item.setX((short) Integer.parseInt(wallPositionString.group(1)));
             item.setY((short) Integer.parseInt(wallPositionString.group(2)));
             item.setZ(Integer.parseInt(wallPositionString.group(4)));
+
             item.setRotation(wallPositionString.group(5).equals("l") ? 0 : 1);
-            item.setWallItemOffset((short)Integer.parseInt(wallPositionString.group(3)));
+
+            item.setWallItemOffset((short) Integer.parseInt(wallPositionString.group(3)));
         }
     }
-
 }
