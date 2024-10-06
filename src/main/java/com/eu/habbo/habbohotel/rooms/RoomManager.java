@@ -14,6 +14,7 @@ import com.eu.habbo.habbohotel.games.tag.IceTagGame;
 import com.eu.habbo.habbohotel.games.tag.RollerskateGame;
 import com.eu.habbo.habbohotel.games.wired.WiredGame;
 import com.eu.habbo.habbohotel.guilds.Guild;
+import com.eu.habbo.habbohotel.items.interactions.InteractionAreaHider;
 import com.eu.habbo.habbohotel.items.interactions.InteractionWired;
 import com.eu.habbo.habbohotel.messenger.MessengerBuddy;
 import com.eu.habbo.habbohotel.navigation.NavigatorFilterComparator;
@@ -808,8 +809,9 @@ public class RoomManager {
             allFloorItems.forEach(new TObjectProcedure<HabboItem>() {
                 @Override
                 public boolean execute(HabboItem object) {
-                    if (room.isHideWired() && object instanceof InteractionWired)
+                    if ((room.isHideWired() && object instanceof InteractionWired) || object.isItemHiddenByAreaHider()) {
                         return true;
+                    }
 
                     floorItems.add(object);
                     if (floorItems.size() == 250) {

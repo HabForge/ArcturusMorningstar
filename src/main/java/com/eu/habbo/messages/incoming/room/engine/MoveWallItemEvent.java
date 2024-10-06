@@ -33,7 +33,7 @@ public class MoveWallItemEvent extends MessageHandler {
         if (item == null)
             return;
 
-        item.setWallPosition(wallPosition);
+        item.parseWallItemPosition(wallPosition, item);
         item.needsUpdate(true);
         room.updateItem(item);
     }

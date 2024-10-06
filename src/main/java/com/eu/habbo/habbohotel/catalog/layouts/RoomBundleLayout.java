@@ -87,7 +87,7 @@ public class RoomBundleLayout extends SingleBundle {
                 items.put(i.getBaseItem(), items.get(i.getBaseItem()) + 1);
             }
 
-            for (HabboItem i : this.room.getWallItems()) {
+            for (HabboItem i : this.room.getWallItems(true)) {
                 if (!items.contains(i.getBaseItem())) {
                     items.put(i.getBaseItem(), 0);
                 }
@@ -151,7 +151,7 @@ public class RoomBundleLayout extends SingleBundle {
             item.run();
         }
 
-        for (HabboItem item : this.room.getWallItems()) {
+        for (HabboItem item : this.room.getWallItems(true)) {
             item.run();
         }
 

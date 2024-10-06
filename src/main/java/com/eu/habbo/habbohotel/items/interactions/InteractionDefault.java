@@ -68,6 +68,12 @@ public class InteractionDefault extends HabboItem {
         if (room != null && (client == null || this.canToggle(client.getHabbo(), room) || (objects.length >= 2 && objects[1] instanceof WiredEffectType && objects[1] == WiredEffectType.TOGGLE_STATE))) {
             super.onClick(client, room, objects);
 
+            // Skip processing for InteractionAreaHider items since they handle extradata differently
+            // AreaHiders have their own mechanism for interpreting and managing their state, which is not compatible with the standard extradata format used by other items
+            if (this instanceof InteractionAreaHider) {
+                return;
+            }
+
             if (objects != null && objects.length > 0) {
                 if (objects[0] instanceof Integer) {
                     if (this.getExtradata().length() == 0)

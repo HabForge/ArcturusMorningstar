@@ -69,6 +69,7 @@ import com.eu.habbo.plugin.events.rooms.RoomUnloadedEvent;
 import com.eu.habbo.plugin.events.rooms.RoomUnloadingEvent;
 import com.eu.habbo.plugin.events.users.*;
 import com.eu.habbo.threading.runnables.YouAreAPirate;
+import com.google.gson.JsonSyntaxException;
 import gnu.trove.TCollections;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.array.TIntArrayList;
@@ -97,6 +98,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Room implements Comparable<Room>, ISerialize, Runnable {
 
@@ -713,7 +715,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 this.updateBotsAt(tile.x, tile.y);
             }
         } else if (item.getBaseItem().getType() == FurnitureType.WALL) {
-            this.sendComposer(new ItemRemoveComposer(item).compose());
+            this.sendComposer(new ItemRemoveComposer(item, false).compose());
         }
 
         Habbo habbo = (picker != null && picker.getHabboInfo().getId() == item.getId() ? picker : Emulator.getGameServer().getGameClientManager().getHabbo(item.getUserId()));
@@ -2614,23 +2616,27 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
 
     }
 
-    public THashSet<HabboItem> getWallItems() {
+    public THashSet<HabboItem> getWallItems(boolean includeHiddenItems) {
         THashSet<HabboItem> items = new THashSet<>();
         TIntObjectIterator<HabboItem> iterator = this.roomItems.iterator();
 
-        for (int i = this.roomItems.size(); i-- > 0; ) {
+        while (iterator.hasNext()) {
             try {
                 iterator.advance();
+                HabboItem item = iterator.value();
+
+                if (item.getBaseItem().getType() == FurnitureType.WALL) {
+
+                    if (includeHiddenItems || !item.isItemHiddenByAreaHider()) {
+                        items.add(item);
+                    }
+                }
             } catch (Exception e) {
+                LOGGER.error("An error occurred while processing wall items: ", e);
                 break;
             }
-
-            if (iterator.value().getBaseItem().getType() == FurnitureType.WALL)
-                items.add(iterator.value());
         }
-
         return items;
-
     }
 
     public THashSet<HabboItem> getPostItNotes() {
@@ -4623,7 +4629,7 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
                 return FurnitureMovementError.CANCEL_PLUGIN_PLACE;
         }
 
-        item.setWallPosition(wallPosition);
+        item.parseWallItemPosition(wallPosition, item);
         if (!this.furniOwnerNames.containsKey(item.getUserId()) && owner != null) {
             this.furniOwnerNames.put(item.getUserId(), owner.getHabboInfo().getUsername());
         }
@@ -4872,5 +4878,164 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
     public Collection<RoomUnit> getRoomUnitsAt(RoomTile tile) {
         THashSet<RoomUnit> roomUnits = getRoomUnits();
         return roomUnits.stream().filter(unit -> unit.getCurrentLocation() == tile).collect(Collectors.toSet());
+    }
+
+    public List<HabboItem> getAreaHiders(boolean onlyActive) {
+
+        TIntObjectIterator<HabboItem> iterator = this.roomItems.iterator();
+        List<HabboItem> foundItems = new ArrayList<>();
+
+        for (int i = this.roomItems.size(); i > 0; i--) {
+            try {
+                iterator.advance();
+                HabboItem object = iterator.value();
+
+                if (object instanceof InteractionAreaHider && object.getExtradata() != null && object.getExtradata().trim().startsWith("{")) {
+
+                    InteractionAreaHider.JsonData data = InteractionAreaHider.parseExtradata(object);
+
+                    if (!onlyActive || (onlyActive && data.on)) {
+                        foundItems.add(object);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("An error occurred while processing AreaHiders: ", e);
+            }
+        }
+
+
+        return foundItems;
+    }
+
+    public void toggleAreaHiderItemsVisibility() {
+
+        List<HabboItem> areaHiders = this.getAreaHiders(false);
+
+        for (HabboItem areaHider : areaHiders) {
+            String extraData = areaHider.getExtradata();
+
+            if (extraData != null && extraData.trim().startsWith("{")) {
+                try {
+                    InteractionAreaHider.JsonData data = InteractionAreaHider.parseExtradata(areaHider);
+
+                    Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
+
+                    Map<String, THashSet<HabboItem>> items = getItemsInRectangle(rectangle, data.invertEnabled, data.hideWallItems);
+                    THashSet<HabboItem> floorItems = items.get("floorItems");
+                    THashSet<HabboItem> wallItems = items.get("wallItems");
+
+                    for (HabboItem item : Stream.concat(floorItems.stream(), wallItems.stream()).collect(Collectors.toSet())) {
+                        if (!furniOwnerNames.containsKey(item.getUserId())) {
+                            HabboInfo habbo = Emulator.getGameEnvironment().getHabboManager().getHabboInfo(item.getUserId());
+                            if (habbo != null) {
+                                furniOwnerNames.put(item.getUserId(), habbo.getUsername());
+                            }
+                        }
+                    }
+
+                    if (data.on) {
+                        if (!floorItems.isEmpty()) {
+                            this.sendComposer(new ObjectRemoveMultipleComposer(floorItems).compose());
+                        }
+                        if (!wallItems.isEmpty()) {
+                            wallItems.stream().forEach(item -> this.sendComposer(new ItemRemoveComposer(item, true).compose()));
+                        }
+                    }
+
+                    else {
+                        if (!floorItems.isEmpty()) {
+                            this.sendComposer(new ObjectsComposer(furniOwnerNames, floorItems).compose());
+                        }
+                        if (!wallItems.isEmpty()) {
+                            this.sendComposer(new ItemsComposer(this).compose());
+                        }
+                    }
+                } catch (JsonSyntaxException e) {
+                    LOGGER.error("Error upon parsing extradata of AreaHider({}), error: {}", areaHider.getId(), e.getMessage());
+                }
+            }
+        }
+    }
+
+    public Map<String, THashSet<HabboItem>> getItemsInRectangle(Rectangle rectangle, boolean invert, boolean wallitems) {
+        TIntObjectIterator<HabboItem> iterator = this.roomItems.iterator();
+        THashSet<HabboItem> foundFloorItems = new THashSet<>();
+        THashSet<HabboItem> foundWallItems = new THashSet<>();
+
+        while (iterator.hasNext()) {
+            try {
+                iterator.advance();
+                HabboItem object = iterator.value();
+
+                // Exclude AreaHiders themselves from being hidden, as their visibility is controlled by the Invisible Furni Controller
+                if (object instanceof InteractionAreaHider) {
+                    continue;
+                }
+
+                short x = object.getX();
+                short y = object.getY();
+
+                if (object.getBaseItem().getType() == FurnitureType.WALL) {
+                    x += (short) ((object.getRotation() == 0) ? 1 : 0);
+                    y += (short) ((object.getRotation() == 1) ? 1 : 0);
+                }
+
+                RoomTile tile = this.getLayout().getTile(x, y);
+                boolean isInRectangle = RoomLayout.tileInSquare(rectangle, tile);
+
+                if (object.getBaseItem().getType() == FurnitureType.FLOOR && ((invert && !isInRectangle) || (!invert && isInRectangle))) {
+                    foundFloorItems.add(object);
+                }
+
+                if (wallitems && object.getBaseItem().getType() == FurnitureType.WALL && ((invert && !isInRectangle) || (!invert && isInRectangle))) {
+                    foundWallItems.add(object);
+                }
+            } catch (Exception e) {
+                LOGGER.error("An error occurred while processing item: ", e);
+            }
+        }
+
+        Map<String, THashSet<HabboItem>> resultMap = new HashMap<>();
+        resultMap.put("floorItems", foundFloorItems);
+        resultMap.put("wallItems", foundWallItems);
+
+        return resultMap;
+    }
+
+    public void resetAreaHiderItems(HabboItem areaHider) {
+        String extraData = areaHider.getExtradata();
+
+        if (extraData != null && extraData.trim().startsWith("{")) {
+            try {
+                InteractionAreaHider.JsonData data = InteractionAreaHider.parseExtradata(areaHider);
+
+                Rectangle rectangle = new Rectangle(data.rootX, data.rootY, data.width, data.length);
+
+                Map<String, THashSet<HabboItem>> items = getItemsInRectangle(rectangle, data.invertEnabled, data.hideWallItems);
+
+                THashSet<HabboItem> floorItems = items.get("floorItems");
+                THashSet<HabboItem> wallItems = items.get("wallItems");
+
+                for (HabboItem item : Stream.concat(floorItems.stream(), wallItems.stream()).collect(Collectors.toSet())) {
+                    if (!furniOwnerNames.containsKey(item.getUserId())) {
+                        HabboInfo habbo = Emulator.getGameEnvironment().getHabboManager().getHabboInfo(item.getUserId());
+                        if (habbo != null) {
+                            furniOwnerNames.put(item.getUserId(), habbo.getUsername());
+                        }
+                    }
+                }
+
+                if (!floorItems.isEmpty()) {
+                    this.sendComposer(new ObjectsComposer(furniOwnerNames, floorItems).compose());
+                }
+
+                if (!wallItems.isEmpty()) {
+                    this.sendComposer(new ItemsComposer(this).compose());
+                }
+
+            } catch (JsonSyntaxException e) {
+                LOGGER.error("Error upon parsing extradata of AreaHider({}), error: {}", areaHider.getId(), e.getMessage());
+            }
+        }
     }
 }

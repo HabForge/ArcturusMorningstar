@@ -456,6 +456,7 @@ public class PacketManager {
         this.registerHandler(Incoming.FriendFurniConfirmLock, FriendFurniConfirmLockEvent.class);
         this.registerHandler(Incoming.DeleteFavouriteRoom, DeleteFavouriteRoomEvent.class);
         this.registerHandler(Incoming.SetRandomState, SetRandomStateEvent.class);
+        this.registerHandler(Incoming.SetAreaHideData, SetAreaHideDataEvent.class);
     }
 
     void registerPolls() throws Exception {

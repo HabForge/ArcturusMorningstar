@@ -18,6 +18,7 @@ public class PlacePostItEvent extends MessageHandler {
     public void handle() throws Exception {
         int itemId = this.packet.readInt();
         String location = this.packet.readString();
+        String wallPosition = this.packet.readString();
 
         Room room = this.client.getHabbo().getHabboInfo().getCurrentRoom();
 
@@ -30,7 +31,8 @@ public class PlacePostItEvent extends MessageHandler {
                         room.addHabboItem(item);
                         item.setExtradata("FFFF33");
                         item.setRoomId(this.client.getHabbo().getHabboInfo().getCurrentRoom().getId());
-                        item.setWallPosition(location);
+
+                        item.parseWallItemPosition(wallPosition, item);
                         item.setUserId(this.client.getHabbo().getHabboInfo().getId());
                         item.needsUpdate(true);
                         room.sendComposer(new ItemAddComposer(item, this.client.getHabbo().getHabboInfo().getUsername()).compose());
@@ -54,4 +56,5 @@ public class PlacePostItEvent extends MessageHandler {
             }
         }
     }
+
 }
